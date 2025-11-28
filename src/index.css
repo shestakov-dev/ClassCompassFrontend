@@ -1,1 +1,120 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
 @import "tailwindcss";
+
+@theme {
+	/* Custom colors */
+	--color-mine-shaft-50: #f6f6f6;
+	--color-mine-shaft-100: #e7e7e7;
+	--color-mine-shaft-200: #d1d1d1;
+	--color-mine-shaft-300: #b0b0b0;
+	--color-mine-shaft-400: #888888;
+	--color-mine-shaft-500: #6d6d6d;
+	--color-mine-shaft-600: #5d5d5d;
+	--color-mine-shaft-700: #4f4f4f;
+	--color-mine-shaft-800: #454545;
+	--color-mine-shaft-900: #333333;
+	--color-mine-shaft-950: #262626;
+
+	--color-gallery-50: #f8f8f8;
+	--color-gallery-100: #ededed;
+	--color-gallery-200: #dcdcdc;
+	--color-gallery-300: #bdbdbd;
+	--color-gallery-400: #989898;
+	--color-gallery-500: #7c7c7c;
+	--color-gallery-600: #656565;
+	--color-gallery-700: #525252;
+	--color-gallery-800: #464646;
+	--color-gallery-900: #3d3d3d;
+	--color-gallery-950: #292929;
+
+	--color-shamrock-50: #edfcf6;
+	--color-shamrock-100: #d4f7e8;
+	--color-shamrock-200: #aceed5;
+	--color-shamrock-300: #76dfbd;
+	--color-shamrock-400: #40c9a2;
+	--color-shamrock-500: #1bae89;
+	--color-shamrock-600: #0f8c6f;
+	--color-shamrock-700: #0c705c;
+	--color-shamrock-800: #0c5949;
+	--color-shamrock-900: #0b493e;
+	--color-shamrock-950: #052924;
+
+	--font-roboto: "Roboto", sans-serif;
+
+	/* Useful colors */
+	--color-error: var(--color-red-500);
+	--color-success: var(--color-green-500);
+	--color-warning: var(--color-yellow-500);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		interpolate-size: allow-keywords;
+	}
+}
+
+body {
+	font-family: var(--font-roboto);
+	background-color: var(--color-mine-shaft-900);
+	color: var(--color-gallery-100);
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+p {
+	text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	text-wrap: balance;
+}
+
+#root,
+#__next {
+	isolation: isolate;
+}
+
+#root {
+	height: 100%;
+}

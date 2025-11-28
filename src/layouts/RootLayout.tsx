@@ -1,14 +1,19 @@
-import { NavLink, Outlet } from "react-router";
+import { Outlet, useNavigation } from "react-router";
+import NavigationBar from "../components/navigation/NavigationBar";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
-export function RootLayout() {
+export const RootLayout = () => {
+	const navigation = useNavigation();
+	const isLoading = navigation.state === "loading";
+
 	return (
-		<div className="p-4">
-			<nav className="flex gap-4 mb-6">
-				<NavLink to="/">Home</NavLink>
-				<NavLink to="/app/schools">Schools</NavLink>
-			</nav>
+		<div className="flex flex-col min-h-screen">
+			{isLoading && <LoadingSpinner />}
+			<NavigationBar />
 
-			<Outlet />
+			<main className="grow p-4">
+				<Outlet />
+			</main>
 		</div>
 	);
-}
+};
