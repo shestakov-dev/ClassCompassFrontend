@@ -1,0 +1,13 @@
+@keyframes rock {
+	0%,
+	100% {
+		transform: rotate(-30deg);
+	}
+	50% {
+		transform: rotate(30deg);
+	}
+}
+
+#loading-spinner {
+	animation: rock 1s ease-in-out infinite;
+}
