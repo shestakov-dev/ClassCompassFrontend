@@ -16,13 +16,11 @@ export default function RootLayout() {
 	}, [navigation.state, setIsLoading]);
 
 	return (
-		<div className="relative h-dvh flex flex-col bg-background text-foreground font-sans antialiased overflow-hidden">
+		<div className="min-h-dvh flex flex-col bg-background text-foreground font-sans antialiased">
 			<Navbar />
 
-			<main className="flex-1">
-				<div className="h-full w-full overflow-y-auto scroll-smooth">
-					<Outlet />
-				</div>
+			<main className="flex-1 flex flex-col">
+				<Outlet />
 			</main>
 		</div>
 	);
