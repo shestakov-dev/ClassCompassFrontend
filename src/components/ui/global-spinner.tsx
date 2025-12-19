@@ -1,4 +1,4 @@
-export function MainLoader() {
+export function GlobalSpinner() {
 	return (
 		<div className="flex flex-col items-center justify-center gap-12">
 			<div className="relative flex items-center justify-center">

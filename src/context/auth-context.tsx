@@ -9,11 +9,11 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
+import { useLoading } from "@/context/loading-context";
 
 interface AuthContextType {
 	session: Session | null;
 	isAuthenticated: boolean;
-	isLoading: boolean;
 	refreshSession: () => Promise<void>;
 }
 
@@ -31,7 +31,7 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const { setIsLoading } = useLoading();
 
 	const refreshSession = useCallback(async () => {
 		setIsLoading(true);
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		setSession(data);
 
 		setIsLoading(false);
-	}, []);
+	}, [setIsLoading]);
 
 	const onMount = useEffectEvent(() => {
 		refreshSession();
@@ -57,7 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			value={{
 				session,
 				isAuthenticated: !!session,
-				isLoading,
 				refreshSession,
 			}}>
 			{children}
