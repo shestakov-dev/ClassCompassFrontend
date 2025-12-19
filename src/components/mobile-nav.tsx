@@ -18,18 +18,16 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { NAV_ITEMS, NAV_BUTTONS } from "@/config/navigation";
 import { Logo } from "@/components/logo";
+import { useNavigation } from "@/hooks/use-navigation";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
+	const { navGroups, navLinks, navButtons } = useNavigation();
 
 	const handleLinkClick = () => {
 		setOpen(false);
 	};
-
-	const navGroups = NAV_ITEMS.filter(item => item.type === "group");
-	const navLinks = NAV_ITEMS.filter(item => item.type === "link");
 
 	return (
 		<Sheet
@@ -100,7 +98,7 @@ export function MobileNav() {
 
 					{/* Action Buttons */}
 					<div className="flex flex-col gap-3 mt-6">
-						{NAV_BUTTONS.map(item => (
+						{navButtons.map(item => (
 							<Link
 								key={item.href}
 								to={item.href}

@@ -19,20 +19,10 @@ import {
 } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Logo } from "@/components/logo";
-import {
-	NAV_ITEMS,
-	NAV_BUTTONS,
-	type NavGroup,
-	type NavLink,
-} from "@/config/navigation";
+import { useNavigation } from "@/hooks/use-navigation";
 
 export function Navbar() {
-	const navGroups = NAV_ITEMS.filter(
-		(item): item is NavGroup => item.type === "group"
-	);
-	const navLinks = NAV_ITEMS.filter(
-		(item): item is NavLink => item.type === "link"
-	);
+	const { navGroups, navLinks, navButtons } = useNavigation();
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -112,7 +102,7 @@ export function Navbar() {
 
 				{/* Right Section */}
 				<div className="flex items-center gap-2">
-					{NAV_BUTTONS.map(item => (
+					{navButtons.map(item => (
 						<Link
 							key={item.href}
 							to={item.href}>

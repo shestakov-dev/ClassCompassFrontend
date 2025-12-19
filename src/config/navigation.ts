@@ -1,26 +1,29 @@
-import { LogIn } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 
-export type NavItem = {
+export type NavVisibility = "authenticated" | "guest";
+
+export interface BaseNavItem {
 	title: string;
+	visibility?: NavVisibility;
+}
+
+export type NavItem = BaseNavItem & {
 	href: string;
 	description?: string;
 	featured?: boolean;
 };
 
-export type NavGroup = {
+export type NavGroup = BaseNavItem & {
 	type: "group";
-	title: string;
 	items: NavItem[];
 };
 
-export type NavLink = {
+export type NavLink = BaseNavItem & {
 	type: "link";
-	title: string;
 	href: string;
 };
 
-export type NavButton = {
-	title: string;
+export type NavButton = BaseNavItem & {
 	href: string;
 	variant:
 		| "default"
@@ -42,5 +45,13 @@ export const NAV_BUTTONS: readonly NavButton[] = [
 		href: "https://classcompass.shestakov.app/login",
 		variant: "default",
 		iconElement: LogIn,
+		visibility: "guest",
+	},
+	{
+		title: "Log Out",
+		href: "https://classcompass.shestakov.app/",
+		variant: "outline",
+		iconElement: LogOut,
+		visibility: "authenticated",
 	},
 ] as const;
