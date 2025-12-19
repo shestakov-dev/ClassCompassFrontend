@@ -39,7 +39,7 @@ export default function HomePage() {
 
 					{/* CTA Buttons */}
 					<div className="flex flex-col gap-4 sm:flex-row">
-						<Link to="/login">
+						<Link to="https://classcompass.shestakov.app/login">
 							<Button
 								size="lg"
 								className="px-8 text-lg h-12">
