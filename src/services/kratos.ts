@@ -1,7 +1,8 @@
 import { Configuration, FrontendApi, ResponseError } from "@ory/client-fetch";
+import { KRATOS_URL } from "@/config/urls";
 
 const kratosConfig = new Configuration({
-	basePath: "https://kratos.classcompass.shestakov.app",
+	basePath: KRATOS_URL,
 	credentials: "include",
 });
 

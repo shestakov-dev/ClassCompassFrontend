@@ -1,4 +1,5 @@
 import { LogIn, LogOut } from "lucide-react";
+import { ROUTE_LOGIN, ROUTE_LOGOUT } from "@/config/urls";
 
 export type NavVisibility = "authenticated" | "guest";
 
@@ -42,14 +43,14 @@ export const NAV_ITEMS: readonly MainNavItem[] = [] as const;
 export const NAV_BUTTONS: readonly NavButton[] = [
 	{
 		title: "Log In",
-		href: "/login",
+		href: ROUTE_LOGIN,
 		variant: "default",
 		iconElement: LogIn,
 		visibility: "guest",
 	},
 	{
 		title: "Log Out",
-		href: "/logout",
+		href: ROUTE_LOGOUT,
 		variant: "outline",
 		iconElement: LogOut,
 		visibility: "authenticated",

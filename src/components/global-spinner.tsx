@@ -1,3 +1,5 @@
+import { LOGO_URL } from "@/config/urls";
+
 export function GlobalSpinner() {
 	return (
 		<div className="flex flex-col items-center justify-center gap-12">
@@ -6,7 +8,7 @@ export function GlobalSpinner() {
 				<div className="absolute inset-0 animate-ping rounded-full bg-primary/20 opacity-75 duration-1000" />
 
 				<img
-					src="https://api.classcompass.shestakov.app/assets/images/ClassCompassLogo.png"
+					src={LOGO_URL}
 					alt="ClassCompass Logo"
 					className="relative h-32 w-32 animate-wiggle"
 				/>

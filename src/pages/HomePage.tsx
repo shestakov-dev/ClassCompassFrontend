@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ReactNode } from "react";
+import { LOGO_URL, ROUTE_LOGIN } from "@/config/urls";
 
 export default function HomePage() {
 	return (
@@ -21,7 +22,7 @@ export default function HomePage() {
 						<div className="absolute inset-0 rounded-full bg-primary/20 blur-xl animate-pulse" />
 
 						<img
-							src="https://api.classcompass.shestakov.app/assets/images/ClassCompassLogo.png"
+							src={LOGO_URL}
 							alt="ClassCompass Logo"
 							className="relative h-32 w-32 rounded-full object-cover border-4 border-background ring-2 ring-primary shadow-2xl"
 						/>
@@ -39,7 +40,7 @@ export default function HomePage() {
 
 					{/* CTA Buttons */}
 					<div className="flex flex-col gap-4 sm:flex-row">
-						<Link to="/login">
+						<Link to={ROUTE_LOGIN}>
 							<Button
 								size="lg"
 								className="px-8 text-lg h-12">

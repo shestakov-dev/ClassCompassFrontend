@@ -2,6 +2,7 @@ import { redirect } from "react-router";
 import { getSession } from "@/services/kratos";
 import { sessionContext } from "@/context/router-context";
 import type { MiddlewareFunction } from "react-router";
+import { ROUTE_LOGIN, ROUTE_HOME } from "@/config/urls";
 
 // Tries to get session, but doesn't force redirect
 // Ensures we have the session available for the whole app
@@ -24,7 +25,7 @@ export const requireAuthMiddleware: MiddlewareFunction = async (
 	const session = context.get(sessionContext);
 
 	if (!session) {
-		throw redirect("/login");
+		throw redirect(ROUTE_LOGIN);
 	}
 
 	return next();
@@ -38,7 +39,7 @@ export const requireGuestMiddleware: MiddlewareFunction = async (
 	const session = context.get(sessionContext);
 
 	if (session) {
-		throw redirect("/");
+		throw redirect(ROUTE_HOME);
 	}
 
 	return next();
