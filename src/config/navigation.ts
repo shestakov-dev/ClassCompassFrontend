@@ -49,7 +49,7 @@ export const NAV_BUTTONS: readonly NavButton[] = [
 	},
 	{
 		title: "Log Out",
-		href: "https://classcompass.shestakov.app/",
+		href: "/logout",
 		variant: "outline",
 		iconElement: LogOut,
 		visibility: "authenticated",

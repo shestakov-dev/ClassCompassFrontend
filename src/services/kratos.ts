@@ -19,3 +19,16 @@ export async function getSession() {
 		throw error;
 	}
 }
+
+export async function createLogoutFlow() {
+	try {
+		return await frontendApi.createBrowserLogoutFlow();
+	} catch (error) {
+		if (error instanceof ResponseError && error.response.status === 401) {
+			// Not logged in
+			return null;
+		}
+
+		throw error;
+	}
+}

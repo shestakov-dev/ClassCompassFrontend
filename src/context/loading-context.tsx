@@ -5,7 +5,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
-import { GlobalSpinner } from "@/components/ui/global-spinner";
+import { GlobalSpinner } from "@/components/global-spinner";
 
 interface LoadingContextType {
 	isLoading: boolean;

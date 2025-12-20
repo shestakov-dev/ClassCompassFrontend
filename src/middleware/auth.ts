@@ -24,7 +24,7 @@ export const requireAuthMiddleware: MiddlewareFunction = async (
 	const session = context.get(sessionContext);
 
 	if (!session) {
-		throw redirect("https://classcompass.shestakov.app/login");
+		throw redirect("/login");
 	}
 
 	return next();
