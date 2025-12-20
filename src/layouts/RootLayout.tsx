@@ -2,6 +2,7 @@ import { Outlet, useNavigation } from "react-router";
 import { Navbar } from "@/components/navbar";
 import { useLoading } from "@/context/loading-context";
 import { useEffect } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout() {
 	const navigation = useNavigation();
@@ -22,6 +23,8 @@ export default function RootLayout() {
 			<main className="flex-1 flex flex-col">
 				<Outlet />
 			</main>
+
+			<Toaster position="bottom-right" />
 		</div>
 	);
 }
