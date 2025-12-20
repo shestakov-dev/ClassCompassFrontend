@@ -1,5 +1,5 @@
 import { useState, type PropsWithChildren } from "react";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,18 +18,16 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { NAV_ITEMS, NAV_BUTTONS } from "@/config/navigation";
 import { Logo } from "@/components/logo";
+import { useNavigationItems } from "@/hooks/use-navigation-items";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
+	const { navGroups, navLinks, navButtons } = useNavigationItems();
 
 	const handleLinkClick = () => {
 		setOpen(false);
 	};
-
-	const navGroups = NAV_ITEMS.filter(item => item.type === "group");
-	const navLinks = NAV_ITEMS.filter(item => item.type === "link");
 
 	return (
 		<Sheet
@@ -86,21 +84,25 @@ export function MobileNav() {
 					{/* Regular Links */}
 					<div className="flex flex-col">
 						{navLinks.map(item => (
-							<Link
+							<NavLink
+								end
 								key={item.href}
 								to={item.href}
-								className={cn(
-									"flex w-full items-center py-4 text-base font-medium transition-colors hover:text-primary"
-								)}
+								className={({ isActive }) =>
+									cn(
+										"flex w-full items-center py-4 text-base font-medium transition-colors hover:text-primary",
+										isActive && "text-primary"
+									)
+								}
 								onClick={handleLinkClick}>
 								{item.title}
-							</Link>
+							</NavLink>
 						))}
 					</div>
 
 					{/* Action Buttons */}
 					<div className="flex flex-col gap-3 mt-6">
-						{NAV_BUTTONS.map(item => (
+						{navButtons.map(item => (
 							<Link
 								key={item.href}
 								to={item.href}
@@ -145,11 +147,17 @@ interface MobileLinkProps extends PropsWithChildren {
 
 function MobileLink({ to, onClick, children }: MobileLinkProps) {
 	return (
-		<Link
+		<NavLink
+			end
 			to={to}
 			onClick={onClick}
-			className="block select-none rounded-md p-3 text-base font-medium leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+			className={({ isActive }) =>
+				cn(
+					"block select-none rounded-md p-3 text-base font-medium leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+					isActive && "bg-primary/10 text-primary"
+				)
+			}>
 			{children}
-		</Link>
+		</NavLink>
 	);
 }

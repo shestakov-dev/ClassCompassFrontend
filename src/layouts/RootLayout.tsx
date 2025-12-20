@@ -1,23 +1,26 @@
 import { Outlet, useNavigation } from "react-router";
 import { Navbar } from "@/components/navbar";
-import { MainLoader } from "@/components/ui/main-loader";
+import { useLoading } from "@/context/loading-context";
+import { useEffect } from "react";
 
 export default function RootLayout() {
 	const navigation = useNavigation();
-	const isLoading = navigation.state === "loading";
+	const { setIsLoading } = useLoading();
+
+	useEffect(() => {
+		if (navigation.state === "loading") {
+			setIsLoading(true);
+
+			return () => setIsLoading(false);
+		}
+	}, [navigation.state, setIsLoading]);
 
 	return (
-		<div className="h-dvh flex flex-col bg-background text-foreground font-sans antialiased overflow-hidden">
+		<div className="min-h-dvh flex flex-col bg-background text-foreground font-sans antialiased">
 			<Navbar />
 
-			<main className="flex-1 overflow-y-auto scroll-smooth">
-				{isLoading ? (
-					<div className="flex h-full w-full items-center justify-center">
-						<MainLoader />
-					</div>
-				) : (
-					<Outlet />
-				)}
+			<main className="flex-1 flex flex-col">
+				<Outlet />
 			</main>
 		</div>
 	);
