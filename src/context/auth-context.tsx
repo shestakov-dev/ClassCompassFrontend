@@ -1,15 +1,7 @@
-import { getSession } from "@/services/kratos";
+import type { RootLoaderData } from "@/loaders/root-loader";
 import type { Session } from "@ory/client-fetch";
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useEffectEvent,
-	useState,
-	type ReactNode,
-} from "react";
-import { useLoading } from "@/context/loading-context";
+import { createContext, useContext, type ReactNode } from "react";
+import { useLoaderData, useRevalidator } from "react-router";
 
 interface AuthContextType {
 	session: Session | null;
@@ -30,33 +22,20 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const [session, setSession] = useState<Session | null>(null);
-	const { setIsLoading } = useLoading();
+	const { session } = useLoaderData<RootLoaderData>();
+	const { revalidate } = useRevalidator();
 
-	const refreshSession = useCallback(async () => {
-		setIsLoading(true);
+	const isAuthenticated = !!session;
 
-		const data = await getSession();
-
-		setSession(data);
-
-		setIsLoading(false);
-	}, [setIsLoading]);
-
-	const onMount = useEffectEvent(() => {
-		refreshSession();
-	});
-
-	// Initial check on mount
-	useEffect(() => {
-		onMount();
-	}, []);
+	const refreshSession = async () => {
+		revalidate();
+	};
 
 	return (
 		<AuthContext.Provider
 			value={{
 				session,
-				isAuthenticated: !!session,
+				isAuthenticated,
 				refreshSession,
 			}}>
 			{children}

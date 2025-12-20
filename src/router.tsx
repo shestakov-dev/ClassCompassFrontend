@@ -1,17 +1,32 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 import HomePage from "@/pages/HomePage";
 import RootLayout from "@/layouts/RootLayout";
 import ErrorPage from "@/pages/ErrorPage";
+import { sessionMiddleware } from "@/middleware/auth";
+import { rootLoader } from "@/loaders/root-loader";
+import SessionProvider from "@/layouts/SessionProvider";
 
 export const router = createBrowserRouter([
 	{
-		path: "/",
-		element: <RootLayout />,
+		element: <SessionProvider />,
 		errorElement: <ErrorPage />,
+		middleware: [sessionMiddleware],
+		loader: rootLoader,
 		children: [
 			{
-				index: true,
-				element: <HomePage />,
+				element: <RootLayout />,
+				children: [
+					{
+						index: true,
+						element: <HomePage />,
+					},
+				],
+			},
+			{
+				path: "/login",
+				loader: () => {
+					throw redirect("https://classcompass.shestakov.app/login");
+				},
 			},
 		],
 	},

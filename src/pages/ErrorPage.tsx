@@ -6,7 +6,6 @@ import {
 } from "react-router";
 import { Button } from "@/components/ui/button";
 import { TriangleAlert, Home, ArrowLeft } from "lucide-react";
-import { Navbar } from "@/components/navbar";
 
 export default function ErrorPage() {
 	const error = useRouteError();
@@ -38,8 +37,6 @@ export default function ErrorPage() {
 
 	return (
 		<div className="h-dvh flex flex-col bg-background text-foreground font-sans antialiased overflow-hidden">
-			<Navbar />
-
 			<main className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-4 text-center">
 				<div className="flex flex-col items-center justify-center space-y-6">
 					<div className="rounded-full bg-muted p-6">
