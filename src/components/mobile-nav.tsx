@@ -1,5 +1,5 @@
 import { useState, type PropsWithChildren } from "react";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,11 +19,11 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Logo } from "@/components/logo";
-import { useNavigation } from "@/hooks/use-navigation";
+import { useNavigationItems } from "@/hooks/use-navigation-items";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
-	const { navGroups, navLinks, navButtons } = useNavigation();
+	const { navGroups, navLinks, navButtons } = useNavigationItems();
 
 	const handleLinkClick = () => {
 		setOpen(false);
@@ -84,15 +84,19 @@ export function MobileNav() {
 					{/* Regular Links */}
 					<div className="flex flex-col">
 						{navLinks.map(item => (
-							<Link
+							<NavLink
+								end
 								key={item.href}
 								to={item.href}
-								className={cn(
-									"flex w-full items-center py-4 text-base font-medium transition-colors hover:text-primary"
-								)}
+								className={({ isActive }) =>
+									cn(
+										"flex w-full items-center py-4 text-base font-medium transition-colors hover:text-primary",
+										isActive && "text-primary"
+									)
+								}
 								onClick={handleLinkClick}>
 								{item.title}
-							</Link>
+							</NavLink>
 						))}
 					</div>
 
@@ -143,11 +147,17 @@ interface MobileLinkProps extends PropsWithChildren {
 
 function MobileLink({ to, onClick, children }: MobileLinkProps) {
 	return (
-		<Link
+		<NavLink
+			end
 			to={to}
 			onClick={onClick}
-			className="block select-none rounded-md p-3 text-base font-medium leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+			className={({ isActive }) =>
+				cn(
+					"block select-none rounded-md p-3 text-base font-medium leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+					isActive && "bg-primary/10 text-primary"
+				)
+			}>
 			{children}
-		</Link>
+		</NavLink>
 	);
 }

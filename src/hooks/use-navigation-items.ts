@@ -5,14 +5,15 @@ import {
 	type NavGroup,
 	type NavLink,
 	type BaseNavItem,
+	type MainNavItem,
 } from "@/config/navigation";
 
-function isNavGroup(item: BaseNavItem): item is NavGroup {
-	return (item as NavGroup).type === "group";
+function isNavGroup(item: MainNavItem): item is NavGroup {
+	return item.type === "group";
 }
 
-function isNavLink(item: BaseNavItem): item is NavLink {
-	return (item as NavLink).type === "link";
+function isNavLink(item: MainNavItem): item is NavLink {
+	return item.type === "link";
 }
 
 function shouldShowNavItem(isAuthenticated: boolean, item: BaseNavItem) {
@@ -27,7 +28,7 @@ function shouldShowNavItem(isAuthenticated: boolean, item: BaseNavItem) {
 	return true;
 }
 
-export function useNavigation() {
+export function useNavigationItems() {
 	const { isAuthenticated } = useAuth();
 
 	const shouldShow = shouldShowNavItem.bind(null, isAuthenticated);

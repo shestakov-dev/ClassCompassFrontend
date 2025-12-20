@@ -42,7 +42,7 @@ export const NAV_ITEMS: readonly MainNavItem[] = [] as const;
 export const NAV_BUTTONS: readonly NavButton[] = [
 	{
 		title: "Log In",
-		href: "https://classcompass.shestakov.app/login",
+		href: "/login",
 		variant: "default",
 		iconElement: LogIn,
 		visibility: "guest",
