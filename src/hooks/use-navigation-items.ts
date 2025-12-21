@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/auth-context";
+import { useSession } from "@/context/session-context";
 import {
 	NAV_ITEMS,
 	NAV_BUTTONS,
@@ -29,7 +29,7 @@ function shouldShowNavItem(isAuthenticated: boolean, item: BaseNavItem) {
 }
 
 export function useNavigationItems() {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated } = useSession();
 
 	const shouldShow = shouldShowNavItem.bind(null, isAuthenticated);
 
