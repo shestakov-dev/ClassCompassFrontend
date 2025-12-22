@@ -2,9 +2,13 @@ import type { RootLoaderData } from "@/loaders/root-loader";
 import { createContext, useContext, type ReactNode } from "react";
 import { useLoaderData, useRevalidator } from "react-router";
 import type { UserEntity } from "@/api/generated/models";
-import { useUsersControllerFindByIdentityId } from "@/api/generated/endpoints/users/users";
+import {
+	getUsersControllerFindByIdentityIdQueryKey,
+	useUsersControllerFindByIdentityId,
+} from "@/api/generated/endpoints/users/users";
 import type { AxiosError } from "axios";
 import type { Session } from "@ory/client-fetch";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SessionContextType {
 	session: Session | null;
@@ -31,6 +35,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 	const { session } = useLoaderData<RootLoaderData>();
 	const { revalidate } = useRevalidator();
 
+	const queryClient = useQueryClient();
+
 	const isAuthenticated = !!session;
 
 	const identityId = session?.identity?.id;
@@ -51,6 +57,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 	);
 
 	const refreshSession = async () => {
+		if (identityId) {
+			// Invalidate user data to ensure fresh data is fetched (query level)
+			await queryClient.invalidateQueries({
+				queryKey: getUsersControllerFindByIdentityIdQueryKey(identityId),
+			});
+		}
+
+		// Revalidate the session data (router level)
 		revalidate();
 	};
 
