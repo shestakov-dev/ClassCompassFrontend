@@ -1,13 +1,9 @@
-import {
-	identityIdContext,
-	type RouterContextType,
-} from "@/context/router-identity-context";
-import type { LoaderFunctionArgs } from "react-router";
+import { getSession } from "@/services/kratos";
 
-export async function rootLoader({ context }: LoaderFunctionArgs) {
+export async function rootLoader() {
+	const sessionPromise = getSession();
+
 	return {
-		identityId: context.get(identityIdContext) as RouterContextType,
+		sessionPromise,
 	};
 }
-
-export type RootLoaderData = Awaited<ReturnType<typeof rootLoader>>;

@@ -5,17 +5,9 @@ import { RouterProvider } from "react-router";
 import { router } from "@/router";
 import { ThemeProvider } from "@/context/theme-context";
 import { LoadingProvider } from "@/context/loading-context";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			retry: 1,
-			refetchOnWindowFocus: false,
-		},
-	},
-});
+import { queryClient } from "./lib/query-client";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
