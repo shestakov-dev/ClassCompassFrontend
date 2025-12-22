@@ -4,7 +4,7 @@ import RootLayout from "@/layouts/RootLayout";
 import ErrorPage from "@/pages/ErrorPage";
 import { sessionMiddleware } from "@/middleware/auth";
 import { rootLoader } from "@/loaders/root-loader";
-import SessionProvider from "@/layouts/SessionProvider";
+import SessionLayout from "@/layouts/SessionLayout";
 import { createLogoutFlow } from "@/services/kratos";
 import {
 	LOGIN_URL,
@@ -15,7 +15,7 @@ import {
 
 export const router = createBrowserRouter([
 	{
-		element: <SessionProvider />,
+		element: <SessionLayout />,
 		errorElement: <ErrorPage />,
 		middleware: [sessionMiddleware],
 		loader: rootLoader,

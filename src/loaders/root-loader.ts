@@ -1,12 +1,12 @@
 import {
-	sessionContext,
+	identityIdContext,
 	type RouterContextType,
-} from "@/context/router-context";
+} from "@/context/router-identity-context";
 import type { LoaderFunctionArgs } from "react-router";
 
 export async function rootLoader({ context }: LoaderFunctionArgs) {
 	return {
-		session: context.get(sessionContext) as RouterContextType,
+		identityId: context.get(identityIdContext) as RouterContextType,
 	};
 }
 
