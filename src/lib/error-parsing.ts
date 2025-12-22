@@ -1,4 +1,5 @@
 import type { OryApiError, StandardApiError } from "@/types/api-errors";
+import type { ResponseError } from "@ory/client-fetch";
 import { isAxiosError } from "axios";
 
 export function isStandardApiError(data: unknown): data is StandardApiError {
@@ -43,4 +44,27 @@ export function getErrorMessage(error: unknown): string {
 	}
 
 	return "An unknown error occurred";
+}
+
+// Attempts to extract and throw a clean error message from a ResponseError object
+export async function throwCleanOryError(error: ResponseError): Promise<never> {
+	try {
+		const body = await error.response.json();
+		const message = body?.error?.message;
+
+		if (message) {
+			throw new Error(message);
+		}
+	} catch (error) {
+		// If we successfully created a new error above, re-throw it
+		if (
+			error instanceof Error &&
+			error.message !== "Unexpected end of JSON input"
+		) {
+			throw error;
+		}
+	}
+
+	// If we couldn't parse anything, just throw the original
+	throw error;
 }

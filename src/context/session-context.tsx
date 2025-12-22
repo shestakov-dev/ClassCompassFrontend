@@ -1,6 +1,5 @@
-import type { RootLoaderData } from "@/loaders/root-loader";
 import { createContext, useContext, type ReactNode } from "react";
-import { useLoaderData, useRevalidator } from "react-router";
+import { useRevalidator } from "react-router";
 import type { UserEntity } from "@/api/generated/models";
 import {
 	getUsersControllerFindByIdentityIdQueryKey,
@@ -31,15 +30,18 @@ export const useSession = () => {
 	return context;
 };
 
-export function SessionProvider({ children }: { children: ReactNode }) {
-	const { session } = useLoaderData<RootLoaderData>();
+export function SessionProvider({
+	children,
+	initialSession,
+}: {
+	children: ReactNode;
+	initialSession: Session | null;
+}) {
 	const { revalidate } = useRevalidator();
-
 	const queryClient = useQueryClient();
 
-	const isAuthenticated = !!session;
-
-	const identityId = session?.identity?.id;
+	const isAuthenticated = !!initialSession;
+	const identityId = initialSession?.identity?.id;
 
 	const {
 		data: user,
@@ -71,7 +73,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 	return (
 		<SessionContext.Provider
 			value={{
-				session,
+				session: initialSession,
 				isAuthenticated,
 				user: user ?? null,
 				isLoading,

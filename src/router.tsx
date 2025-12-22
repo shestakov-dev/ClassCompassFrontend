@@ -2,7 +2,6 @@ import { createBrowserRouter, redirect } from "react-router";
 import HomePage from "@/pages/HomePage";
 import RootLayout from "@/layouts/RootLayout";
 import ErrorPage from "@/pages/ErrorPage";
-import { sessionMiddleware } from "@/middleware/auth";
 import { rootLoader } from "@/loaders/root-loader";
 import SessionLayout from "@/layouts/SessionLayout";
 import { createLogoutFlow } from "@/services/kratos";
@@ -17,7 +16,6 @@ export const router = createBrowserRouter([
 	{
 		element: <SessionLayout />,
 		errorElement: <ErrorPage />,
-		middleware: [sessionMiddleware],
 		loader: rootLoader,
 		children: [
 			{
