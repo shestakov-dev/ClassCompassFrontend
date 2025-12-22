@@ -4,9 +4,10 @@ import { useLoaderData, useRevalidator } from "react-router";
 import type { UserEntity } from "@/api/generated/models";
 import { useUsersControllerFindByIdentityId } from "@/api/generated/endpoints/users/users";
 import type { AxiosError } from "axios";
+import type { Session } from "@ory/client-fetch";
 
 interface SessionContextType {
-	identityId: string | null;
+	session: Session | null;
 	isAuthenticated: boolean;
 	user: UserEntity | null;
 	isLoading: boolean;
@@ -27,10 +28,12 @@ export const useSession = () => {
 };
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-	const { identityId } = useLoaderData<RootLoaderData>();
+	const { session } = useLoaderData<RootLoaderData>();
 	const { revalidate } = useRevalidator();
 
-	const isAuthenticated = !!identityId;
+	const isAuthenticated = !!session;
+
+	const identityId = session?.identity?.id;
 
 	const {
 		data: user,
@@ -54,7 +57,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 	return (
 		<SessionContext.Provider
 			value={{
-				identityId,
+				session,
 				isAuthenticated,
 				user: user ?? null,
 				isLoading,

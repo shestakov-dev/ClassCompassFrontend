@@ -1,6 +1,6 @@
 import { redirect } from "react-router";
 import { getSession } from "@/services/kratos";
-import { identityIdContext } from "@/context/router-identity-context";
+import { routerSessionContext } from "@/context/router-session-context";
 import type { MiddlewareFunction } from "react-router";
 import { ROUTE_LOGIN, ROUTE_HOME } from "@/config/urls";
 
@@ -12,9 +12,7 @@ export const sessionMiddleware: MiddlewareFunction = async (
 ) => {
 	const session = await getSession();
 
-	const identityId = session?.identity?.id ?? null;
-
-	context.set(identityIdContext, identityId);
+	context.set(routerSessionContext, session);
 
 	return next();
 };
@@ -24,7 +22,7 @@ export const requireAuthMiddleware: MiddlewareFunction = async (
 	{ context },
 	next
 ) => {
-	const identityId = context.get(identityIdContext);
+	const identityId = context.get(routerSessionContext);
 
 	if (!identityId) {
 		throw redirect(ROUTE_LOGIN);
@@ -38,7 +36,7 @@ export const requireGuestMiddleware: MiddlewareFunction = async (
 	{ context },
 	next
 ) => {
-	const identityId = context.get(identityIdContext);
+	const identityId = context.get(routerSessionContext);
 
 	if (identityId) {
 		throw redirect(ROUTE_HOME);
