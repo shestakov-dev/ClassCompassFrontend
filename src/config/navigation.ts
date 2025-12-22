@@ -1,42 +1,6 @@
 import { LogIn, LogOut } from "lucide-react";
 import { ROUTE_LOGIN, ROUTE_LOGOUT } from "@/config/urls";
-
-export type NavVisibility = "authenticated" | "guest";
-
-export interface BaseNavItem {
-	title: string;
-	visibility?: NavVisibility;
-}
-
-export type NavItem = BaseNavItem & {
-	href: string;
-	description?: string;
-	featured?: boolean;
-};
-
-export type NavGroup = BaseNavItem & {
-	type: "group";
-	items: NavItem[];
-};
-
-export type NavLink = BaseNavItem & {
-	type: "link";
-	href: string;
-};
-
-export type NavButton = BaseNavItem & {
-	href: string;
-	variant:
-		| "default"
-		| "destructive"
-		| "outline"
-		| "secondary"
-		| "ghost"
-		| "link";
-	iconElement?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-};
-
-export type MainNavItem = NavGroup | NavLink;
+import type { MainNavItem, NavButton } from "@/types/navigation";
 
 export const NAV_ITEMS: readonly MainNavItem[] = [] as const;
 

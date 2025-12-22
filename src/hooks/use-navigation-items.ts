@@ -1,12 +1,11 @@
 import { useSession } from "@/context/session-context";
-import {
-	NAV_ITEMS,
-	NAV_BUTTONS,
-	type NavGroup,
-	type NavLink,
-	type BaseNavItem,
-	type MainNavItem,
-} from "@/config/navigation";
+import { NAV_ITEMS, NAV_BUTTONS } from "@/config/navigation";
+import type {
+	BaseNavItem,
+	MainNavItem,
+	NavGroup,
+	NavLink,
+} from "@/types/navigation";
 
 function isNavGroup(item: MainNavItem): item is NavGroup {
 	return item.type === "group";
