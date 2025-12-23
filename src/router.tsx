@@ -11,6 +11,7 @@ import {
 	ROUTE_LOGOUT,
 	ROUTE_HOME,
 } from "@/config/urls";
+import SchedulePage from "./pages/SchedulePage";
 
 export const router = createBrowserRouter([
 	{
@@ -24,6 +25,10 @@ export const router = createBrowserRouter([
 					{
 						index: true,
 						element: <HomePage />,
+					},
+					{
+						path: "/schedule",
+						element: <SchedulePage />,
 					},
 				],
 			},
