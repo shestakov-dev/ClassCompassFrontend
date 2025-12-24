@@ -1,5 +1,5 @@
 import { type LessonEntity } from "@/api/generated/models";
-import { type ScheduleEvent } from "@/components/daily-schedule-grid";
+import { type ScheduleEvent } from "@/components/schedule/daily-schedule-grid";
 import { addDays, parseISO, set } from "date-fns";
 
 const DAY_TO_INDEX_MAP: Record<string, number> = {
@@ -16,10 +16,6 @@ export function transformLessonsToEvents(
 	lessons: LessonEntity[],
 	weekStart: Date
 ): ScheduleEvent[] {
-	// We no longer filter by week parity here.
-	// The API is the source of truth for filtering.
-	// If the API returns a lesson, we map it to the grid.
-
 	return lessons.map(lesson => {
 		const dayName = lesson.dailySchedule!.day.toLowerCase();
 		const dayOffset = DAY_TO_INDEX_MAP[dayName];

@@ -7,7 +7,7 @@ import {
 	CalendarRange,
 	Clock,
 } from "lucide-react";
-import { format, setHours, setMinutes, getISOWeek, getDay } from "date-fns";
+import { getISOWeek, getDay } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,6 @@ import {
 	type MouseEvent,
 } from "react";
 
-// --- HELPERS ---
 const JS_DAY_TO_ENUM: Record<number, Day> = {
 	0: Day.sunday,
 	1: Day.monday,
@@ -64,7 +63,6 @@ export interface FilterOptions {
 }
 
 export type FilterMode = "calendar" | "generic";
-
 type TimeSubMode = "full-day" | "timestamp" | "range";
 
 interface ScheduleFiltersProps {
@@ -96,51 +94,81 @@ export function ScheduleFilters({
 }: ScheduleFiltersProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
-	// --- LOCAL UI STATE ---
 	const [timeSubMode, setTimeSubMode] = useState<TimeSubMode>("full-day");
 	const [atTime, setAtTime] = useState("08:00");
 	const [rangeStart, setRangeStart] = useState("08:00");
 	const [rangeEnd, setRangeEnd] = useState("17:00");
 	const [genericWeek, setGenericWeek] = useState<LessonWeek | "all">("all");
 
-	// --- LOGIC: SYNC UI TO API PARAMS ---
 	const applyFilters = useCallback(() => {
-		setFilters(prev => {
-			const next = { ...prev };
+		setFilters(prevParams => {
+			const nextParams = { ...prevParams };
 
-			// 1. Clean up mutually exclusive fields
-			delete next.timestamp;
-			delete next.from;
-			delete next.to;
-			delete next.day;
-			delete next.week;
+			// Clear mutually exclusive fields
+			delete nextParams.timestamp;
+			delete nextParams.from;
+			delete nextParams.to;
+			delete nextParams.day;
+			delete nextParams.week;
 
 			if (mode === "calendar") {
 				if (timeSubMode === "full-day") {
 					const dayIndex = getDay(date);
-					const weekNum = getISOWeek(date);
-					next.day = JS_DAY_TO_ENUM[dayIndex];
-					next.week = weekNum % 2 === 0 ? LessonWeek.even : LessonWeek.odd;
+					const weekNumber = getISOWeek(date);
+					nextParams.day = JS_DAY_TO_ENUM[dayIndex];
+					nextParams.week = weekNumber % 2 === 0 ? LessonWeek.even : LessonWeek.odd;
 				} else if (timeSubMode === "timestamp" && atTime) {
-					const [h, m] = atTime.split(":").map(Number);
-					const dt = setMinutes(setHours(date, h), m);
-					next.timestamp = format(dt, "yyyy-MM-dd'T'HH:mm:ss");
+					const [hours, minutes] = atTime.split(":").map(Number);
+
+					const timestampDate = new Date(
+						Date.UTC(
+							date.getFullYear(),
+							date.getMonth(),
+							date.getDate(),
+							hours,
+							minutes,
+							0
+						)
+					);
+
+					nextParams.timestamp = timestampDate.toISOString();
 				} else if (timeSubMode === "range" && rangeStart && rangeEnd) {
-					const [h1, m1] = rangeStart.split(":").map(Number);
-					const [h2, m2] = rangeEnd.split(":").map(Number);
-					const dt1 = setMinutes(setHours(date, h1), m1);
-					const dt2 = setMinutes(setHours(date, h2), m2);
-					next.from = format(dt1, "yyyy-MM-dd'T'HH:mm:ss");
-					next.to = format(dt2, "yyyy-MM-dd'T'HH:mm:ss");
+					const [startH, startM] = rangeStart.split(":").map(Number);
+					const [endH, endM] = rangeEnd.split(":").map(Number);
+
+					const startDate = new Date(
+						Date.UTC(
+							date.getFullYear(),
+							date.getMonth(),
+							date.getDate(),
+							startH,
+							startM,
+							0
+						)
+					);
+
+					const endDate = new Date(
+						Date.UTC(
+							date.getFullYear(),
+							date.getMonth(),
+							date.getDate(),
+							endH,
+							endM,
+							0
+						)
+					);
+
+					nextParams.from = startDate.toISOString();
+					nextParams.to = endDate.toISOString();
 				}
 			} else if (mode === "generic") {
-				next.day = genericDay;
+				nextParams.day = genericDay;
 				if (genericWeek !== "all") {
-					next.week = genericWeek;
+					nextParams.week = genericWeek;
 				}
 			}
 
-			return next;
+			return nextParams;
 		});
 	}, [
 		mode,
@@ -158,7 +186,6 @@ export function ScheduleFilters({
 		applyFilters();
 	}, [applyFilters]);
 
-	// --- HANDLERS ---
 	const handleEntityChange = (
 		key: keyof LessonsControllerFindFilteredParams,
 		val: string
@@ -177,7 +204,6 @@ export function ScheduleFilters({
 	const clearFilters = (e: MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
 
-		// Reset local states
 		setTimeSubMode("full-day");
 		setAtTime("08:00");
 		setGenericWeek("all");
@@ -185,14 +211,13 @@ export function ScheduleFilters({
 		if (onReset) {
 			onReset();
 		} else {
-			// Fallback
 			setMode("generic");
 			setFilters({});
 		}
 	};
 
 	const activeCount = Object.keys(filters).filter(
-		k => k !== "ignoreWeek"
+		key => key !== "ignoreWeek"
 	).length;
 
 	return (
@@ -203,7 +228,6 @@ export function ScheduleFilters({
 				"w-full border rounded-md bg-card shadow-sm transition-all",
 				className
 			)}>
-			{/* --- HEADER --- */}
 			<div className="flex items-center justify-between p-3 px-4">
 				<div className="flex items-center gap-4">
 					<CollapsibleTrigger asChild>
@@ -263,12 +287,10 @@ export function ScheduleFilters({
 				)}
 			</div>
 
-			{/* --- CONTENT --- */}
 			<CollapsibleContent>
 				<div className="px-4 pb-4 space-y-6">
 					<Separator />
 
-					{/* 1. VIEW MODE SELECTION */}
 					<div className="space-y-4">
 						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
 							View Mode
@@ -294,7 +316,6 @@ export function ScheduleFilters({
 						</Tabs>
 					</div>
 
-					{/* 2. MODE SPECIFIC CONTROLS */}
 					<div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
 						{mode === "calendar" ? (
 							<div className="space-y-3">
@@ -368,7 +389,6 @@ export function ScheduleFilters({
 							</div>
 						)}
 
-						{/* Ignore Week Switch (Only visible in Calendar Mode) */}
 						{mode === "calendar" && (
 							<div className="flex items-center justify-start sm:justify-end pt-8">
 								<div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-md border border-dashed">
@@ -387,7 +407,6 @@ export function ScheduleFilters({
 						)}
 					</div>
 
-					{/* 3. TIME INPUTS (Only for Calendar Mode + Submodes) */}
 					{mode === "calendar" && timeSubMode !== "full-day" && (
 						<div className="bg-muted/30 p-3 rounded-md border border-dashed">
 							<div className="flex flex-wrap items-end gap-4">
@@ -431,14 +450,12 @@ export function ScheduleFilters({
 
 					<Separator />
 
-					{/* 4. ENTITY FILTERS */}
 					<div className="space-y-3">
 						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
 							Refine Results
 						</Label>
 
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-							{/* Class Filter */}
 							<div className="space-y-1">
 								<Label className="text-xs">Class</Label>
 								<Select
@@ -460,7 +477,6 @@ export function ScheduleFilters({
 								</Select>
 							</div>
 
-							{/* Subject Filter */}
 							<div className="space-y-1">
 								<Label className="text-xs">Subject</Label>
 								<Select
@@ -482,7 +498,6 @@ export function ScheduleFilters({
 								</Select>
 							</div>
 
-							{/* Teacher Filter */}
 							<div className="space-y-1">
 								<Label className="text-xs">Teacher</Label>
 								<Select
@@ -504,7 +519,6 @@ export function ScheduleFilters({
 								</Select>
 							</div>
 
-							{/* Room Filter */}
 							<div className="space-y-1">
 								<Label className="text-xs">Room</Label>
 								<Select

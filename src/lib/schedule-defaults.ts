@@ -15,6 +15,16 @@ const JS_DAY_TO_ENUM: Record<number, Day> = {
 	6: Day.saturday,
 };
 
+export const DAYS_OF_WEEK = [
+	Day.monday,
+	Day.tuesday,
+	Day.wednesday,
+	Day.thursday,
+	Day.friday,
+	Day.saturday,
+	Day.sunday,
+];
+
 export const getCurrentDayEnum = (): Day => {
 	return JS_DAY_TO_ENUM[getDay(new Date())];
 };

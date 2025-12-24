@@ -1,24 +1,13 @@
-"use client";
-
+import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 import { differenceInMinutes, format, startOfDay } from "date-fns";
-import { enUS } from "date-fns/locale/en-US";
-import {
-	type ReactNode,
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from "react";
-import type { Locale } from "date-fns";
+import { useMemo } from "react";
 import { LessonEntityLessonWeek as LessonWeek } from "@/api/generated/models";
 
-// --- CONFIGURATION ---
 const SLOT_HEIGHT_PX = 80;
-const COLUMN_GAP_PX = 8; // Horizontal space between overlapping columns
-const ROW_GAP_PX = 4; // Vertical space between consecutive lessons
+const COLUMN_GAP_PX = 8;
+const ROW_GAP_PX = 4;
 
-// --- TYPES ---
 export type ScheduleEvent = {
 	id: string;
 	start: Date;
@@ -29,7 +18,6 @@ export type ScheduleEvent = {
 	type: LessonWeek;
 };
 
-// Internal type for rendering
 type LayoutEvent = ScheduleEvent & {
 	style: {
 		top: string;
@@ -39,79 +27,46 @@ type LayoutEvent = ScheduleEvent & {
 	};
 };
 
-// --- CONTEXT ---
-type ScheduleContextType = {
-	date: Date;
-	setDate: (date: Date) => void;
-	events: ScheduleEvent[];
-	locale: Locale;
-	onEventClick?: (event: ScheduleEvent) => void;
-};
-
-const ScheduleContext = createContext<ScheduleContextType>(
-	{} as ScheduleContextType
+const eventCardVariants = cva(
+	"absolute z-10 flex flex-col gap-0.5 border-l-4 rounded-md px-2 py-1 text-xs text-foreground transition-all hover:brightness-95 hover:shadow-md cursor-pointer overflow-hidden",
+	{
+		variants: {
+			variant: {
+				default: "bg-primary/10 border-primary border-l-primary",
+				odd: "bg-chart-3/15 border-chart-3",
+				even: "bg-chart-4/15 border-chart-4",
+			},
+		},
+		defaultVariants: {
+			variant: "default",
+		},
+	}
 );
 
-type DailyScheduleProps = {
-	children: ReactNode;
-	defaultDate?: Date;
-	events?: ScheduleEvent[];
-	locale?: Locale;
-	onEventClick?: (event: ScheduleEvent) => void;
-	date?: Date;
-	onDateChange?: (date: Date) => void;
-};
+interface EventCardProps {
+	event: LayoutEvent;
+	onClick?: (event: ScheduleEvent) => void;
+}
 
-const DailySchedule = ({
-	children,
-	defaultDate = new Date(),
-	locale = enUS,
-	onEventClick,
-	events = [],
-	date: controlledDate,
-	onDateChange,
-}: DailyScheduleProps) => {
-	const [internalDate, setInternalDate] = useState(defaultDate);
+const EventCard = ({ event, onClick }: EventCardProps) => {
+	const variantMap: Record<
+		string,
+		VariantProps<typeof eventCardVariants>["variant"]
+	> = {
+		[LessonWeek.odd]: "odd",
+		[LessonWeek.even]: "even",
+	};
 
-	const date = controlledDate ?? internalDate;
-
-	const setDate = useCallback(
-		(newDate: Date) => {
-			if (onDateChange) onDateChange(newDate);
-			setInternalDate(newDate);
-		},
-		[onDateChange]
-	);
-
-	return (
-		<ScheduleContext.Provider
-			value={{
-				date,
-				setDate,
-				events,
-				locale,
-				onEventClick,
-			}}>
-			{children}
-		</ScheduleContext.Provider>
-	);
-};
-
-export const useScheduleContext = () => useContext(ScheduleContext);
-
-// --- COMPONENT: EVENT CARD ---
-const EventCard = ({ event }: { event: LayoutEvent }) => {
-	const { onEventClick } = useScheduleContext();
-
+	const variant = variantMap[event.type] || "default";
 	const heightPx = parseFloat(event.style.height);
 
 	return (
 		<div
 			onClick={e => {
 				e.stopPropagation();
-				onEventClick?.(event);
+				onClick?.(event);
 			}}
-			className="absolute z-10 flex flex-col gap-0.5 border-l-4 rounded-md px-2 py-1 text-xs text-foreground transition-all hover:brightness-95 hover:shadow-md cursor-pointer overflow-hidden bg-primary/10 border-primary border-l-primary"
+			className={cn(eventCardVariants({ variant }))}
 			style={event.style}>
 			<div className="flex justify-between w-full font-semibold leading-none text-sm">
 				<span className="truncate">{event.subject}</span>
@@ -147,11 +102,15 @@ const EventCard = ({ event }: { event: LayoutEvent }) => {
 	);
 };
 
-// --- COMPONENT: TIME GRID ---
-const TimeGrid = () => {
-	const { events, date } = useScheduleContext();
+interface TimeGridProps {
+	events: ScheduleEvent[];
+	date: Date;
+	minHour?: number;
+	maxHour?: number;
+	onEventClick?: (event: ScheduleEvent) => void;
+}
 
-	// 1. Calculate Grid Range (Min/Max Hours)
+export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 	const { minHour, totalHours, ticks } = useMemo(() => {
 		if (events.length === 0)
 			return {
@@ -176,11 +135,9 @@ const TimeGrid = () => {
 		};
 	}, [events]);
 
-	// 2. Calculate Layout (Clusters for Overlaps)
 	const layoutEvents = useMemo(() => {
 		if (!events.length) return [];
 
-		// Sort events by start time, then duration (longest first)
 		const sorted = [...events].sort((a, b) => {
 			if (a.start.getTime() !== b.start.getTime())
 				return a.start.getTime() - b.start.getTime();
@@ -194,25 +151,20 @@ const TimeGrid = () => {
 		const processCluster = (group: ScheduleEvent[]) => {
 			if (group.length === 0) return;
 
-			// Pack events into columns
 			const columns: ScheduleEvent[][] = [];
 			for (const ev of group) {
 				let placed = false;
 				for (let i = 0; i < columns.length; i++) {
 					const lastInCol = columns[i][columns[i].length - 1];
-					// If event starts after the last one ends, it fits in this column
 					if (lastInCol.end.getTime() <= ev.start.getTime()) {
 						columns[i].push(ev);
 						placed = true;
 						break;
 					}
 				}
-				if (!placed) {
-					columns.push([ev]);
-				}
+				if (!placed) columns.push([ev]);
 			}
 
-			// Calculate style for each event in the cluster
 			const widthPercent = 100 / columns.length;
 			columns.forEach((col, colIndex) => {
 				col.forEach(ev => {
@@ -224,13 +176,11 @@ const TimeGrid = () => {
 						...ev,
 						style: {
 							top: `${(startMinutes / 60) * SLOT_HEIGHT_PX}px`,
-							// Add vertical gap between stacked lessons
 							height: `${Math.max(
 								(durationMinutes / 60) * SLOT_HEIGHT_PX - ROW_GAP_PX,
 								24
 							)}px`,
 							left: `${colIndex * widthPercent}%`,
-							// Add horizontal gap between columns
 							width: `calc(${widthPercent}% - ${COLUMN_GAP_PX}px)`,
 						},
 					});
@@ -239,7 +189,6 @@ const TimeGrid = () => {
 		};
 
 		for (const ev of sorted) {
-			// Check for overlap with the current cluster
 			if (ev.start.getTime() < clusterEnd || cluster.length === 0) {
 				cluster.push(ev);
 				clusterEnd = Math.max(clusterEnd, ev.end.getTime());
@@ -263,7 +212,6 @@ const TimeGrid = () => {
 					paddingBottom: "2.5rem",
 					boxSizing: "content-box",
 				}}>
-				{/* Y-Axis: Time Labels */}
 				<div className="w-12 shrink-0 border-r border-border/50 bg-muted/5 relative">
 					{ticks.map((hour, index) => (
 						<div
@@ -280,22 +228,20 @@ const TimeGrid = () => {
 					))}
 				</div>
 
-				{/* Main Grid Area */}
 				<div className="flex-1 relative">
-					{/* Horizontal Guidelines */}
-					{ticks.map((hour, index) => (
+					{ticks.map((_, index) => (
 						<div
-							key={hour}
+							key={index}
 							className="absolute w-full border-b border-dashed border-border/40"
 							style={{ top: `${index * SLOT_HEIGHT_PX}px` }}
 						/>
 					))}
 
-					{/* Events */}
 					{layoutEvents.map(event => (
 						<EventCard
 							key={event.id}
 							event={event}
+							onClick={onEventClick}
 						/>
 					))}
 
@@ -336,5 +282,3 @@ const CurrentTimeLine = ({
 		</div>
 	);
 };
-
-export { DailySchedule, TimeGrid };

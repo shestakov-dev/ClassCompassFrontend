@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-	DailySchedule,
 	TimeGrid,
 	type ScheduleEvent,
-} from "@/components/daily-schedule-grid";
+} from "@/components/schedule/daily-schedule-grid";
 import { startOfWeek, format } from "date-fns";
 import {
 	Dialog,
@@ -27,10 +26,8 @@ export function DailyScheduleViewer({
 	const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
-	// Memoize event transformation to prevent recalculation on every render
-	const events = React.useMemo(() => {
+	const events = useMemo(() => {
 		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-
 		return transformLessonsToEvents(lessons, weekStart);
 	}, [lessons, date]);
 
@@ -40,17 +37,15 @@ export function DailyScheduleViewer({
 	};
 
 	return (
-		<>
-			<DailySchedule
-				date={date}
-				events={events}
-				onEventClick={handleEventClick}>
-				<div className="flex-1 h-full relative">
-					<TimeGrid />
-				</div>
-			</DailySchedule>
+		<div className="h-full flex flex-col">
+			<div className="flex-1 min-h-0 relative border rounded-md bg-background shadow-sm overflow-hidden">
+				<TimeGrid
+					events={events}
+					date={date}
+					onEventClick={handleEventClick}
+				/>
+			</div>
 
-			{/* Lesson Details Modal */}
 			<Dialog
 				open={isModalOpen}
 				onOpenChange={setIsModalOpen}>
@@ -85,6 +80,6 @@ export function DailyScheduleViewer({
 					)}
 				</DialogContent>
 			</Dialog>
-		</>
+		</div>
 	);
 }
