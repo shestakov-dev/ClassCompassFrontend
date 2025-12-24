@@ -2,7 +2,20 @@ import { LogIn, LogOut } from "lucide-react";
 import { ROUTE_LOGIN, ROUTE_LOGOUT } from "@/config/urls";
 import type { MainNavItem, NavButton } from "@/types/navigation";
 
-export const NAV_ITEMS: readonly MainNavItem[] = [] as const;
+export const NAV_ITEMS: readonly MainNavItem[] = [
+	{
+		title: "Home",
+		href: "/",
+		visibility: "guest",
+		type: "link",
+	},
+	{
+		title: "Schedule",
+		href: "/schedule",
+		visibility: "authenticated",
+		type: "link",
+	},
+] as const;
 
 export const NAV_BUTTONS: readonly NavButton[] = [
 	{

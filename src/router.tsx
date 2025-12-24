@@ -10,7 +10,10 @@ import {
 	ROUTE_LOGIN,
 	ROUTE_LOGOUT,
 	ROUTE_HOME,
+	ROUTE_SCHEDULE,
 } from "@/config/urls";
+import SchedulePage from "./pages/SchedulePage";
+import { scheduleLoader } from "./loaders/schedule-loader";
 
 export const router = createBrowserRouter([
 	{
@@ -24,6 +27,11 @@ export const router = createBrowserRouter([
 					{
 						index: true,
 						element: <HomePage />,
+					},
+					{
+						path: ROUTE_SCHEDULE,
+						element: <SchedulePage />,
+						loader: scheduleLoader,
 					},
 				],
 			},

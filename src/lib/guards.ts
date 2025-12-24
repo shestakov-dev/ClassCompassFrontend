@@ -7,8 +7,6 @@ const getCachedSession = () => {
 	return queryClient.fetchQuery({
 		queryKey: ["session"],
 		queryFn: getSession,
-		// Cache the session for 5 minutes
-		staleTime: 1000 * 60 * 5,
 	});
 };
 
