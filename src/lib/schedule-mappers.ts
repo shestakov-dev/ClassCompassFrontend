@@ -1,6 +1,6 @@
 import { type LessonEntity } from "@/api/generated/models";
 import { type ScheduleEvent } from "@/components/daily-schedule-grid";
-import { addDays, setHours, setMinutes, setSeconds } from "date-fns";
+import { addDays, parseISO, set } from "date-fns";
 
 const DAY_TO_INDEX_MAP: Record<string, number> = {
 	sunday: 0,
@@ -27,18 +27,17 @@ export function transformLessonsToEvents(
 		// Calculate target date based on the week start
 		const targetDate = addDays(weekStart, dayOffset === 0 ? 6 : dayOffset - 1);
 
-		const startObj = new Date(lesson.startTime);
-		const endObj = new Date(lesson.endTime);
+		const startTime = parseISO(lesson.startTime);
+		const endTime = parseISO(lesson.endTime);
 
-		// Use getHours() (Local) instead of getUTCHours() to prevent timezone shifts
-		const start = setSeconds(
-			setMinutes(setHours(targetDate, startObj.getHours()), startObj.getMinutes()),
-			0
-		);
-		const end = setSeconds(
-			setMinutes(setHours(targetDate, endObj.getHours()), endObj.getMinutes()),
-			0
-		);
+		const start = set(targetDate, {
+			hours: startTime.getUTCHours(),
+			minutes: startTime.getUTCMinutes(),
+		});
+		const end = set(targetDate, {
+			hours: endTime.getUTCHours(),
+			minutes: endTime.getUTCMinutes(),
+		});
 
 		return {
 			id: lesson.id,

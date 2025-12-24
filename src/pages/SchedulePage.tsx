@@ -102,6 +102,7 @@ export default function SchedulePage() {
 			query: {
 				enabled: !!user?.schoolId,
 				staleTime: 1000 * 60 * 1,
+				placeholderData: previousData => previousData,
 			},
 		}
 	);
