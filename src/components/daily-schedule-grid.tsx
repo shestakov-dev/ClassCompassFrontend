@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import { cva, type VariantProps } from "class-variance-authority";
+"use client";
+
 import { differenceInMinutes, format, startOfDay } from "date-fns";
 import { enUS } from "date-fns/locale/en-US";
 import {
@@ -13,8 +13,12 @@ import {
 import type { Locale } from "date-fns";
 import { LessonEntityLessonWeek as LessonWeek } from "@/api/generated/models";
 
+// --- CONFIGURATION ---
 const SLOT_HEIGHT_PX = 80;
+const COLUMN_GAP_PX = 8; // Horizontal space between overlapping columns
+const ROW_GAP_PX = 4; // Vertical space between consecutive lessons
 
+// --- TYPES ---
 export type ScheduleEvent = {
 	id: string;
 	start: Date;
@@ -25,22 +29,17 @@ export type ScheduleEvent = {
 	type: LessonWeek;
 };
 
-const eventCardVariants = cva(
-	"absolute left-1 right-1 z-10 flex flex-col gap-0.5 border-l-4 rounded-md px-2 py-1 text-xs transition-all hover:brightness-95 hover:shadow-md cursor-pointer overflow-hidden",
-	{
-		variants: {
-			variant: {
-				default: "bg-primary/10 border-primary text-primary-foreground-dark",
-				odd: "bg-primary/10 border-primary text-primary-foreground-dark",
-				even: "bg-primary/10 border-primary text-primary-foreground-dark",
-			},
-		},
-		defaultVariants: {
-			variant: "default",
-		},
-	}
-);
+// Internal type for rendering
+type LayoutEvent = ScheduleEvent & {
+	style: {
+		top: string;
+		height: string;
+		left: string;
+		width: string;
+	};
+};
 
+// --- CONTEXT ---
 type ScheduleContextType = {
 	date: Date;
 	setDate: (date: Date) => void;
@@ -100,32 +99,11 @@ const DailySchedule = ({
 
 export const useScheduleContext = () => useContext(ScheduleContext);
 
-const EventCard = ({
-	event,
-	startHour,
-}: {
-	event: ScheduleEvent;
-	startHour: number;
-}) => {
+// --- COMPONENT: EVENT CARD ---
+const EventCard = ({ event }: { event: LayoutEvent }) => {
 	const { onEventClick } = useScheduleContext();
 
-	const startMinutes =
-		(event.start.getHours() - startHour) * 60 + event.start.getMinutes();
-	const durationMinutes = differenceInMinutes(event.end, event.start);
-
-	const top = (startMinutes / 60) * SLOT_HEIGHT_PX;
-	const height = (durationMinutes / 60) * SLOT_HEIGHT_PX;
-
-	// Map lesson type to visual variant
-	const variantMap: Record<
-		string,
-		VariantProps<typeof eventCardVariants>["variant"]
-	> = {
-		[LessonWeek.odd]: "odd",
-		[LessonWeek.even]: "even",
-	};
-
-	const variant = variantMap[event.type] || "default";
+	const heightPx = parseFloat(event.style.height);
 
 	return (
 		<div
@@ -133,28 +111,32 @@ const EventCard = ({
 				e.stopPropagation();
 				onEventClick?.(event);
 			}}
-			className={cn(eventCardVariants({ variant }))}
-			style={{
-				top: `${top}px`,
-				// Ensure small events remain visible
-				height: `${Math.max(height - 2, 24)}px`,
-			}}>
+			className="absolute z-10 flex flex-col gap-0.5 border-l-4 rounded-md px-2 py-1 text-xs text-foreground transition-all hover:brightness-95 hover:shadow-md cursor-pointer overflow-hidden bg-primary/10 border-primary border-l-primary"
+			style={event.style}>
 			<div className="flex justify-between w-full font-semibold leading-none text-sm">
 				<span className="truncate">{event.subject}</span>
-				<span className="text-[10px] opacity-70 whitespace-nowrap pl-1">
-					{format(event.start, "HH:mm")}
-				</span>
+				{heightPx > 40 && (
+					<span className="text-[10px] opacity-70 whitespace-nowrap pl-1">
+						{format(event.start, "HH:mm")}
+					</span>
+				)}
 			</div>
 
 			<div className="flex flex-col text-[11px] opacity-90 leading-tight gap-0.5 mt-1">
 				<div className="flex justify-between items-center">
 					<span className="truncate">{event.room}</span>
-					<span className="text-[9px] opacity-60">{format(event.end, "HH:mm")}</span>
+					<span className="text-[9px] opacity-60">
+						{heightPx <= 40
+							? `${format(event.start, "HH:mm")} - ${format(event.end, "HH:mm")}`
+							: format(event.end, "HH:mm")}
+					</span>
 				</div>
-				<div className="truncate opacity-80">{event.teacher}</div>
+				{heightPx > 50 && (
+					<div className="truncate opacity-80">{event.teacher}</div>
+				)}
 			</div>
 
-			{height > 50 && (
+			{heightPx > 70 && (
 				<div className="mt-auto self-start">
 					<span className="inline-block px-1 rounded-[2px] bg-primary/20 text-[9px] font-bold uppercase tracking-wider">
 						{event.type}
@@ -165,34 +147,117 @@ const EventCard = ({
 	);
 };
 
+// --- COMPONENT: TIME GRID ---
 const TimeGrid = () => {
 	const { events, date } = useScheduleContext();
 
-	// Determine the start and end hours dynamically based on events
-	const { minHour, maxHour } = useMemo(() => {
-		if (events.length === 0) return { minHour: 6, maxHour: 20 };
+	// 1. Calculate Grid Range (Min/Max Hours)
+	const { minHour, totalHours, ticks } = useMemo(() => {
+		if (events.length === 0)
+			return {
+				minHour: 6,
+				totalHours: 14,
+				ticks: Array.from({ length: 15 }, (_, i) => 6 + i),
+			};
 
 		const starts = events.map(e => e.start.getHours());
 		const ends = events.map(
 			e => e.end.getHours() + (e.end.getMinutes() > 0 ? 1 : 0)
 		);
 
-		const min = Math.min(...starts) - 1;
-		const max = Math.max(...ends) + 1;
+		const min = Math.max(0, Math.min(...starts) - 1);
+		const max = Math.min(24, Math.max(...ends) + 1);
+		const total = max - min;
 
 		return {
-			minHour: Math.max(0, min),
-			maxHour: Math.min(24, max),
+			minHour: min,
+			totalHours: total,
+			ticks: Array.from({ length: total + 1 }, (_, i) => min + i),
 		};
 	}, [events]);
 
-	const totalHours = maxHour - minHour;
-	const ticks = Array.from({ length: totalHours + 1 }, (_, i) => minHour + i);
+	// 2. Calculate Layout (Clusters for Overlaps)
+	const layoutEvents = useMemo(() => {
+		if (!events.length) return [];
+
+		// Sort events by start time, then duration (longest first)
+		const sorted = [...events].sort((a, b) => {
+			if (a.start.getTime() !== b.start.getTime())
+				return a.start.getTime() - b.start.getTime();
+			return b.end.getTime() - a.end.getTime();
+		});
+
+		const result: LayoutEvent[] = [];
+		let cluster: ScheduleEvent[] = [];
+		let clusterEnd = 0;
+
+		const processCluster = (group: ScheduleEvent[]) => {
+			if (group.length === 0) return;
+
+			// Pack events into columns
+			const columns: ScheduleEvent[][] = [];
+			for (const ev of group) {
+				let placed = false;
+				for (let i = 0; i < columns.length; i++) {
+					const lastInCol = columns[i][columns[i].length - 1];
+					// If event starts after the last one ends, it fits in this column
+					if (lastInCol.end.getTime() <= ev.start.getTime()) {
+						columns[i].push(ev);
+						placed = true;
+						break;
+					}
+				}
+				if (!placed) {
+					columns.push([ev]);
+				}
+			}
+
+			// Calculate style for each event in the cluster
+			const widthPercent = 100 / columns.length;
+			columns.forEach((col, colIndex) => {
+				col.forEach(ev => {
+					const startMinutes =
+						(ev.start.getHours() - minHour) * 60 + ev.start.getMinutes();
+					const durationMinutes = differenceInMinutes(ev.end, ev.start);
+
+					result.push({
+						...ev,
+						style: {
+							top: `${(startMinutes / 60) * SLOT_HEIGHT_PX}px`,
+							// Add vertical gap between stacked lessons
+							height: `${Math.max(
+								(durationMinutes / 60) * SLOT_HEIGHT_PX - ROW_GAP_PX,
+								24
+							)}px`,
+							left: `${colIndex * widthPercent}%`,
+							// Add horizontal gap between columns
+							width: `calc(${widthPercent}% - ${COLUMN_GAP_PX}px)`,
+						},
+					});
+				});
+			});
+		};
+
+		for (const ev of sorted) {
+			// Check for overlap with the current cluster
+			if (ev.start.getTime() < clusterEnd || cluster.length === 0) {
+				cluster.push(ev);
+				clusterEnd = Math.max(clusterEnd, ev.end.getTime());
+			} else {
+				processCluster(cluster);
+				cluster = [ev];
+				clusterEnd = ev.end.getTime();
+			}
+		}
+		processCluster(cluster);
+
+		return result;
+	}, [events, minHour]);
 
 	return (
-		<div className="flex relative h-full overflow-y-auto bg-background border border/50 rounded-md">
+		<div className="flex relative h-full overflow-y-auto bg-background">
 			<div
-				className="flex w-full relative min-w-65 pt-6"
+				className="flex w-full relative min-w-75 pt-6"
 				style={{
 					height: `${totalHours * SLOT_HEIGHT_PX}px`,
 					paddingBottom: "2.5rem",
@@ -209,7 +274,7 @@ const TimeGrid = () => {
 								transform: "translateY(-50%)",
 							}}>
 							<span className="text-xs text-muted-foreground font-medium tabular-nums">
-								{hour.toString().padStart(2, "0")}:00
+								{hour < 10 ? `0${hour}` : hour}:00
 							</span>
 						</div>
 					))}
@@ -221,23 +286,22 @@ const TimeGrid = () => {
 					{ticks.map((hour, index) => (
 						<div
 							key={hour}
-							className="absolute w-full border-b border-border/40"
+							className="absolute w-full border-b border-dashed border-border/40"
 							style={{ top: `${index * SLOT_HEIGHT_PX}px` }}
 						/>
 					))}
 
 					{/* Events */}
-					{events.map(event => (
+					{layoutEvents.map(event => (
 						<EventCard
 							key={event.id}
 							event={event}
-							startHour={minHour}
 						/>
 					))}
 
 					<CurrentTimeLine
 						minHour={minHour}
-						maxHour={maxHour}
+						maxHour={minHour + totalHours}
 						date={date}
 					/>
 				</div>
@@ -256,13 +320,9 @@ const CurrentTimeLine = ({
 	date: Date;
 }) => {
 	const now = new Date();
-
-	// Only display if the viewed date is today
 	if (startOfDay(now).getTime() !== startOfDay(date).getTime()) return null;
 
 	const currentHour = now.getHours();
-
-	// Only render if the current time is within the visible grid range
 	if (currentHour < minHour || currentHour >= maxHour) return null;
 
 	const minutesFromStart = (currentHour - minHour) * 60 + now.getMinutes();
