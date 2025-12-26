@@ -19,6 +19,10 @@ import {
 import { addDays, subDays, setDay, parseISO, set } from "date-fns";
 import { useSession } from "@/context/session-context";
 import { useLessonsControllerFindFiltered } from "@/api/generated/endpoints/lessons/lessons";
+import { useClassesControllerFindAllBySchool } from "@/api/generated/endpoints/classes/classes";
+import { useSubjectsControllerFindAllBySchool } from "@/api/generated/endpoints/subjects/subjects";
+import { useTeachersControllerFindAllBySchool } from "@/api/generated/endpoints/teachers/teachers";
+import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
 import {
 	type LessonsControllerFindFilteredParams,
 	LessonsControllerFindFilteredDay as Day,
@@ -109,6 +113,23 @@ export default function SchedulePage() {
 			placeholderData: keepPreviousData,
 		},
 	});
+
+	const { data: classes } = useClassesControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+	const { data: subjects } = useSubjectsControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+	const { data: teachers } = useTeachersControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+	const { data: buildings } = useBuildingsControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
 
 	const hasLessons = lessons && lessons.length > 0;
 	// if we are initially loading or if we are fetching and
@@ -318,6 +339,12 @@ export default function SchedulePage() {
 						genericDay={genericDay}
 						setGenericDay={handleGenericDayChange}
 						onReset={handleReset}
+						options={{
+							classes,
+							subjects,
+							teachers,
+							buildings,
+						}}
 					/>
 				</div>
 
@@ -351,16 +378,18 @@ export default function SchedulePage() {
 											No classes found
 										</EmptyTitle>
 										<EmptyDescription>
+											There are no classes scheduled{" "}
 											{mode === "calendar"
-												? "There are no classes scheduled for this specific date and time."
-												: `There are no classes scheduled for ${
+												? "for this specific date and time"
+												: `for ${
 														genericDay
 															.charAt(0)
 															.toUpperCase() +
 														genericDay
 															.slice(1)
 															.toLowerCase()
-													}s.`}
+													}s`}{" "}
+											with the current filters.
 										</EmptyDescription>
 									</EmptyHeader>
 									<EmptyContent>

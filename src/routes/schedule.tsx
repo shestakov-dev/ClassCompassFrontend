@@ -82,16 +82,16 @@ export const Route = createFileRoute("/schedule")({
 			apiFilters.to = search.to;
 
 			// Clear generic params
-			delete apiFilters.day;
-			delete apiFilters.week;
+			apiFilters.day = undefined;
+			apiFilters.week = undefined;
 		} else {
 			apiFilters.day = search.day ?? defaults.day;
 			apiFilters.week = search.week;
 
 			// Clear calendar params
-			delete apiFilters.timestamp;
-			delete apiFilters.from;
-			delete apiFilters.to;
+			apiFilters.timestamp = undefined;
+			apiFilters.from = undefined;
+			apiFilters.to = undefined;
 		}
 
 		queryClient.prefetchQuery({

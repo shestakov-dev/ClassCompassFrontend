@@ -18,7 +18,9 @@ import { Separator } from "@/components/ui/separator";
 import {
 	Select,
 	SelectContent,
+	SelectGroup,
 	SelectItem,
+	SelectLabel,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
@@ -35,6 +37,10 @@ import {
 	type LessonsControllerFindFilteredParams,
 	LessonsControllerFindFilteredWeek as LessonWeek,
 	LessonsControllerFindFilteredDay as Day,
+	type ClassEntity,
+	type SubjectEntity,
+	type TeacherEntity,
+	type BuildingEntity,
 } from "@/api/generated/models";
 import {
 	useState,
@@ -45,10 +51,10 @@ import {
 import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-defaults";
 
 export interface FilterOptions {
-	classes?: { id: string; name: string }[];
-	subjects?: { id: string; name: string }[];
-	teachers?: { id: string; name: string }[];
-	rooms?: { id: string; name: string }[];
+	classes?: ClassEntity[];
+	subjects?: SubjectEntity[];
+	teachers?: TeacherEntity[];
+	buildings?: BuildingEntity[];
 }
 
 export type FilterMode = "calendar" | "generic";
@@ -116,9 +122,9 @@ export function ScheduleFilters({
 					? undefined
 					: getWeekParity(targetDate);
 
-				delete nextParams.timestamp;
-				delete nextParams.from;
-				delete nextParams.to;
+				nextParams.timestamp = undefined;
+				nextParams.from = undefined;
+				nextParams.to = undefined;
 			} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
 				const [hours, minutes] = targetAtTime.split(":").map(Number);
 				const dateWithTime = set(targetDate, {
@@ -130,10 +136,10 @@ export function ScheduleFilters({
 
 				nextParams.timestamp = dateWithTime.toISOString();
 
-				delete nextParams.from;
-				delete nextParams.to;
-				delete nextParams.day;
-				delete nextParams.week;
+				nextParams.from = undefined;
+				nextParams.to = undefined;
+				nextParams.day = undefined;
+				nextParams.week = undefined;
 			} else if (
 				targetTimeSubMode === "range" &&
 				targetRangeStart &&
@@ -162,9 +168,9 @@ export function ScheduleFilters({
 				nextParams.from = fromDate.toISOString();
 				nextParams.to = toDate.toISOString();
 
-				delete nextParams.timestamp;
-				delete nextParams.day;
-				delete nextParams.week;
+				nextParams.timestamp = undefined;
+				nextParams.day = undefined;
+				nextParams.week = undefined;
 			}
 		} else {
 			nextParams.day = targetGenericDay;
@@ -173,10 +179,10 @@ export function ScheduleFilters({
 					? undefined
 					: targetGenericWeek;
 
-			delete nextParams.timestamp;
-			delete nextParams.from;
-			delete nextParams.to;
-			delete nextParams.ignoreWeek;
+			nextParams.timestamp = undefined;
+			nextParams.from = undefined;
+			nextParams.to = undefined;
+			nextParams.ignoreWeek = undefined;
 		}
 
 		return nextParams;
@@ -257,7 +263,11 @@ export function ScheduleFilters({
 	) => {
 		setFilters(previous => {
 			const next = { ...previous, [key]: value };
-			if (value === "all") delete next[key];
+
+			if (value === "all") {
+				next[key] = undefined;
+			}
+
 			return next;
 		});
 	};
@@ -617,7 +627,7 @@ export function ScheduleFilters({
 											<SelectItem
 												key={item.id}
 												value={item.id}>
-												{item.name}
+												{`${item.user?.firstName} ${item.user?.lastName}`}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -637,12 +647,22 @@ export function ScheduleFilters({
 										<SelectItem value="all">
 											All Rooms
 										</SelectItem>
-										{options.rooms?.map(item => (
-											<SelectItem
-												key={item.id}
-												value={item.id}>
-												{item.name}
-											</SelectItem>
+										{options.buildings?.map(building => (
+											<SelectGroup key={building.id}>
+												<SelectLabel>
+													{building.name}
+												</SelectLabel>
+												{building.floors?.map(floor =>
+													floor.rooms?.map(room => (
+														<SelectItem
+															key={room.id}
+															value={room.id}>
+															{room.name} (Floor{" "}
+															{floor.number})
+														</SelectItem>
+													))
+												)}
+											</SelectGroup>
 										))}
 									</SelectContent>
 								</Select>
