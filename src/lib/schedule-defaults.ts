@@ -52,7 +52,11 @@ export const getDefaultFilters = (
 		day: getCurrentDayEnum(),
 	};
 
-	// Add other user defaults here if needed
+	if (user?.student) {
+		defaults.classId = user.student.classId;
+	} else if (user?.teacher) {
+		defaults.teacherId = user.teacher.id;
+	}
 
 	return defaults;
 };

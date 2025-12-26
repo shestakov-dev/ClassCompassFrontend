@@ -70,6 +70,7 @@ interface ScheduleFiltersProps {
 	genericDay: Day;
 	setGenericDay: (day: Day) => void;
 	onReset?: () => void;
+	showReset?: boolean;
 	options?: FilterOptions;
 	className?: string;
 }
@@ -84,6 +85,7 @@ export function ScheduleFilters({
 	genericDay,
 	setGenericDay,
 	onReset,
+	showReset = true,
 	options = {},
 	className,
 }: ScheduleFiltersProps) {
@@ -339,7 +341,7 @@ export function ScheduleFilters({
 						</div>
 					)}
 				</div>
-				{(activeCount > 0 || onReset) && (
+				{showReset && onReset && (
 					<Button
 						variant="ghost"
 						size="sm"

@@ -102,6 +102,23 @@ export default function SchedulePage() {
 		}
 	}, [search, user, mode, genericDay, currentDate]);
 
+	const isDefaultFilters = useMemo(() => {
+		if (!user) return true;
+		const defaults = getDefaultFilters(user);
+
+		if (mode !== "generic") return false;
+
+		if (filters.classId !== defaults.classId) return false;
+		if (filters.teacherId !== defaults.teacherId) return false;
+		if (filters.subjectId) return false;
+		if (filters.roomId) return false;
+		if (filters.week) return false;
+		if (filters.ignoreWeek) return false;
+		if (filters.day !== defaults.day) return false;
+
+		return true;
+	}, [user, filters, mode]);
+
 	const {
 		data: lessons,
 		isLoading,
@@ -339,6 +356,7 @@ export default function SchedulePage() {
 						genericDay={genericDay}
 						setGenericDay={handleGenericDayChange}
 						onReset={handleReset}
+						showReset={!isDefaultFilters}
 						options={{
 							classes,
 							subjects,
@@ -378,27 +396,22 @@ export default function SchedulePage() {
 											No classes found
 										</EmptyTitle>
 										<EmptyDescription>
-											There are no classes scheduled{" "}
+											There are no classes scheduled for{" "}
 											{mode === "calendar"
-												? "for this specific date and time"
-												: `for ${
-														genericDay
-															.charAt(0)
-															.toUpperCase() +
-														genericDay
-															.slice(1)
-															.toLowerCase()
-													}s`}{" "}
+												? "this specific date and time"
+												: `${genericDay.charAt(0).toUpperCase()}${genericDay.slice(1).toLowerCase()}`}{" "}
 											with the current filters.
 										</EmptyDescription>
 									</EmptyHeader>
 									<EmptyContent>
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={handleReset}>
-											Reset Filters
-										</Button>
+										{!isDefaultFilters && (
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={handleReset}>
+												Reset Filters
+											</Button>
+										)}
 									</EmptyContent>
 								</Empty>
 							</div>
