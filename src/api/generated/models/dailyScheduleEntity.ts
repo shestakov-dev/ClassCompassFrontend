@@ -12,23 +12,23 @@ import type { ClassEntity } from "./classEntity";
  * A daily schedule object
  */
 export interface DailyScheduleEntity {
-  /** The day of the week for the schedule */
-  day: DailyScheduleEntityDay;
-  /** The daily schedule's unique identifier */
-  id: string;
-  /** The daily schedule's class identifier */
-  classId: string;
-  /** The daily schedule's populated class */
-  class?: ClassEntity;
-  /** The time the daily schedule was created */
-  createdAt: string;
-  /** The time the daily schedule was last updated */
-  updatedAt: string;
-  /** Whether the daily schedule has been deleted */
-  deleted: boolean;
-  /**
-   * The time the daily schedule was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The day of the week for the schedule */
+	day: DailyScheduleEntityDay;
+	/** The daily schedule's unique identifier */
+	id: string;
+	/** The daily schedule's class identifier */
+	classId: string;
+	/** The daily schedule's populated class */
+	class?: ClassEntity;
+	/** The time the daily schedule was created */
+	createdAt: string;
+	/** The time the daily schedule was last updated */
+	updatedAt: string;
+	/** Whether the daily schedule has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the daily schedule was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

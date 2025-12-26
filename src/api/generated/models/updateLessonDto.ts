@@ -11,20 +11,20 @@ import type { UpdateLessonDtoLessonWeek } from "./updateLessonDtoLessonWeek";
  * The data required to update an existing lesson
  */
 export interface UpdateLessonDto {
-  /** The lesson's week */
-  lessonWeek?: UpdateLessonDtoLessonWeek;
-  /** The lesson's number in the daily schedule */
-  lessonNumber?: number;
-  /** The lesson's start time */
-  startTime?: string;
-  /** The lesson's end time */
-  endTime?: string;
-  /** The lesson's room identifier */
-  roomId?: string;
-  /** The lesson's teacher identifier */
-  teacherId?: string;
-  /** The lesson's subject identifier */
-  subjectId?: string;
-  /** The lesson's daily schedule identifier */
-  dailyScheduleId?: string;
+	/** The lesson's week */
+	lessonWeek?: UpdateLessonDtoLessonWeek;
+	/** The lesson's number in the daily schedule */
+	lessonNumber?: number;
+	/** The lesson's start time */
+	startTime?: string;
+	/** The lesson's end time */
+	endTime?: string;
+	/** The lesson's room identifier */
+	roomId?: string;
+	/** The lesson's teacher identifier */
+	teacherId?: string;
+	/** The lesson's subject identifier */
+	subjectId?: string;
+	/** The lesson's daily schedule identifier */
+	dailyScheduleId?: string;
 }

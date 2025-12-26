@@ -10,8 +10,8 @@
  * The data required to update a building
  */
 export interface UpdateBuildingDto {
-  /** The building's name */
-  name?: string;
-  /** The building's school identifier */
-  schoolId?: string;
+	/** The building's name */
+	name?: string;
+	/** The building's school identifier */
+	schoolId?: string;
 }

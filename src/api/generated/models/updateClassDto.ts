@@ -10,8 +10,8 @@
  * The data required to update a class
  */
 export interface UpdateClassDto {
-  /** The class's name */
-  name?: string;
-  /** The class's school identifier */
-  schoolId?: string;
+	/** The class's name */
+	name?: string;
+	/** The class's school identifier */
+	schoolId?: string;
 }

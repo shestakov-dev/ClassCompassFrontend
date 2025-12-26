@@ -10,11 +10,11 @@
  * The data required to create a new invite
  */
 export interface CreateInviteDto {
-  /** The user identifier for whom the invite is being created */
-  userId: string;
-  /**
-   * The time-to-live for the invite in seconds
-   * @minimum 1
-   */
-  ttlSeconds?: number;
+	/** The user identifier for whom the invite is being created */
+	userId: string;
+	/**
+	 * The time-to-live for the invite in seconds
+	 * @minimum 1
+	 */
+	ttlSeconds?: number;
 }

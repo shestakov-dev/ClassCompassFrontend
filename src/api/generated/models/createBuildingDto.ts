@@ -10,8 +10,8 @@
  * The data required to create a new building
  */
 export interface CreateBuildingDto {
-  /** The building's name */
-  name: string;
-  /** The building's school identifier */
-  schoolId: string;
+	/** The building's name */
+	name: string;
+	/** The building's school identifier */
+	schoolId: string;
 }

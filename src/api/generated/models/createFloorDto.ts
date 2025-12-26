@@ -10,10 +10,10 @@
  * The data required to create a new floor
  */
 export interface CreateFloorDto {
-  /** The floor's number */
-  number: number;
-  /** The floor's description */
-  description?: string;
-  /** The floor's building identifier */
-  buildingId: string;
+	/** The floor's number */
+	number: number;
+	/** The floor's description */
+	description?: string;
+	/** The floor's building identifier */
+	buildingId: string;
 }

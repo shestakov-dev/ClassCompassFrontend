@@ -10,8 +10,8 @@
  * The data required to update an existing room
  */
 export interface UpdateRoomDto {
-  /** The room's name */
-  name?: string;
-  /** The room's floor identifier */
-  floorId?: string;
+	/** The room's name */
+	name?: string;
+	/** The room's floor identifier */
+	floorId?: string;
 }

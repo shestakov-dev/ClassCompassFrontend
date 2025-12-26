@@ -10,6 +10,6 @@
  * The data required to update a school
  */
 export interface UpdateSchoolDto {
-  /** The school's name */
-  name?: string;
+	/** The school's name */
+	name?: string;
 }

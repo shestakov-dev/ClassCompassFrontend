@@ -10,11 +10,11 @@
  * The lesson's week
  */
 export type LessonEntityLessonWeek =
-  (typeof LessonEntityLessonWeek)[keyof typeof LessonEntityLessonWeek];
+	(typeof LessonEntityLessonWeek)[keyof typeof LessonEntityLessonWeek];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const LessonEntityLessonWeek = {
-  odd: "odd",
-  even: "even",
-  every: "every",
+	odd: "odd",
+	even: "even",
+	every: "every",
 } as const;

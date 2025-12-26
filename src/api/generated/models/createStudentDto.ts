@@ -10,8 +10,8 @@
  * The data required to create a new student
  */
 export interface CreateStudentDto {
-  /** The student's user identifier */
-  userId: string;
-  /** The student's class identifier */
-  classId: string;
+	/** The student's user identifier */
+	userId: string;
+	/** The student's class identifier */
+	classId: string;
 }

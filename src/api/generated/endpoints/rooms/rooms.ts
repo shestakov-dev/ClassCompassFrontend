@@ -7,18 +7,18 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
+	MutationFunction,
+	QueryClient,
+	QueryFunction,
+	QueryKey,
+	UndefinedInitialDataOptions,
+	UseMutationOptions,
+	UseMutationResult,
+	UseQueryOptions,
+	UseQueryResult,
 } from "@tanstack/react-query";
 
 import type { CreateRoomDto, RoomEntity, UpdateRoomDto } from "../../models";
@@ -29,57 +29,57 @@ import { customInstance } from "../../../mutators/custom-instance";
  * @summary Create a new room
  */
 export const roomsControllerCreate = (
-  createRoomDto: CreateRoomDto,
-  signal?: AbortSignal,
+	createRoomDto: CreateRoomDto,
+	signal?: AbortSignal
 ) => {
-  return customInstance<RoomEntity>({
-    url: `https://api.classcompass.shestakov.app/rooms`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createRoomDto,
-    signal,
-  });
+	return customInstance<RoomEntity>({
+		url: `https://api.classcompass.shestakov.app/rooms`,
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		data: createRoomDto,
+		signal,
+	});
 };
 
 export const getRoomsControllerCreateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof roomsControllerCreate>>,
-    TError,
-    { data: CreateRoomDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof roomsControllerCreate>>,
+		TError,
+		{ data: CreateRoomDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof roomsControllerCreate>>,
-  TError,
-  { data: CreateRoomDto },
-  TContext
+	Awaited<ReturnType<typeof roomsControllerCreate>>,
+	TError,
+	{ data: CreateRoomDto },
+	TContext
 > => {
-  const mutationKey = ["roomsControllerCreate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["roomsControllerCreate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof roomsControllerCreate>>,
-    { data: CreateRoomDto }
-  > = (props) => {
-    const { data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof roomsControllerCreate>>,
+		{ data: CreateRoomDto }
+	> = props => {
+		const { data } = props ?? {};
 
-    return roomsControllerCreate(data);
-  };
+		return roomsControllerCreate(data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type RoomsControllerCreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof roomsControllerCreate>>
+	Awaited<ReturnType<typeof roomsControllerCreate>>
 >;
 export type RoomsControllerCreateMutationBody = CreateRoomDto;
 export type RoomsControllerCreateMutationError = unknown;
@@ -88,407 +88,408 @@ export type RoomsControllerCreateMutationError = unknown;
  * @summary Create a new room
  */
 export const useRoomsControllerCreate = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof roomsControllerCreate>>,
-      TError,
-      { data: CreateRoomDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof roomsControllerCreate>>,
+			TError,
+			{ data: CreateRoomDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof roomsControllerCreate>>,
-  TError,
-  { data: CreateRoomDto },
-  TContext
+	Awaited<ReturnType<typeof roomsControllerCreate>>,
+	TError,
+	{ data: CreateRoomDto },
+	TContext
 > => {
-  const mutationOptions = getRoomsControllerCreateMutationOptions(options);
+	const mutationOptions = getRoomsControllerCreateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Get all rooms for a floor
  */
 export const roomsControllerFindAllByFloor = (
-  floorId: string,
-  signal?: AbortSignal,
+	floorId: string,
+	signal?: AbortSignal
 ) => {
-  return customInstance<RoomEntity[]>({
-    url: `https://api.classcompass.shestakov.app/rooms/floor/${floorId}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<RoomEntity[]>({
+		url: `https://api.classcompass.shestakov.app/rooms/floor/${floorId}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getRoomsControllerFindAllByFloorQueryKey = (floorId?: string) => {
-  return [
-    `https://api.classcompass.shestakov.app/rooms/floor/${floorId}`,
-  ] as const;
+	return [
+		`https://api.classcompass.shestakov.app/rooms/floor/${floorId}`,
+	] as const;
 };
 
 export const getRoomsControllerFindAllByFloorQueryOptions = <
-  TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+	TError = unknown,
 >(
-  floorId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	floorId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getRoomsControllerFindAllByFloorQueryKey(floorId);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getRoomsControllerFindAllByFloorQueryKey(floorId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
-  > = ({ signal }) => roomsControllerFindAllByFloor(floorId, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
+	> = ({ signal }) => roomsControllerFindAllByFloor(floorId, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!floorId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!floorId,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type RoomsControllerFindAllByFloorQueryResult = NonNullable<
-  Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
+	Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
 >;
 export type RoomsControllerFindAllByFloorQueryError = unknown;
 
 export function useRoomsControllerFindAllByFloor<
-  TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+	TError = unknown,
 >(
-  floorId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-          TError,
-          Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	floorId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+					TError,
+					Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useRoomsControllerFindAllByFloor<
-  TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+	TError = unknown,
 >(
-  floorId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-          TError,
-          Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	floorId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+					TError,
+					Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useRoomsControllerFindAllByFloor<
-  TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+	TError = unknown,
 >(
-  floorId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	floorId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get all rooms for a floor
  */
 
 export function useRoomsControllerFindAllByFloor<
-  TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+	TError = unknown,
 >(
-  floorId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	floorId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindAllByFloor>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getRoomsControllerFindAllByFloorQueryOptions(
-    floorId,
-    options,
-  );
+	const queryOptions = getRoomsControllerFindAllByFloorQueryOptions(
+		floorId,
+		options
+	);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Get a room by ID
  */
 export const roomsControllerFindOne = (id: string, signal?: AbortSignal) => {
-  return customInstance<RoomEntity>({
-    url: `https://api.classcompass.shestakov.app/rooms/${id}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<RoomEntity>({
+		url: `https://api.classcompass.shestakov.app/rooms/${id}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getRoomsControllerFindOneQueryKey = (id?: string) => {
-  return [`https://api.classcompass.shestakov.app/rooms/${id}`] as const;
+	return [`https://api.classcompass.shestakov.app/rooms/${id}`] as const;
 };
 
 export const getRoomsControllerFindOneQueryOptions = <
-  TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getRoomsControllerFindOneQueryKey(id);
+	const queryKey =
+		queryOptions?.queryKey ?? getRoomsControllerFindOneQueryKey(id);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof roomsControllerFindOne>>
-  > = ({ signal }) => roomsControllerFindOne(id, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof roomsControllerFindOne>>
+	> = ({ signal }) => roomsControllerFindOne(id, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof roomsControllerFindOne>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof roomsControllerFindOne>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type RoomsControllerFindOneQueryResult = NonNullable<
-  Awaited<ReturnType<typeof roomsControllerFindOne>>
+	Awaited<ReturnType<typeof roomsControllerFindOne>>
 >;
 export type RoomsControllerFindOneQueryError = unknown;
 
 export function useRoomsControllerFindOne<
-  TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof roomsControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof roomsControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof roomsControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof roomsControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useRoomsControllerFindOne<
-  TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof roomsControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof roomsControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof roomsControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof roomsControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useRoomsControllerFindOne<
-  TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get a room by ID
  */
 
 export function useRoomsControllerFindOne<
-  TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof roomsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof roomsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof roomsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getRoomsControllerFindOneQueryOptions(id, options);
+	const queryOptions = getRoomsControllerFindOneQueryOptions(id, options);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Update a room by ID
  */
 export const roomsControllerUpdate = (
-  id: string,
-  updateRoomDto: UpdateRoomDto,
+	id: string,
+	updateRoomDto: UpdateRoomDto
 ) => {
-  return customInstance<RoomEntity>({
-    url: `https://api.classcompass.shestakov.app/rooms/${id}`,
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    data: updateRoomDto,
-  });
+	return customInstance<RoomEntity>({
+		url: `https://api.classcompass.shestakov.app/rooms/${id}`,
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		data: updateRoomDto,
+	});
 };
 
 export const getRoomsControllerUpdateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof roomsControllerUpdate>>,
-    TError,
-    { id: string; data: UpdateRoomDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof roomsControllerUpdate>>,
+		TError,
+		{ id: string; data: UpdateRoomDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof roomsControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateRoomDto },
-  TContext
+	Awaited<ReturnType<typeof roomsControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateRoomDto },
+	TContext
 > => {
-  const mutationKey = ["roomsControllerUpdate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["roomsControllerUpdate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof roomsControllerUpdate>>,
-    { id: string; data: UpdateRoomDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof roomsControllerUpdate>>,
+		{ id: string; data: UpdateRoomDto }
+	> = props => {
+		const { id, data } = props ?? {};
 
-    return roomsControllerUpdate(id, data);
-  };
+		return roomsControllerUpdate(id, data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type RoomsControllerUpdateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof roomsControllerUpdate>>
+	Awaited<ReturnType<typeof roomsControllerUpdate>>
 >;
 export type RoomsControllerUpdateMutationBody = UpdateRoomDto;
 export type RoomsControllerUpdateMutationError = unknown;
@@ -497,74 +498,74 @@ export type RoomsControllerUpdateMutationError = unknown;
  * @summary Update a room by ID
  */
 export const useRoomsControllerUpdate = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof roomsControllerUpdate>>,
-      TError,
-      { id: string; data: UpdateRoomDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof roomsControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateRoomDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof roomsControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateRoomDto },
-  TContext
+	Awaited<ReturnType<typeof roomsControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateRoomDto },
+	TContext
 > => {
-  const mutationOptions = getRoomsControllerUpdateMutationOptions(options);
+	const mutationOptions = getRoomsControllerUpdateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Delete a room by ID
  */
 export const roomsControllerRemove = (id: string) => {
-  return customInstance<RoomEntity>({
-    url: `https://api.classcompass.shestakov.app/rooms/${id}`,
-    method: "DELETE",
-  });
+	return customInstance<RoomEntity>({
+		url: `https://api.classcompass.shestakov.app/rooms/${id}`,
+		method: "DELETE",
+	});
 };
 
 export const getRoomsControllerRemoveMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof roomsControllerRemove>>,
-    TError,
-    { id: string },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof roomsControllerRemove>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof roomsControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof roomsControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationKey = ["roomsControllerRemove"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["roomsControllerRemove"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof roomsControllerRemove>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof roomsControllerRemove>>,
+		{ id: string }
+	> = props => {
+		const { id } = props ?? {};
 
-    return roomsControllerRemove(id);
-  };
+		return roomsControllerRemove(id);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type RoomsControllerRemoveMutationResult = NonNullable<
-  Awaited<ReturnType<typeof roomsControllerRemove>>
+	Awaited<ReturnType<typeof roomsControllerRemove>>
 >;
 
 export type RoomsControllerRemoveMutationError = unknown;
@@ -573,22 +574,22 @@ export type RoomsControllerRemoveMutationError = unknown;
  * @summary Delete a room by ID
  */
 export const useRoomsControllerRemove = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof roomsControllerRemove>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof roomsControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof roomsControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof roomsControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationOptions = getRoomsControllerRemoveMutationOptions(options);
+	const mutationOptions = getRoomsControllerRemoveMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };

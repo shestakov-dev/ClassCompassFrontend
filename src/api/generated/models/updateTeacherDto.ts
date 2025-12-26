@@ -7,8 +7,8 @@
  */
 
 export interface UpdateTeacherDto {
-  /** The teacher's user identifier */
-  userId?: string;
-  /** The teacher's subject identifiers */
-  subjectIds?: string[];
+	/** The teacher's user identifier */
+	userId?: string;
+	/** The teacher's subject identifiers */
+	subjectIds?: string[];
 }

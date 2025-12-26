@@ -11,23 +11,23 @@ import type { FloorEntity } from "./floorEntity";
  * A room object
  */
 export interface RoomEntity {
-  /** The room's unique identifier */
-  id: string;
-  /** The room's name */
-  name: string;
-  /** The room's floor identifier */
-  floorId: string;
-  /** The room's populated floor */
-  floor?: FloorEntity;
-  /** The time the room was created */
-  createdAt: string;
-  /** The time the room was last updated */
-  updatedAt: string;
-  /** Whether the room has been deleted */
-  deleted: boolean;
-  /**
-   * The time the room was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The room's unique identifier */
+	id: string;
+	/** The room's name */
+	name: string;
+	/** The room's floor identifier */
+	floorId: string;
+	/** The room's populated floor */
+	floor?: FloorEntity;
+	/** The time the room was created */
+	createdAt: string;
+	/** The time the room was last updated */
+	updatedAt: string;
+	/** Whether the room has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the room was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

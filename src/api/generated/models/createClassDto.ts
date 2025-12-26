@@ -10,8 +10,8 @@
  * The data required to create a new class
  */
 export interface CreateClassDto {
-  /** The class's name */
-  name: string;
-  /** The class's school identifier */
-  schoolId: string;
+	/** The class's name */
+	name: string;
+	/** The class's school identifier */
+	schoolId: string;
 }

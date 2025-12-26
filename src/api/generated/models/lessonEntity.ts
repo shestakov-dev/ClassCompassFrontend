@@ -15,41 +15,41 @@ import type { DailyScheduleEntity } from "./dailyScheduleEntity";
  * A lesson object
  */
 export interface LessonEntity {
-  /** The lesson's week */
-  lessonWeek: LessonEntityLessonWeek;
-  /** The lesson's unique identifier */
-  id: string;
-  /** The lesson's number in the daily schedule */
-  lessonNumber: number;
-  /** The lesson's start time */
-  startTime: string;
-  /** The lesson's end time */
-  endTime: string;
-  /** The lesson's room identifier */
-  roomId: string;
-  /** The lesson's populated room */
-  room?: RoomEntity;
-  /** The lesson's teacher identifier */
-  teacherId: string;
-  /** The lesson's populated teacher */
-  teacher?: TeacherEntity;
-  /** The lesson's subject identifier */
-  subjectId: string;
-  /** The lesson's populated subject */
-  subject?: SubjectEntity;
-  /** The lesson's daily schedule identifier */
-  dailyScheduleId: string;
-  /** The lesson's populated daily schedule */
-  dailySchedule?: DailyScheduleEntity;
-  /** The time the lesson was created */
-  createdAt: string;
-  /** The time the lesson was last updated */
-  updatedAt: string;
-  /** Whether the lesson has been deleted */
-  deleted: boolean;
-  /**
-   * The time the lesson was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The lesson's week */
+	lessonWeek: LessonEntityLessonWeek;
+	/** The lesson's unique identifier */
+	id: string;
+	/** The lesson's number in the daily schedule */
+	lessonNumber: number;
+	/** The lesson's start time */
+	startTime: string;
+	/** The lesson's end time */
+	endTime: string;
+	/** The lesson's room identifier */
+	roomId: string;
+	/** The lesson's populated room */
+	room?: RoomEntity;
+	/** The lesson's teacher identifier */
+	teacherId: string;
+	/** The lesson's populated teacher */
+	teacher?: TeacherEntity;
+	/** The lesson's subject identifier */
+	subjectId: string;
+	/** The lesson's populated subject */
+	subject?: SubjectEntity;
+	/** The lesson's daily schedule identifier */
+	dailyScheduleId: string;
+	/** The lesson's populated daily schedule */
+	dailySchedule?: DailyScheduleEntity;
+	/** The time the lesson was created */
+	createdAt: string;
+	/** The time the lesson was last updated */
+	updatedAt: string;
+	/** Whether the lesson has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the lesson was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

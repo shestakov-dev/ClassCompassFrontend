@@ -49,3 +49,5 @@ export * from "./updateSubjectDto";
 export * from "./updateTeacherDto";
 export * from "./updateUserDto";
 export * from "./userEntity";
+export * from "./userEntityStudent";
+export * from "./userEntityTeacher";

@@ -6,28 +6,31 @@
  * OpenAPI spec version: 1.0
  */
 import type { SchoolEntity } from "./schoolEntity";
+import type { FloorEntity } from "./floorEntity";
 
 /**
  * A building object
  */
 export interface BuildingEntity {
-  /** The building's unique identifier */
-  id: string;
-  /** The building's name */
-  name: string;
-  /** The building's school identifier */
-  schoolId: string;
-  /** The building's populated school */
-  school?: SchoolEntity;
-  /** The date the building was created */
-  createdAt: string;
-  /** The date the building was last updated */
-  updatedAt: string;
-  /** Whether the building is deleted */
-  deleted: boolean;
-  /**
-   * The date the building was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The building's unique identifier */
+	id: string;
+	/** The building's name */
+	name: string;
+	/** The building's school identifier */
+	schoolId: string;
+	/** The building's populated school */
+	school?: SchoolEntity;
+	/** The building's populated floors */
+	floors?: FloorEntity[];
+	/** The date the building was created */
+	createdAt: string;
+	/** The date the building was last updated */
+	updatedAt: string;
+	/** Whether the building is deleted */
+	deleted: boolean;
+	/**
+	 * The date the building was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

@@ -12,25 +12,25 @@ import type { ClassEntity } from "./classEntity";
  * A student object
  */
 export interface StudentEntity {
-  /** The student's unique identifier */
-  id: string;
-  /** The student's user identifier */
-  userId: string;
-  /** The student's populated user */
-  user?: UserEntity;
-  /** The student's class identifier */
-  classId: string;
-  /** The student's populated class */
-  class?: ClassEntity;
-  /** The time the student was created */
-  createdAt: string;
-  /** The time the student was last updated */
-  updatedAt: string;
-  /** Whether the student has been deleted */
-  deleted: boolean;
-  /**
-   * The time the student was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The student's unique identifier */
+	id: string;
+	/** The student's user identifier */
+	userId: string;
+	/** The student's populated user */
+	user?: UserEntity;
+	/** The student's class identifier */
+	classId: string;
+	/** The student's populated class */
+	class?: ClassEntity;
+	/** The time the student was created */
+	createdAt: string;
+	/** The time the student was last updated */
+	updatedAt: string;
+	/** Whether the student has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the student was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

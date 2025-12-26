@@ -10,8 +10,8 @@
  * The data required to create a new teacher
  */
 export interface CreateTeacherDto {
-  /** The teacher's user identifier */
-  userId: string;
-  /** The teacher's subject identifiers */
-  subjectIds?: string[];
+	/** The teacher's user identifier */
+	userId: string;
+	/** The teacher's subject identifiers */
+	subjectIds?: string[];
 }

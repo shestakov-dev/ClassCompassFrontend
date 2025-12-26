@@ -11,23 +11,23 @@ import type { SchoolEntity } from "./schoolEntity";
  * A class object
  */
 export interface ClassEntity {
-  /** The class's unique identifier */
-  id: string;
-  /** The class's name */
-  name: string;
-  /** The class's school identifier */
-  schoolId: string;
-  /** The class's populated school */
-  school?: SchoolEntity;
-  /** The time the class was created */
-  createdAt: string;
-  /** The time the class was last updated */
-  updatedAt: string;
-  /** Whether the class has been deleted */
-  deleted: boolean;
-  /**
-   * The time the class was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The class's unique identifier */
+	id: string;
+	/** The class's name */
+	name: string;
+	/** The class's school identifier */
+	schoolId: string;
+	/** The class's populated school */
+	school?: SchoolEntity;
+	/** The time the class was created */
+	createdAt: string;
+	/** The time the class was last updated */
+	updatedAt: string;
+	/** Whether the class has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the class was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

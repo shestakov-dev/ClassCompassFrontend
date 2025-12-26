@@ -10,8 +10,8 @@
  * The data required to create a new room
  */
 export interface CreateRoomDto {
-  /** The room's name */
-  name: string;
-  /** The room's floor identifier */
-  floorId: string;
+	/** The room's name */
+	name: string;
+	/** The room's floor identifier */
+	floorId: string;
 }

@@ -7,24 +7,24 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
+	MutationFunction,
+	QueryClient,
+	QueryFunction,
+	QueryKey,
+	UndefinedInitialDataOptions,
+	UseMutationOptions,
+	UseMutationResult,
+	UseQueryOptions,
+	UseQueryResult,
 } from "@tanstack/react-query";
 
 import type {
-  CreateStudentDto,
-  StudentEntity,
-  UpdateStudentDto,
+	CreateStudentDto,
+	StudentEntity,
+	UpdateStudentDto,
 } from "../../models";
 
 import { customInstance } from "../../../mutators/custom-instance";
@@ -33,57 +33,57 @@ import { customInstance } from "../../../mutators/custom-instance";
  * @summary Create a new student
  */
 export const studentsControllerCreate = (
-  createStudentDto: CreateStudentDto,
-  signal?: AbortSignal,
+	createStudentDto: CreateStudentDto,
+	signal?: AbortSignal
 ) => {
-  return customInstance<StudentEntity>({
-    url: `https://api.classcompass.shestakov.app/students`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createStudentDto,
-    signal,
-  });
+	return customInstance<StudentEntity>({
+		url: `https://api.classcompass.shestakov.app/students`,
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		data: createStudentDto,
+		signal,
+	});
 };
 
 export const getStudentsControllerCreateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof studentsControllerCreate>>,
-    TError,
-    { data: CreateStudentDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof studentsControllerCreate>>,
+		TError,
+		{ data: CreateStudentDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof studentsControllerCreate>>,
-  TError,
-  { data: CreateStudentDto },
-  TContext
+	Awaited<ReturnType<typeof studentsControllerCreate>>,
+	TError,
+	{ data: CreateStudentDto },
+	TContext
 > => {
-  const mutationKey = ["studentsControllerCreate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["studentsControllerCreate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof studentsControllerCreate>>,
-    { data: CreateStudentDto }
-  > = (props) => {
-    const { data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof studentsControllerCreate>>,
+		{ data: CreateStudentDto }
+	> = props => {
+		const { data } = props ?? {};
 
-    return studentsControllerCreate(data);
-  };
+		return studentsControllerCreate(data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type StudentsControllerCreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof studentsControllerCreate>>
+	Awaited<ReturnType<typeof studentsControllerCreate>>
 >;
 export type StudentsControllerCreateMutationBody = CreateStudentDto;
 export type StudentsControllerCreateMutationError = unknown;
@@ -92,413 +92,417 @@ export type StudentsControllerCreateMutationError = unknown;
  * @summary Create a new student
  */
 export const useStudentsControllerCreate = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof studentsControllerCreate>>,
-      TError,
-      { data: CreateStudentDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof studentsControllerCreate>>,
+			TError,
+			{ data: CreateStudentDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof studentsControllerCreate>>,
-  TError,
-  { data: CreateStudentDto },
-  TContext
+	Awaited<ReturnType<typeof studentsControllerCreate>>,
+	TError,
+	{ data: CreateStudentDto },
+	TContext
 > => {
-  const mutationOptions = getStudentsControllerCreateMutationOptions(options);
+	const mutationOptions = getStudentsControllerCreateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Get all students for a class
  */
 export const studentsControllerFindAllByClass = (
-  classId: string,
-  signal?: AbortSignal,
+	classId: string,
+	signal?: AbortSignal
 ) => {
-  return customInstance<StudentEntity[]>({
-    url: `https://api.classcompass.shestakov.app/students/class/${classId}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<StudentEntity[]>({
+		url: `https://api.classcompass.shestakov.app/students/class/${classId}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getStudentsControllerFindAllByClassQueryKey = (
-  classId?: string,
+	classId?: string
 ) => {
-  return [
-    `https://api.classcompass.shestakov.app/students/class/${classId}`,
-  ] as const;
+	return [
+		`https://api.classcompass.shestakov.app/students/class/${classId}`,
+	] as const;
 };
 
 export const getStudentsControllerFindAllByClassQueryOptions = <
-  TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getStudentsControllerFindAllByClassQueryKey(classId);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getStudentsControllerFindAllByClassQueryKey(classId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
-  > = ({ signal }) => studentsControllerFindAllByClass(classId, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
+	> = ({ signal }) => studentsControllerFindAllByClass(classId, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!classId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!classId,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type StudentsControllerFindAllByClassQueryResult = NonNullable<
-  Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
+	Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
 >;
 export type StudentsControllerFindAllByClassQueryError = unknown;
 
 export function useStudentsControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-          TError,
-          Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<
+						ReturnType<typeof studentsControllerFindAllByClass>
+					>,
+					TError,
+					Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useStudentsControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-          TError,
-          Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<
+						ReturnType<typeof studentsControllerFindAllByClass>
+					>,
+					TError,
+					Awaited<ReturnType<typeof studentsControllerFindAllByClass>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useStudentsControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get all students for a class
  */
 
 export function useStudentsControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindAllByClass>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getStudentsControllerFindAllByClassQueryOptions(
-    classId,
-    options,
-  );
+	const queryOptions = getStudentsControllerFindAllByClassQueryOptions(
+		classId,
+		options
+	);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Get a student by ID
  */
 export const studentsControllerFindOne = (id: string, signal?: AbortSignal) => {
-  return customInstance<StudentEntity>({
-    url: `https://api.classcompass.shestakov.app/students/${id}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<StudentEntity>({
+		url: `https://api.classcompass.shestakov.app/students/${id}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getStudentsControllerFindOneQueryKey = (id?: string) => {
-  return [`https://api.classcompass.shestakov.app/students/${id}`] as const;
+	return [`https://api.classcompass.shestakov.app/students/${id}`] as const;
 };
 
 export const getStudentsControllerFindOneQueryOptions = <
-  TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getStudentsControllerFindOneQueryKey(id);
+	const queryKey =
+		queryOptions?.queryKey ?? getStudentsControllerFindOneQueryKey(id);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof studentsControllerFindOne>>
-  > = ({ signal }) => studentsControllerFindOne(id, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof studentsControllerFindOne>>
+	> = ({ signal }) => studentsControllerFindOne(id, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof studentsControllerFindOne>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof studentsControllerFindOne>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type StudentsControllerFindOneQueryResult = NonNullable<
-  Awaited<ReturnType<typeof studentsControllerFindOne>>
+	Awaited<ReturnType<typeof studentsControllerFindOne>>
 >;
 export type StudentsControllerFindOneQueryError = unknown;
 
 export function useStudentsControllerFindOne<
-  TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof studentsControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof studentsControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof studentsControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof studentsControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useStudentsControllerFindOne<
-  TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof studentsControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof studentsControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof studentsControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof studentsControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useStudentsControllerFindOne<
-  TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get a student by ID
  */
 
 export function useStudentsControllerFindOne<
-  TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof studentsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof studentsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof studentsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getStudentsControllerFindOneQueryOptions(id, options);
+	const queryOptions = getStudentsControllerFindOneQueryOptions(id, options);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Update a student by ID
  */
 export const studentsControllerUpdate = (
-  id: string,
-  updateStudentDto: UpdateStudentDto,
+	id: string,
+	updateStudentDto: UpdateStudentDto
 ) => {
-  return customInstance<StudentEntity>({
-    url: `https://api.classcompass.shestakov.app/students/${id}`,
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    data: updateStudentDto,
-  });
+	return customInstance<StudentEntity>({
+		url: `https://api.classcompass.shestakov.app/students/${id}`,
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		data: updateStudentDto,
+	});
 };
 
 export const getStudentsControllerUpdateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof studentsControllerUpdate>>,
-    TError,
-    { id: string; data: UpdateStudentDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof studentsControllerUpdate>>,
+		TError,
+		{ id: string; data: UpdateStudentDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof studentsControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateStudentDto },
-  TContext
+	Awaited<ReturnType<typeof studentsControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateStudentDto },
+	TContext
 > => {
-  const mutationKey = ["studentsControllerUpdate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["studentsControllerUpdate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof studentsControllerUpdate>>,
-    { id: string; data: UpdateStudentDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof studentsControllerUpdate>>,
+		{ id: string; data: UpdateStudentDto }
+	> = props => {
+		const { id, data } = props ?? {};
 
-    return studentsControllerUpdate(id, data);
-  };
+		return studentsControllerUpdate(id, data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type StudentsControllerUpdateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof studentsControllerUpdate>>
+	Awaited<ReturnType<typeof studentsControllerUpdate>>
 >;
 export type StudentsControllerUpdateMutationBody = UpdateStudentDto;
 export type StudentsControllerUpdateMutationError = unknown;
@@ -507,77 +511,77 @@ export type StudentsControllerUpdateMutationError = unknown;
  * @summary Update a student by ID
  */
 export const useStudentsControllerUpdate = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof studentsControllerUpdate>>,
-      TError,
-      { id: string; data: UpdateStudentDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof studentsControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateStudentDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof studentsControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateStudentDto },
-  TContext
+	Awaited<ReturnType<typeof studentsControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateStudentDto },
+	TContext
 > => {
-  const mutationOptions = getStudentsControllerUpdateMutationOptions(options);
+	const mutationOptions = getStudentsControllerUpdateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Delete a student by ID
  */
 export const studentsControllerRemove = (id: string) => {
-  return customInstance<StudentEntity>({
-    url: `https://api.classcompass.shestakov.app/students/${id}`,
-    method: "DELETE",
-  });
+	return customInstance<StudentEntity>({
+		url: `https://api.classcompass.shestakov.app/students/${id}`,
+		method: "DELETE",
+	});
 };
 
 export const getStudentsControllerRemoveMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof studentsControllerRemove>>,
-    TError,
-    { id: string },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof studentsControllerRemove>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof studentsControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof studentsControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationKey = ["studentsControllerRemove"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["studentsControllerRemove"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof studentsControllerRemove>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof studentsControllerRemove>>,
+		{ id: string }
+	> = props => {
+		const { id } = props ?? {};
 
-    return studentsControllerRemove(id);
-  };
+		return studentsControllerRemove(id);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type StudentsControllerRemoveMutationResult = NonNullable<
-  Awaited<ReturnType<typeof studentsControllerRemove>>
+	Awaited<ReturnType<typeof studentsControllerRemove>>
 >;
 
 export type StudentsControllerRemoveMutationError = unknown;
@@ -586,25 +590,25 @@ export type StudentsControllerRemoveMutationError = unknown;
  * @summary Delete a student by ID
  */
 export const useStudentsControllerRemove = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof studentsControllerRemove>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof studentsControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof studentsControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof studentsControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationOptions = getStudentsControllerRemoveMutationOptions(options);
+	const mutationOptions = getStudentsControllerRemoveMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };

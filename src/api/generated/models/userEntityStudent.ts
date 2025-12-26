@@ -5,11 +5,10 @@
  * An API for the Class Compass application
  * OpenAPI spec version: 1.0
  */
+import type { StudentEntity } from "./studentEntity";
 
 /**
- * The data required to create a new school
+ * The user's populated student record
+ * @nullable
  */
-export interface CreateSchoolDto {
-	/** The school's name */
-	name: string;
-}
+export type UserEntityStudent = StudentEntity | null;

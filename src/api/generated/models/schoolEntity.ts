@@ -10,19 +10,19 @@
  * A school object
  */
 export interface SchoolEntity {
-  /** The school's unique identifier */
-  id: string;
-  /** The school's name */
-  name: string;
-  /** The time the school was created */
-  createdAt: string;
-  /** The time the school was last updated */
-  updatedAt: string;
-  /** Whether the school has been deleted */
-  deleted: boolean;
-  /**
-   * The time the school was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The school's unique identifier */
+	id: string;
+	/** The school's name */
+	name: string;
+	/** The time the school was created */
+	createdAt: string;
+	/** The time the school was last updated */
+	updatedAt: string;
+	/** Whether the school has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the school was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }
