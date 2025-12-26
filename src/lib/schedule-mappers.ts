@@ -1,7 +1,7 @@
 import { type LessonEntity } from "@/api/generated/models";
 import { type ScheduleEvent } from "@/components/schedule/daily-schedule-grid";
 import { addDays, parseISO, set } from "date-fns";
-import { DAY_TO_INDEX_MAP } from "@/lib/schedule-defaults";
+import { DAY_TO_DAY_INDEX } from "@/types/schedule";
 
 export function transformLessonsToEvents(
 	lessons: LessonEntity[],
@@ -9,7 +9,7 @@ export function transformLessonsToEvents(
 ): ScheduleEvent[] {
 	return lessons.map(lesson => {
 		const dayName = lesson.dailySchedule!.day;
-		const dayOffset = DAY_TO_INDEX_MAP[dayName];
+		const dayOffset = DAY_TO_DAY_INDEX[dayName];
 
 		// Calculate target date based on the week start (Monday)
 		// If dayOffset is 0 (Sunday), we add 6 days.

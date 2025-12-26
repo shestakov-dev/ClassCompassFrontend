@@ -23,16 +23,12 @@ import { useClassesControllerFindAllBySchool } from "@/api/generated/endpoints/c
 import { useSubjectsControllerFindAllBySchool } from "@/api/generated/endpoints/subjects/subjects";
 import { useTeachersControllerFindAllBySchool } from "@/api/generated/endpoints/teachers/teachers";
 import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
+import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
+import { Day, ALL_DAYS, DAY_TO_DAY_INDEX } from "@/types/schedule";
 import {
-	type LessonsControllerFindFilteredParams,
-	LessonsControllerFindFilteredDay as Day,
-} from "@/api/generated/models";
-import {
-	DAYS_OF_WEEK,
 	getCurrentDayEnum,
 	getDefaultFilters,
 	getWeekParity,
-	JS_DAY_TO_ENUM,
 } from "@/lib/schedule-defaults";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Route } from "@/routes/schedule";
@@ -50,7 +46,7 @@ export default function SchedulePage() {
 	const navigate = Route.useNavigate();
 	const search = Route.useSearch();
 
-	const mode = search.mode ?? "generic";
+	const mode = search.mode ?? "weekly";
 	const currentDate = useMemo(
 		() => (search.date ? parseISO(search.date) : new Date()),
 		[search.date]
@@ -68,7 +64,7 @@ export default function SchedulePage() {
 			ignoreWeek: search.ignoreWeek,
 		};
 
-		if (mode === "calendar") {
+		if (mode === "date") {
 			if (!search.timestamp && !search.from) {
 				return {
 					...base,
@@ -106,7 +102,7 @@ export default function SchedulePage() {
 		if (!user) return true;
 		const defaults = getDefaultFilters(user);
 
-		if (mode !== "generic") return false;
+		if (mode !== "weekly") return false;
 
 		if (filters.classId !== defaults.classId) return false;
 		if (filters.teacherId !== defaults.teacherId) return false;
@@ -199,11 +195,7 @@ export default function SchedulePage() {
 
 	const handleGenericDayChange = useCallback(
 		(day: Day) => {
-			const dayIndex = Number(
-				Object.keys(JS_DAY_TO_ENUM).find(
-					key => JS_DAY_TO_ENUM[Number(key)] === day
-				)
-			);
+			const dayIndex = DAY_TO_DAY_INDEX[day];
 
 			let newDateStr = undefined;
 			if (!isNaN(dayIndex)) {
@@ -228,7 +220,7 @@ export default function SchedulePage() {
 
 		navigate({
 			search: () => ({
-				mode: "generic",
+				mode: "weekly",
 				day: defaults.day,
 				classId: defaults.classId,
 				teacherId: defaults.teacherId,
@@ -279,7 +271,7 @@ export default function SchedulePage() {
 					</div>
 
 					<div className="flex items-center gap-2 self-start md:self-auto">
-						{mode === "calendar" ? (
+						{mode === "date" ? (
 							<div className="flex items-center gap-1 bg-card border rounded-lg p-1 shadow-sm">
 								<Button
 									variant="ghost"
@@ -329,7 +321,7 @@ export default function SchedulePage() {
 										</div>
 									</SelectTrigger>
 									<SelectContent align="end">
-										{DAYS_OF_WEEK.map(dayOption => (
+										{ALL_DAYS.map(dayOption => (
 											<SelectItem
 												key={dayOption}
 												value={dayOption}>
@@ -397,7 +389,7 @@ export default function SchedulePage() {
 										</EmptyTitle>
 										<EmptyDescription>
 											There are no classes scheduled for{" "}
-											{mode === "calendar"
+											{mode === "date"
 												? "this specific date and time"
 												: `${genericDay.charAt(0).toUpperCase()}${genericDay.slice(1).toLowerCase()}`}{" "}
 											with the current filters.

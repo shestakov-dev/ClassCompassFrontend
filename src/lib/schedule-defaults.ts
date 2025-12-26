@@ -1,43 +1,12 @@
 import {
-	LessonsControllerFindFilteredDay as Day,
-	LessonsControllerFindFilteredWeek as LessonWeek,
 	type UserEntity,
 	type LessonsControllerFindFilteredParams,
 } from "@/api/generated/models";
 import { getDay, getISOWeek } from "date-fns";
-
-export const JS_DAY_TO_ENUM: Record<number, Day> = {
-	0: Day.sunday,
-	1: Day.monday,
-	2: Day.tuesday,
-	3: Day.wednesday,
-	4: Day.thursday,
-	5: Day.friday,
-	6: Day.saturday,
-};
-
-export const DAY_TO_INDEX_MAP: Record<Day, number> = {
-	[Day.sunday]: 0,
-	[Day.monday]: 1,
-	[Day.tuesday]: 2,
-	[Day.wednesday]: 3,
-	[Day.thursday]: 4,
-	[Day.friday]: 5,
-	[Day.saturday]: 6,
-};
-
-export const DAYS_OF_WEEK = [
-	Day.monday,
-	Day.tuesday,
-	Day.wednesday,
-	Day.thursday,
-	Day.friday,
-	Day.saturday,
-	Day.sunday,
-];
+import { Day, LessonWeek, DAY_INDEX_TO_DAY } from "@/types/schedule";
 
 export const getCurrentDayEnum = (date: Date = new Date()): Day => {
-	return JS_DAY_TO_ENUM[getDay(date)];
+	return DAY_INDEX_TO_DAY[getDay(date)];
 };
 
 export const getWeekParity = (date: Date): LessonWeek => {

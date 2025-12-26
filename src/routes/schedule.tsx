@@ -4,11 +4,8 @@ import {
 	getLessonsControllerFindFilteredQueryKey,
 	lessonsControllerFindFiltered,
 } from "@/api/generated/endpoints/lessons/lessons";
-import {
-	LessonsControllerFindFilteredDay as Day,
-	LessonEntityLessonWeek,
-	type LessonsControllerFindFilteredParams,
-} from "@/api/generated/models";
+import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
+import { Day, LessonWeek } from "@/types/schedule";
 import { getDefaultFilters } from "@/lib/schedule-defaults";
 import {
 	getUsersControllerFindByIdentityIdQueryKey,
@@ -17,7 +14,7 @@ import {
 import SchedulePage from "@/pages/SchedulePage";
 
 const scheduleSearchSchema = z.object({
-	mode: z.enum(["calendar", "generic"]).default("generic").optional(),
+	mode: z.enum(["date", "weekly"]).default("weekly").optional(),
 	date: z.iso.datetime().optional(),
 	day: z.enum(Day).optional(),
 	timestamp: z.iso.datetime().optional(),
@@ -27,7 +24,7 @@ const scheduleSearchSchema = z.object({
 	teacherId: z.uuidv4().optional(),
 	subjectId: z.uuidv4().optional(),
 	roomId: z.uuidv4().optional(),
-	week: z.enum(LessonEntityLessonWeek).optional(),
+	week: z.enum(LessonWeek).optional(),
 	ignoreWeek: z
 		.union([z.boolean(), z.literal("true"), z.literal("false")])
 		.transform(val => val === true || val === "true")
@@ -65,7 +62,7 @@ export const Route = createFileRoute("/schedule")({
 		}
 
 		const defaults = getDefaultFilters(user);
-		const mode = search.mode ?? "generic";
+		const mode = search.mode ?? "weekly";
 
 		// Base filters
 		const apiFilters: LessonsControllerFindFilteredParams = {
@@ -76,7 +73,7 @@ export const Route = createFileRoute("/schedule")({
 			ignoreWeek: search.ignoreWeek,
 		};
 
-		if (mode === "calendar") {
+		if (mode === "date") {
 			apiFilters.timestamp = search.timestamp;
 			apiFilters.from = search.from;
 			apiFilters.to = search.to;

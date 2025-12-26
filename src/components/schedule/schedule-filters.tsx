@@ -35,8 +35,6 @@ import { DatePicker } from "@/components/date-picker";
 
 import {
 	type LessonsControllerFindFilteredParams,
-	LessonsControllerFindFilteredWeek as LessonWeek,
-	LessonsControllerFindFilteredDay as Day,
 	type ClassEntity,
 	type SubjectEntity,
 	type TeacherEntity,
@@ -49,6 +47,12 @@ import {
 	type MouseEvent,
 } from "react";
 import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-defaults";
+import {
+	Day,
+	LessonWeek,
+	type ScheduleMode,
+	type TimeSubMode,
+} from "@/types/schedule";
 
 export interface FilterOptions {
 	classes?: ClassEntity[];
@@ -57,16 +61,13 @@ export interface FilterOptions {
 	buildings?: BuildingEntity[];
 }
 
-export type FilterMode = "calendar" | "generic";
-type TimeSubMode = "full-day" | "timestamp" | "range";
-
 interface ScheduleFiltersProps {
 	date: Date;
 	setDate: (date: Date) => void;
 	filters: LessonsControllerFindFilteredParams;
 	setFilters: Dispatch<SetStateAction<LessonsControllerFindFilteredParams>>;
-	mode: FilterMode;
-	setMode: (mode: FilterMode) => void;
+	mode: ScheduleMode;
+	setMode: (mode: ScheduleMode) => void;
 	genericDay: Day;
 	setGenericDay: (day: Day) => void;
 	onReset?: () => void;
@@ -99,7 +100,7 @@ export function ScheduleFilters({
 	);
 
 	const computeParams = (
-		targetMode: FilterMode,
+		targetMode: ScheduleMode,
 		targetTimeSubMode: TimeSubMode,
 		targetAtTime: string,
 		targetRangeStart: string,
@@ -115,7 +116,7 @@ export function ScheduleFilters({
 			roomId: filters.roomId,
 		};
 
-		if (targetMode === "calendar") {
+		if (targetMode === "date") {
 			nextParams.ignoreWeek = filters.ignoreWeek;
 
 			if (targetTimeSubMode === "full-day") {
@@ -198,7 +199,7 @@ export function ScheduleFilters({
 			rangeEnd: string;
 			genericWeek: LessonWeek;
 			genericDay: Day;
-			mode: FilterMode;
+			mode: ScheduleMode;
 		}>
 	) => {
 		const newTimeSubMode = changes.timeSubMode ?? timeSubMode;
@@ -217,7 +218,7 @@ export function ScheduleFilters({
 		if (changes.genericDay) setGenericDay(changes.genericDay);
 		if (changes.mode) setMode(changes.mode);
 
-		if (changes.mode === "generic") {
+		if (changes.mode === "weekly") {
 			const derivedDay = getCurrentDayEnum(date);
 
 			setGenericDay(derivedDay);
@@ -257,7 +258,7 @@ export function ScheduleFilters({
 		updateFilters({ genericDay: value as Day });
 	};
 	const handleModeChange = (value: string) =>
-		updateFilters({ mode: value as FilterMode });
+		updateFilters({ mode: value as ScheduleMode });
 
 	const handleEntityChange = (
 		key: keyof LessonsControllerFindFilteredParams,
@@ -323,7 +324,7 @@ export function ScheduleFilters({
 					{!isOpen && (
 						<div className="hidden sm:flex items-center text-xs text-muted-foreground gap-2">
 							<Separator orientation="vertical" className="h-4" />
-							{mode === "calendar" ? (
+							{mode === "date" ? (
 								<span className="flex items-center gap-1">
 									<CalendarIcon className="h-3 w-3" />
 									{date.toLocaleDateString()}
@@ -365,13 +366,13 @@ export function ScheduleFilters({
 							className="w-full">
 							<TabsList className="w-full grid grid-cols-2">
 								<TabsTrigger
-									value="generic"
+									value="weekly"
 									className="flex items-center gap-2">
 									<CalendarRange className="h-4 w-4" /> Weekly
 									Schedule
 								</TabsTrigger>
 								<TabsTrigger
-									value="calendar"
+									value="date"
 									className="flex items-center gap-2">
 									<CalendarDays className="h-4 w-4" />{" "}
 									Specific Date
@@ -381,7 +382,7 @@ export function ScheduleFilters({
 					</div>
 
 					<div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-						{mode === "calendar" ? (
+						{mode === "date" ? (
 							<div className="space-y-3">
 								<Label className="text-xs font-medium">
 									Date & Time
@@ -488,7 +489,7 @@ export function ScheduleFilters({
 							</div>
 						)}
 
-						{mode === "calendar" && (
+						{mode === "date" && (
 							<div className="flex items-center justify-start sm:justify-end pt-8">
 								<div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-md border border-dashed">
 									<Switch
@@ -506,7 +507,7 @@ export function ScheduleFilters({
 						)}
 					</div>
 
-					{mode === "calendar" && timeSubMode !== "full-day" && (
+					{mode === "date" && timeSubMode !== "full-day" && (
 						<div className="bg-muted/30 p-3 rounded-md border border-dashed">
 							<div className="flex flex-wrap items-end gap-4">
 								<Clock className="h-4 w-4 text-muted-foreground mb-2.5" />
