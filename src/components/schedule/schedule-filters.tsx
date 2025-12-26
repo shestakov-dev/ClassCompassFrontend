@@ -7,7 +7,7 @@ import {
 	CalendarRange,
 	Clock,
 } from "lucide-react";
-import { getISOWeek, getDay } from "date-fns";
+import { set } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,23 +37,12 @@ import {
 	LessonsControllerFindFilteredDay as Day,
 } from "@/api/generated/models";
 import {
-	useCallback,
-	useEffect,
 	useState,
 	type Dispatch,
 	type SetStateAction,
 	type MouseEvent,
 } from "react";
-
-const JS_DAY_TO_ENUM: Record<number, Day> = {
-	0: Day.sunday,
-	1: Day.monday,
-	2: Day.tuesday,
-	3: Day.wednesday,
-	4: Day.thursday,
-	5: Day.friday,
-	6: Day.saturday,
-};
+import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-defaults";
 
 export interface FilterOptions {
 	classes?: { id: string; name: string }[];
@@ -93,131 +82,201 @@ export function ScheduleFilters({
 	className,
 }: ScheduleFiltersProps) {
 	const [isOpen, setIsOpen] = useState(false);
-
 	const [timeSubMode, setTimeSubMode] = useState<TimeSubMode>("full-day");
 	const [atTime, setAtTime] = useState("08:00");
 	const [rangeStart, setRangeStart] = useState("08:00");
 	const [rangeEnd, setRangeEnd] = useState("17:00");
-	const [genericWeek, setGenericWeek] = useState<LessonWeek | "all">("all");
+	const [genericWeek, setGenericWeek] = useState<LessonWeek>(
+		LessonWeek.every
+	);
 
-	const applyFilters = useCallback(() => {
-		setFilters(prevParams => {
-			const nextParams = { ...prevParams };
+	const computeParams = (
+		targetMode: FilterMode,
+		targetTimeSubMode: TimeSubMode,
+		targetAtTime: string,
+		targetRangeStart: string,
+		targetRangeEnd: string,
+		targetGenericDay: Day,
+		targetGenericWeek: LessonWeek,
+		targetDate: Date
+	): LessonsControllerFindFilteredParams => {
+		const nextParams: LessonsControllerFindFilteredParams = {
+			classId: filters.classId,
+			teacherId: filters.teacherId,
+			subjectId: filters.subjectId,
+			roomId: filters.roomId,
+		};
 
-			// Clear mutually exclusive fields
+		if (targetMode === "calendar") {
+			nextParams.ignoreWeek = filters.ignoreWeek;
+
+			if (targetTimeSubMode === "full-day") {
+				nextParams.day = getCurrentDayEnum(targetDate);
+				nextParams.week = filters.ignoreWeek
+					? undefined
+					: getWeekParity(targetDate);
+
+				delete nextParams.timestamp;
+				delete nextParams.from;
+				delete nextParams.to;
+			} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
+				const [hours, minutes] = targetAtTime.split(":").map(Number);
+				const dateWithTime = set(targetDate, {
+					hours,
+					minutes,
+					seconds: 0,
+					milliseconds: 0,
+				});
+
+				nextParams.timestamp = dateWithTime.toISOString();
+
+				delete nextParams.from;
+				delete nextParams.to;
+				delete nextParams.day;
+				delete nextParams.week;
+			} else if (
+				targetTimeSubMode === "range" &&
+				targetRangeStart &&
+				targetRangeEnd
+			) {
+				const [startHour, startMinute] = targetRangeStart
+					.split(":")
+					.map(Number);
+				const [endHour, endMinute] = targetRangeEnd
+					.split(":")
+					.map(Number);
+
+				const fromDate = set(targetDate, {
+					hours: startHour,
+					minutes: startMinute,
+					seconds: 0,
+					milliseconds: 0,
+				});
+				const toDate = set(targetDate, {
+					hours: endHour,
+					minutes: endMinute,
+					seconds: 0,
+					milliseconds: 0,
+				});
+
+				nextParams.from = fromDate.toISOString();
+				nextParams.to = toDate.toISOString();
+
+				delete nextParams.timestamp;
+				delete nextParams.day;
+				delete nextParams.week;
+			}
+		} else {
+			nextParams.day = targetGenericDay;
+			nextParams.week =
+				targetGenericWeek === LessonWeek.every
+					? undefined
+					: targetGenericWeek;
+
 			delete nextParams.timestamp;
 			delete nextParams.from;
 			delete nextParams.to;
-			delete nextParams.day;
-			delete nextParams.week;
+			delete nextParams.ignoreWeek;
+		}
 
-			if (mode === "calendar") {
-				if (timeSubMode === "full-day") {
-					const dayIndex = getDay(date);
-					const weekNumber = getISOWeek(date);
-					nextParams.day = JS_DAY_TO_ENUM[dayIndex];
-					nextParams.week = weekNumber % 2 === 0 ? LessonWeek.even : LessonWeek.odd;
-				} else if (timeSubMode === "timestamp" && atTime) {
-					const [hours, minutes] = atTime.split(":").map(Number);
+		return nextParams;
+	};
 
-					const timestampDate = new Date(
-						Date.UTC(
-							date.getFullYear(),
-							date.getMonth(),
-							date.getDate(),
-							hours,
-							minutes,
-							0
-						)
-					);
+	const updateFilters = (
+		changes: Partial<{
+			timeSubMode: TimeSubMode;
+			atTime: string;
+			rangeStart: string;
+			rangeEnd: string;
+			genericWeek: LessonWeek;
+			genericDay: Day;
+			mode: FilterMode;
+		}>
+	) => {
+		const newTimeSubMode = changes.timeSubMode ?? timeSubMode;
+		const newAtTime = changes.atTime ?? atTime;
+		const newRangeStart = changes.rangeStart ?? rangeStart;
+		const newRangeEnd = changes.rangeEnd ?? rangeEnd;
+		const newGenericWeek = changes.genericWeek ?? genericWeek;
+		let newGenericDay = changes.genericDay ?? genericDay;
+		const newMode = changes.mode ?? mode;
 
-					nextParams.timestamp = timestampDate.toISOString();
-				} else if (timeSubMode === "range" && rangeStart && rangeEnd) {
-					const [startH, startM] = rangeStart.split(":").map(Number);
-					const [endH, endM] = rangeEnd.split(":").map(Number);
+		if (changes.timeSubMode) setTimeSubMode(changes.timeSubMode);
+		if (changes.atTime) setAtTime(changes.atTime);
+		if (changes.rangeStart) setRangeStart(changes.rangeStart);
+		if (changes.rangeEnd) setRangeEnd(changes.rangeEnd);
+		if (changes.genericWeek) setGenericWeek(changes.genericWeek);
+		if (changes.genericDay) setGenericDay(changes.genericDay);
+		if (changes.mode) setMode(changes.mode);
 
-					const startDate = new Date(
-						Date.UTC(
-							date.getFullYear(),
-							date.getMonth(),
-							date.getDate(),
-							startH,
-							startM,
-							0
-						)
-					);
+		if (changes.mode === "generic") {
+			const derivedDay = getCurrentDayEnum(date);
 
-					const endDate = new Date(
-						Date.UTC(
-							date.getFullYear(),
-							date.getMonth(),
-							date.getDate(),
-							endH,
-							endM,
-							0
-						)
-					);
+			setGenericDay(derivedDay);
+			newGenericDay = derivedDay;
+		}
 
-					nextParams.from = startDate.toISOString();
-					nextParams.to = endDate.toISOString();
-				}
-			} else if (mode === "generic") {
-				nextParams.day = genericDay;
-				if (genericWeek !== "all") {
-					nextParams.week = genericWeek;
-				}
-			}
+		const newParameters = computeParams(
+			newMode,
+			newTimeSubMode,
+			newAtTime,
+			newRangeStart,
+			newRangeEnd,
+			newGenericDay,
+			newGenericWeek,
+			date
+		);
 
-			return nextParams;
-		});
-	}, [
-		mode,
-		timeSubMode,
-		date,
-		atTime,
-		rangeStart,
-		rangeEnd,
-		genericDay,
-		genericWeek,
-		setFilters,
-	]);
+		setFilters(previousFilters => ({
+			...previousFilters,
+			...newParameters,
+		}));
+	};
 
-	useEffect(() => {
-		applyFilters();
-	}, [applyFilters]);
+	const handleTimeSubModeChange = (value: string) =>
+		updateFilters({ timeSubMode: value as TimeSubMode });
+	const handleAtTimeChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+		updateFilters({ atTime: event.target.value });
+	const handleRangeStartChange = (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => updateFilters({ rangeStart: event.target.value });
+	const handleRangeEndChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+		updateFilters({ rangeEnd: event.target.value });
+	const handleGenericWeekChange = (value: string) =>
+		updateFilters({ genericWeek: value as LessonWeek });
+	const handleGenericDayChange = (value: string) => {
+		setGenericDay(value as Day);
+		updateFilters({ genericDay: value as Day });
+	};
+	const handleModeChange = (value: string) =>
+		updateFilters({ mode: value as FilterMode });
 
 	const handleEntityChange = (
 		key: keyof LessonsControllerFindFilteredParams,
-		val: string
+		value: string
 	) => {
-		setFilters(p => {
-			const n = { ...p, [key]: val };
-			if (val === "all") delete n[key];
-			return n;
+		setFilters(previous => {
+			const next = { ...previous, [key]: value };
+			if (value === "all") delete next[key];
+			return next;
 		});
 	};
 
 	const toggleIgnoreWeek = (checked: boolean) => {
-		setFilters(p => ({ ...p, ignoreWeek: checked }));
+		setFilters(prev => ({ ...prev, ignoreWeek: checked }));
 	};
 
-	const clearFilters = (e: MouseEvent<HTMLButtonElement>) => {
-		e.stopPropagation();
-
+	const clearFilters = (event: MouseEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
 		setTimeSubMode("full-day");
 		setAtTime("08:00");
-		setGenericWeek("all");
-
-		if (onReset) {
-			onReset();
-		} else {
-			setMode("generic");
-			setFilters({});
-		}
+		setGenericWeek(LessonWeek.every);
+		if (onReset) onReset();
 	};
 
-	const activeCount = Object.keys(filters).filter(
-		key => key !== "ignoreWeek"
+	const activeCount = Object.entries(filters).filter(
+		([key, value]) =>
+			key !== "ignoreWeek" && value !== undefined && value !== null
 	).length;
 
 	return (
@@ -237,7 +296,7 @@ export function ScheduleFilters({
 							className="p-0 hover:bg-transparent h-auto font-semibold">
 							<span className="flex items-center gap-2">
 								<Filter className="h-4 w-4 text-muted-foreground" />
-								<span>Refine Schedule</span>
+								<span>Filters</span>
 								{activeCount > 0 && (
 									<Badge
 										variant="secondary"
@@ -249,40 +308,34 @@ export function ScheduleFilters({
 							</span>
 						</Button>
 					</CollapsibleTrigger>
-
 					{!isOpen && (
 						<div className="hidden sm:flex items-center text-xs text-muted-foreground gap-2">
-							<Separator
-								orientation="vertical"
-								className="h-4"
-							/>
+							<Separator orientation="vertical" className="h-4" />
 							{mode === "calendar" ? (
 								<span className="flex items-center gap-1">
 									<CalendarIcon className="h-3 w-3" />
 									{date.toLocaleDateString()}
-									{timeSubMode !== "full-day" && (
-										<span className="opacity-50">({timeSubMode})</span>
-									)}
 								</span>
 							) : (
 								<span className="capitalize flex items-center gap-1">
 									<CalendarRange className="h-3 w-3" />
-									Every {genericDay} ({genericWeek === "all" ? "All Weeks" : genericWeek}
-									)
+									Every {genericDay} (
+									{genericWeek === LessonWeek.every
+										? "All"
+										: genericWeek}{" "}
+									Weeks)
 								</span>
 							)}
 						</div>
 					)}
 				</div>
-
-				{activeCount > 0 && (
+				{(activeCount > 0 || onReset) && (
 					<Button
 						variant="ghost"
 						size="sm"
 						onClick={clearFilters}
 						className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive transition-colors">
-						Reset
-						<X className="ml-1 h-3 w-3" />
+						Reset <X className="ml-1 h-3 w-3" />
 					</Button>
 				)}
 			</div>
@@ -290,26 +343,25 @@ export function ScheduleFilters({
 			<CollapsibleContent>
 				<div className="px-4 pb-4 space-y-6">
 					<Separator />
-
 					<div className="space-y-4">
 						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
 							View Mode
 						</Label>
 						<Tabs
 							value={mode}
-							onValueChange={v => setMode(v as FilterMode)}
+							onValueChange={handleModeChange}
 							className="w-full">
 							<TabsList className="w-full grid grid-cols-2">
 								<TabsTrigger
 									value="generic"
 									className="flex items-center gap-2">
-									<CalendarRange className="h-4 w-4" />
-									Weekly Schedule
+									<CalendarRange className="h-4 w-4" /> Weekly
+									Schedule
 								</TabsTrigger>
 								<TabsTrigger
 									value="calendar"
 									className="flex items-center gap-2">
-									<CalendarDays className="h-4 w-4" />
+									<CalendarDays className="h-4 w-4" />{" "}
 									Specific Date
 								</TabsTrigger>
 							</TabsList>
@@ -319,10 +371,14 @@ export function ScheduleFilters({
 					<div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
 						{mode === "calendar" ? (
 							<div className="space-y-3">
-								<Label className="text-xs font-medium">Date & Time</Label>
+								<Label className="text-xs font-medium">
+									Date & Time
+								</Label>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div className="space-y-1">
-										<Label className="text-xs text-muted-foreground">Date</Label>
+										<Label className="text-xs text-muted-foreground">
+											Date
+										</Label>
 										<DatePicker
 											date={date}
 											setDate={setDate}
@@ -330,17 +386,27 @@ export function ScheduleFilters({
 										/>
 									</div>
 									<div className="space-y-1">
-										<Label className="text-xs text-muted-foreground">Detail Level</Label>
+										<Label className="text-xs text-muted-foreground">
+											Detail Level
+										</Label>
 										<Select
 											value={timeSubMode}
-											onValueChange={v => setTimeSubMode(v as TimeSubMode)}>
+											onValueChange={
+												handleTimeSubModeChange
+											}>
 											<SelectTrigger className="h-9">
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="full-day">Full Day</SelectItem>
-												<SelectItem value="timestamp">Specific Time</SelectItem>
-												<SelectItem value="range">Time Range</SelectItem>
+												<SelectItem value="full-day">
+													Full Day
+												</SelectItem>
+												<SelectItem value="timestamp">
+													Specific Time
+												</SelectItem>
+												<SelectItem value="range">
+													Time Range
+												</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
@@ -348,40 +414,61 @@ export function ScheduleFilters({
 							</div>
 						) : (
 							<div className="space-y-3">
-								<Label className="text-xs font-medium">Recurring Settings</Label>
+								<Label className="text-xs font-medium">
+									Recurring Settings
+								</Label>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div className="space-y-1">
-										<Label className="text-xs text-muted-foreground">Day of Week</Label>
+										<Label className="text-xs text-muted-foreground">
+											Day of Week
+										</Label>
 										<Select
 											value={genericDay}
-											onValueChange={v => setGenericDay(v as Day)}>
+											onValueChange={
+												handleGenericDayChange
+											}>
 											<SelectTrigger className="h-9 capitalize">
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												{Object.values(Day).map(d => (
-													<SelectItem
-														key={d}
-														value={d}
-														className="capitalize">
-														{d}
-													</SelectItem>
-												))}
+												{Object.values(Day).map(
+													dayValue => (
+														<SelectItem
+															key={dayValue}
+															value={dayValue}
+															className="capitalize">
+															{dayValue}
+														</SelectItem>
+													)
+												)}
 											</SelectContent>
 										</Select>
 									</div>
 									<div className="space-y-1">
-										<Label className="text-xs text-muted-foreground">Week Type</Label>
+										<Label className="text-xs text-muted-foreground">
+											Week Type
+										</Label>
 										<Select
 											value={genericWeek}
-											onValueChange={v => setGenericWeek(v as LessonWeek | "all")}>
+											onValueChange={
+												handleGenericWeekChange
+											}>
 											<SelectTrigger className="h-9 capitalize">
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="all">Any Week</SelectItem>
-												<SelectItem value={LessonWeek.odd}>Odd Week</SelectItem>
-												<SelectItem value={LessonWeek.even}>Even Week</SelectItem>
+												<SelectItem
+													value={LessonWeek.every}>
+													All Weeks
+												</SelectItem>
+												<SelectItem
+													value={LessonWeek.odd}>
+													Odd Weeks
+												</SelectItem>
+												<SelectItem
+													value={LessonWeek.even}>
+													Even Weeks
+												</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
@@ -394,7 +481,7 @@ export function ScheduleFilters({
 								<div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-md border border-dashed">
 									<Switch
 										id="ignore-week"
-										checked={filters.ignoreWeek || false}
+										checked={filters.ignoreWeek ?? false}
 										onCheckedChange={toggleIgnoreWeek}
 									/>
 									<Label
@@ -413,11 +500,13 @@ export function ScheduleFilters({
 								<Clock className="h-4 w-4 text-muted-foreground mb-2.5" />
 								{timeSubMode === "timestamp" && (
 									<div className="space-y-1">
-										<Label className="text-xs">At Time</Label>
+										<Label className="text-xs">
+											At Time
+										</Label>
 										<Input
 											type="time"
 											value={atTime}
-											onChange={e => setAtTime(e.target.value)}
+											onChange={handleAtTimeChange}
 											className="h-8 w-32"
 										/>
 									</div>
@@ -425,20 +514,26 @@ export function ScheduleFilters({
 								{timeSubMode === "range" && (
 									<>
 										<div className="space-y-1">
-											<Label className="text-xs">From</Label>
+											<Label className="text-xs">
+												From
+											</Label>
 											<Input
 												type="time"
 												value={rangeStart}
-												onChange={e => setRangeStart(e.target.value)}
+												onChange={
+													handleRangeStartChange
+												}
 												className="h-8 w-32"
 											/>
 										</div>
 										<div className="space-y-1">
-											<Label className="text-xs">To</Label>
+											<Label className="text-xs">
+												To
+											</Label>
 											<Input
 												type="time"
 												value={rangeEnd}
-												onChange={e => setRangeEnd(e.target.value)}
+												onChange={handleRangeEndChange}
 												className="h-8 w-32"
 											/>
 										</div>
@@ -459,81 +554,94 @@ export function ScheduleFilters({
 							<div className="space-y-1">
 								<Label className="text-xs">Class</Label>
 								<Select
-									value={filters.classId || "all"}
-									onValueChange={v => handleEntityChange("classId", v)}>
+									value={filters.classId ?? "all"}
+									onValueChange={value =>
+										handleEntityChange("classId", value)
+									}>
 									<SelectTrigger className="h-9">
 										<SelectValue placeholder="All Classes" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="all">All Classes</SelectItem>
-										{options.classes?.map(c => (
+										<SelectItem value="all">
+											All Classes
+										</SelectItem>
+										{options.classes?.map(item => (
 											<SelectItem
-												key={c.id}
-												value={c.id}>
-												{c.name}
+												key={item.id}
+												value={item.id}>
+												{item.name}
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
 							</div>
-
 							<div className="space-y-1">
 								<Label className="text-xs">Subject</Label>
 								<Select
-									value={filters.subjectId || "all"}
-									onValueChange={v => handleEntityChange("subjectId", v)}>
+									value={filters.subjectId ?? "all"}
+									onValueChange={value =>
+										handleEntityChange("subjectId", value)
+									}>
 									<SelectTrigger className="h-9">
 										<SelectValue placeholder="All Subjects" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="all">All Subjects</SelectItem>
-										{options.subjects?.map(s => (
+										<SelectItem value="all">
+											All Subjects
+										</SelectItem>
+										{options.subjects?.map(item => (
 											<SelectItem
-												key={s.id}
-												value={s.id}>
-												{s.name}
+												key={item.id}
+												value={item.id}>
+												{item.name}
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
 							</div>
-
 							<div className="space-y-1">
 								<Label className="text-xs">Teacher</Label>
 								<Select
-									value={filters.teacherId || "all"}
-									onValueChange={v => handleEntityChange("teacherId", v)}>
+									value={filters.teacherId ?? "all"}
+									onValueChange={value =>
+										handleEntityChange("teacherId", value)
+									}>
 									<SelectTrigger className="h-9">
 										<SelectValue placeholder="All Teachers" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="all">All Teachers</SelectItem>
-										{options.teachers?.map(t => (
+										<SelectItem value="all">
+											All Teachers
+										</SelectItem>
+										{options.teachers?.map(item => (
 											<SelectItem
-												key={t.id}
-												value={t.id}>
-												{t.name}
+												key={item.id}
+												value={item.id}>
+												{item.name}
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
 							</div>
-
 							<div className="space-y-1">
 								<Label className="text-xs">Room</Label>
 								<Select
-									value={filters.roomId || "all"}
-									onValueChange={v => handleEntityChange("roomId", v)}>
+									value={filters.roomId ?? "all"}
+									onValueChange={value =>
+										handleEntityChange("roomId", value)
+									}>
 									<SelectTrigger className="h-9">
 										<SelectValue placeholder="All Rooms" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="all">All Rooms</SelectItem>
-										{options.rooms?.map(r => (
+										<SelectItem value="all">
+											All Rooms
+										</SelectItem>
+										{options.rooms?.map(item => (
 											<SelectItem
-												key={r.id}
-												value={r.id}>
-												{r.name}
+												key={item.id}
+												value={item.id}>
+												{item.name}
 											</SelectItem>
 										))}
 									</SelectContent>

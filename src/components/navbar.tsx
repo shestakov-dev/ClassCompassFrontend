@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from "react-router";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import {
 	NavigationMenu,
@@ -22,7 +22,6 @@ import { Logo } from "@/components/logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 
 export function Navbar() {
-	const { pathname } = useLocation();
 	const { navGroups, navLinks, navButtons } = useNavigationItems();
 
 	return (
@@ -48,20 +47,19 @@ export function Navbar() {
 											<NavigationMenuContent>
 												<ul className="grid gap-3 p-6 md:w-100 lg:w-125 lg:grid-cols-[.75fr_1fr]">
 													{item.items.map(subItem => {
-														const isFeaturedActive = pathname === subItem.href;
 														if (subItem.featured) {
 															return (
 																<li
 																	key={subItem.title}
 																	className="row-span-3">
 																	<NavigationMenuLink asChild>
-																		<NavLink
+																		<Link
 																			to={subItem.href}
-																			className={cn(
-																				"flex h-full w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md hover:from-muted/60 hover:to-muted/80",
-																				isFeaturedActive &&
-																					"from-primary/10 to-primary/20 text-primary hover:from-primary/20 hover:to-primary/30"
-																			)}>
+																			className="flex h-full w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md hover:from-muted/60 hover:to-muted/80"
+																			activeProps={{
+																				className:
+																					"from-primary/10 to-primary/20 text-primary hover:from-primary/20 hover:to-primary/30",
+																			}}>
 																			<Compass className="h-6 w-6 text-primary" />
 																			<div className="mb-2 mt-4 text-lg font-medium">
 																				{subItem.title}
@@ -69,7 +67,7 @@ export function Navbar() {
 																			<p className="text-sm leading-tight text-muted-foreground">
 																				{subItem.description}
 																			</p>
-																		</NavLink>
+																		</Link>
 																	</NavigationMenuLink>
 																</li>
 															);
@@ -78,8 +76,7 @@ export function Navbar() {
 															<ListItem
 																key={subItem.title}
 																href={subItem.href}
-																title={subItem.title}
-																active={pathname === subItem.href}>
+																title={subItem.title}>
 																{subItem.description}
 															</ListItem>
 														);
@@ -92,16 +89,16 @@ export function Navbar() {
 							</NavigationMenu>
 
 							{navLinks.map(item => (
-								<NavLink
+								<Link
 									key={item.title}
 									to={item.href}
-									className={cn(
-										navigationMenuTriggerStyle(),
-										pathname === item.href &&
-											"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
-									)}>
+									className={navigationMenuTriggerStyle()}
+									activeProps={{
+										className:
+											"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary",
+									}}>
 									{item.title}
-								</NavLink>
+								</Link>
 							))}
 						</div>
 					</div>
@@ -148,27 +145,28 @@ const ListItem = forwardRef<
 	ComponentPropsWithoutRef<"a"> & {
 		title: string;
 		href: string;
-		active?: boolean;
 	}
->(({ className, title, children, href, active, ...props }, ref) => {
+>(({ className, title, children, href, ...props }, ref) => {
 	return (
 		<li>
 			<NavigationMenuLink asChild>
-				<NavLink
+				<Link
 					ref={ref}
 					to={href}
 					className={cn(
 						"block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-						active &&
-							"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary",
 						className
 					)}
+					activeProps={{
+						className:
+							"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary",
+					}}
 					{...props}>
 					<div className="text-sm font-medium leading-none">{title}</div>
 					<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
 						{children}
 					</p>
-				</NavLink>
+				</Link>
 			</NavigationMenuLink>
 		</li>
 	);

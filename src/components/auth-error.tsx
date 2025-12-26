@@ -1,12 +1,9 @@
-import { useAsyncError } from "react-router";
 import { GeneralError } from "@/components/general-error";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, ShieldAlert } from "lucide-react";
 import { getErrorMessage } from "@/lib/error-parsing";
 
-export function AuthError() {
-	const error = useAsyncError();
-
+export function AuthError({ error }: { error: unknown }) {
 	const message = getErrorMessage(error);
 
 	return (

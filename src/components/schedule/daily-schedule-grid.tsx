@@ -57,7 +57,7 @@ const EventCard = ({ event, onClick }: EventCardProps) => {
 		[LessonWeek.even]: "even",
 	};
 
-	const variant = variantMap[event.type] || "default";
+	const variant = variantMap[event.type] ?? "default";
 	const heightPx = parseFloat(event.style.height);
 
 	return (
@@ -112,16 +112,23 @@ interface TimeGridProps {
 
 export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 	const { minHour, totalHours, ticks } = useMemo(() => {
-		if (events.length === 0)
-			return {
-				minHour: 6,
-				totalHours: 14,
-				ticks: Array.from({ length: 15 }, (_, i) => 6 + i),
-			};
+		if (events.length === 0) {
+			const minHour = 8;
+			const totalHours = 6;
 
-		const starts = events.map(e => e.start.getHours());
+			return {
+				minHour,
+				totalHours,
+				ticks: Array.from(
+					{ length: totalHours + 1 },
+					(_, i) => minHour + i
+				),
+			};
+		}
+
+		const starts = events.map(event => event.start.getHours());
 		const ends = events.map(
-			e => e.end.getHours() + (e.end.getMinutes() > 0 ? 1 : 0)
+			event => event.end.getHours() + (event.end.getMinutes() > 0 ? 1 : 0)
 		);
 
 		const min = Math.max(0, Math.min(...starts) - 1);
@@ -136,11 +143,15 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 	}, [events]);
 
 	const layoutEvents = useMemo(() => {
-		if (!events.length) return [];
+		if (!events.length) {
+			return [];
+		}
 
 		const sorted = [...events].sort((a, b) => {
-			if (a.start.getTime() !== b.start.getTime())
+			if (a.start.getTime() !== b.start.getTime()) {
 				return a.start.getTime() - b.start.getTime();
+			}
+
 			return b.end.getTime() - a.end.getTime();
 		});
 
@@ -149,11 +160,14 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 		let clusterEnd = 0;
 
 		const processCluster = (group: ScheduleEvent[]) => {
-			if (group.length === 0) return;
+			if (group.length === 0) {
+				return;
+			}
 
 			const columns: ScheduleEvent[][] = [];
 			for (const ev of group) {
 				let placed = false;
+
 				for (let i = 0; i < columns.length; i++) {
 					const lastInCol = columns[i][columns[i].length - 1];
 					if (lastInCol.end.getTime() <= ev.start.getTime()) {
@@ -162,22 +176,30 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 						break;
 					}
 				}
-				if (!placed) columns.push([ev]);
+
+				if (!placed) {
+					columns.push([ev]);
+				}
 			}
 
 			const widthPercent = 100 / columns.length;
 			columns.forEach((col, colIndex) => {
 				col.forEach(ev => {
 					const startMinutes =
-						(ev.start.getHours() - minHour) * 60 + ev.start.getMinutes();
-					const durationMinutes = differenceInMinutes(ev.end, ev.start);
+						(ev.start.getHours() - minHour) * 60 +
+						ev.start.getMinutes();
+					const durationMinutes = differenceInMinutes(
+						ev.end,
+						ev.start
+					);
 
 					result.push({
 						...ev,
 						style: {
 							top: `${(startMinutes / 60) * SLOT_HEIGHT_PX}px`,
 							height: `${Math.max(
-								(durationMinutes / 60) * SLOT_HEIGHT_PX - ROW_GAP_PX,
+								(durationMinutes / 60) * SLOT_HEIGHT_PX -
+									ROW_GAP_PX,
 								24
 							)}px`,
 							left: `${colIndex * widthPercent}%`,
@@ -266,10 +288,14 @@ const CurrentTimeLine = ({
 	date: Date;
 }) => {
 	const now = new Date();
-	if (startOfDay(now).getTime() !== startOfDay(date).getTime()) return null;
+	if (startOfDay(now).getTime() !== startOfDay(date).getTime()) {
+		return null;
+	}
 
 	const currentHour = now.getHours();
-	if (currentHour < minHour || currentHour >= maxHour) return null;
+	if (currentHour < minHour || currentHour >= maxHour) {
+		return null;
+	}
 
 	const minutesFromStart = (currentHour - minHour) * 60 + now.getMinutes();
 	const top = (minutesFromStart / 60) * SLOT_HEIGHT_PX;

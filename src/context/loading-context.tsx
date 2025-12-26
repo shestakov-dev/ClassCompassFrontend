@@ -25,8 +25,6 @@ export function useLoading() {
 }
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
-	// If multiple processes trigger loading (e.g. auth & navigation),
-	// we want the spinner to be present until ALL of them are finished
 	const [loadingCount, setLoadingCount] = useState(0);
 
 	const setIsLoading = useCallback((isLoading: boolean) => {

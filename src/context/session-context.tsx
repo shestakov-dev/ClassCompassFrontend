@@ -1,5 +1,4 @@
 import { createContext, useContext, type ReactNode } from "react";
-import { useRevalidator } from "react-router";
 import type { UserEntity } from "@/api/generated/models";
 import {
 	getUsersControllerFindByIdentityIdQueryKey,
@@ -7,7 +6,7 @@ import {
 } from "@/api/generated/endpoints/users/users";
 import type { AxiosError } from "axios";
 import type { Session } from "@ory/client-fetch";
-import { useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 
 interface SessionContextType {
 	session: Session | null;
@@ -37,7 +36,6 @@ export function SessionProvider({
 	children: ReactNode;
 	initialSession: Session | null;
 }) {
-	const { revalidate } = useRevalidator();
 	const queryClient = useQueryClient();
 
 	const isAuthenticated = !!initialSession;
@@ -53,21 +51,18 @@ export function SessionProvider({
 			query: {
 				enabled: isAuthenticated && !!identityId,
 				// Keep previous data while refetching to prevent flicker
-				placeholderData: previousData => previousData,
+				placeholderData: keepPreviousData,
 			},
 		}
 	);
 
 	const refreshSession = async () => {
 		if (identityId) {
-			// Invalidate user data to ensure fresh data is fetched (query level)
+			// Invalidate user data to ensure fresh data is fetched
 			await queryClient.invalidateQueries({
 				queryKey: getUsersControllerFindByIdentityIdQueryKey(identityId),
 			});
 		}
-
-		// Revalidate the session data (router level)
-		revalidate();
 	};
 
 	return (

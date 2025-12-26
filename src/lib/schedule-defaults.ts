@@ -1,11 +1,12 @@
 import {
 	LessonsControllerFindFilteredDay as Day,
-	type LessonsControllerFindFilteredParams,
+	LessonsControllerFindFilteredWeek as LessonWeek,
 	type UserEntity,
+	type LessonsControllerFindFilteredParams,
 } from "@/api/generated/models";
-import { getDay } from "date-fns";
+import { getDay, getISOWeek } from "date-fns";
 
-const JS_DAY_TO_ENUM: Record<number, Day> = {
+export const JS_DAY_TO_ENUM: Record<number, Day> = {
 	0: Day.sunday,
 	1: Day.monday,
 	2: Day.tuesday,
@@ -13,6 +14,16 @@ const JS_DAY_TO_ENUM: Record<number, Day> = {
 	4: Day.thursday,
 	5: Day.friday,
 	6: Day.saturday,
+};
+
+export const DAY_TO_INDEX_MAP: Record<Day, number> = {
+	[Day.sunday]: 0,
+	[Day.monday]: 1,
+	[Day.tuesday]: 2,
+	[Day.wednesday]: 3,
+	[Day.thursday]: 4,
+	[Day.friday]: 5,
+	[Day.saturday]: 6,
 };
 
 export const DAYS_OF_WEEK = [
@@ -25,8 +36,13 @@ export const DAYS_OF_WEEK = [
 	Day.sunday,
 ];
 
-export const getCurrentDayEnum = (): Day => {
-	return JS_DAY_TO_ENUM[getDay(new Date())];
+export const getCurrentDayEnum = (date: Date = new Date()): Day => {
+	return JS_DAY_TO_ENUM[getDay(date)];
+};
+
+export const getWeekParity = (date: Date): LessonWeek => {
+	const weekNumber = getISOWeek(date);
+	return weekNumber % 2 === 0 ? LessonWeek.even : LessonWeek.odd;
 };
 
 export const getDefaultFilters = (
@@ -36,9 +52,7 @@ export const getDefaultFilters = (
 		day: getCurrentDayEnum(),
 	};
 
-	if (!user) return defaults;
-
-	// Future user-specific defaults can be added here
+	// Add other user defaults here if needed
 
 	return defaults;
 };

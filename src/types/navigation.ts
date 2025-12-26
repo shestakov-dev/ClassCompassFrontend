@@ -1,3 +1,5 @@
+import type { LinkProps } from "@tanstack/react-router";
+
 export type NavVisibility = "authenticated" | "guest";
 
 export interface BaseNavItem {
@@ -6,7 +8,7 @@ export interface BaseNavItem {
 }
 
 export type NavItem = BaseNavItem & {
-	href: string;
+	href: Exclude<LinkProps["to"], undefined>;
 	description?: string;
 	featured?: boolean;
 };
@@ -18,11 +20,11 @@ export type NavGroup = BaseNavItem & {
 
 export type NavLink = BaseNavItem & {
 	type: "link";
-	href: string;
+	href: LinkProps["to"];
 };
 
 export type NavButton = BaseNavItem & {
-	href: string;
+	href: LinkProps["to"];
 	variant:
 		| "default"
 		| "destructive"

@@ -52,7 +52,7 @@ export function DatePicker({
 				<Calendar
 					mode="single"
 					selected={date}
-					onSelect={d => d && setDate(d)}
+					onSelect={selectedDate => selectedDate && setDate(selectedDate)}
 				/>
 			</PopoverContent>
 		</Popover>
