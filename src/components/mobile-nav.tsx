@@ -1,7 +1,6 @@
 import { useState, type PropsWithChildren } from "react";
-import { Link, NavLink } from "react-router";
+import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
 	Sheet,
@@ -30,14 +29,9 @@ export function MobileNav() {
 	};
 
 	return (
-		<Sheet
-			open={open}
-			onOpenChange={setOpen}>
+		<Sheet open={open} onOpenChange={setOpen}>
 			<SheetTrigger asChild>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="md:hidden">
+				<Button variant="ghost" size="icon" className="md:hidden">
 					<Menu className="h-5 w-5" />
 					<span className="sr-only">Toggle menu</span>
 				</Button>
@@ -55,10 +49,7 @@ export function MobileNav() {
 				<div className="flex flex-col px-6">
 					{/* Accordion Menus */}
 					{navGroups.length > 0 && (
-						<Accordion
-							type="single"
-							collapsible
-							className="w-full">
+						<Accordion type="single" collapsible className="w-full">
 							{navGroups.map(item => (
 								<AccordionItem
 									key={item.title}
@@ -84,19 +75,14 @@ export function MobileNav() {
 					{/* Regular Links */}
 					<div className="flex flex-col">
 						{navLinks.map(item => (
-							<NavLink
-								end
+							<Link
 								key={item.href}
 								to={item.href}
-								className={({ isActive }) =>
-									cn(
-										"flex w-full items-center py-4 text-base font-medium transition-colors hover:text-primary",
-										isActive && "text-primary"
-									)
-								}
+								className="flex w-full items-center py-4 text-base font-medium transition-colors hover:text-primary"
+								activeProps={{ className: "text-primary" }}
 								onClick={handleLinkClick}>
 								{item.title}
-							</NavLink>
+							</Link>
 						))}
 					</div>
 
@@ -108,7 +94,11 @@ export function MobileNav() {
 								to={item.href}
 								onClick={handleLinkClick}>
 								<Button
-									variant={item.variant === "ghost" ? "outline" : item.variant}
+									variant={
+										item.variant === "ghost"
+											? "outline"
+											: item.variant
+									}
 									className="w-full">
 									{item.title}
 								</Button>
@@ -120,7 +110,10 @@ export function MobileNav() {
 				<SheetFooter className="px-6 pb-6">
 					<div className="flex w-full items-center justify-between border-t pt-4">
 						<div className="flex flex-col text-xs text-muted-foreground gap-0.5">
-							<span>© 2024-{new Date().getFullYear()} Alexander Shestakov</span>
+							<span>
+								© 2024-{new Date().getFullYear()} Alexander
+								Shestakov
+							</span>
 
 							<a
 								href="http://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -147,17 +140,12 @@ interface MobileLinkProps extends PropsWithChildren {
 
 function MobileLink({ to, onClick, children }: MobileLinkProps) {
 	return (
-		<NavLink
-			end
+		<Link
 			to={to}
 			onClick={onClick}
-			className={({ isActive }) =>
-				cn(
-					"block select-none rounded-md p-3 text-base font-medium leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-					isActive && "bg-primary/10 text-primary"
-				)
-			}>
+			className="block select-none rounded-md p-3 text-base font-medium leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+			activeProps={{ className: "bg-primary/10 text-primary" }}>
 			{children}
-		</NavLink>
+		</Link>
 	);
 }

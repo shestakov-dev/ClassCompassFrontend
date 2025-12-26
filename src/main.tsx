@@ -1,24 +1,35 @@
+import "./index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@/index.css";
-import { RouterProvider } from "react-router";
-import { router } from "@/router";
-import { ThemeProvider } from "@/context/theme-context";
-import { LoadingProvider } from "@/context/loading-context";
+import { RouterProvider } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
+import { ThemeProvider } from "./context/theme-context";
+import { Toaster } from "./components/ui/sonner";
+import { SessionProvider } from "./context/session-context";
+import { getSession } from "./services/kratos";
+import { router } from "./router";
 
-createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<QueryClientProvider client={queryClient}>
-			<ThemeProvider>
-				<LoadingProvider>
-					<RouterProvider router={router} />
-				</LoadingProvider>
+getSession().then(session => {
+	createRoot(document.getElementById("root")!).render(
+		<StrictMode>
+			<ThemeProvider
+				defaultTheme="system"
+				storageKey="vite-ui-theme">
+				<QueryClientProvider client={queryClient}>
+					<SessionProvider initialSession={session}>
+						<RouterProvider
+							router={router}
+							context={{ session }}
+						/>
+					</SessionProvider>
+
+					<Toaster />
+
+					<ReactQueryDevtools initialIsOpen={false} />
+				</QueryClientProvider>
 			</ThemeProvider>
-
-			<ReactQueryDevtools initialIsOpen={false} />
-		</QueryClientProvider>
-	</StrictMode>
-);
+		</StrictMode>
+	);
+});

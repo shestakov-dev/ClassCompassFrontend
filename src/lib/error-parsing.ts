@@ -46,7 +46,6 @@ export function getErrorMessage(error: unknown): string {
 	return "An unknown error occurred";
 }
 
-// Attempts to extract and throw a clean error message from a ResponseError object
 export async function throwCleanOryError(error: ResponseError): Promise<never> {
 	try {
 		const body = await error.response.json();

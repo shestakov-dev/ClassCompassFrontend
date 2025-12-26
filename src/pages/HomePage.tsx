@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 import {
 	CalendarRange,
 	ShieldCheck,
@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ReactNode } from "react";
-import { LOGO_URL, ROUTE_LOGIN } from "@/config/urls";
+import { type ReactNode } from "react";
+import { LOGO_URL } from "@/config/urls";
 
 export default function HomePage() {
 	return (
@@ -40,7 +40,7 @@ export default function HomePage() {
 
 					{/* CTA Buttons */}
 					<div className="flex flex-col gap-4 sm:flex-row">
-						<Link to={ROUTE_LOGIN}>
+						<Link to="/login">
 							<Button
 								size="lg"
 								className="px-8 text-lg h-12">

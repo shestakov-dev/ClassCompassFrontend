@@ -1,9 +1,6 @@
-import { useState, useCallback, useEffectEvent } from "react";
+import { useCallback, useMemo } from "react";
 import { DailyScheduleViewer } from "@/components/schedule/daily-schedule-viewer";
-import {
-	ScheduleFilters,
-	type FilterMode,
-} from "@/components/schedule/schedule-filters";
+import { ScheduleFilters } from "@/components/schedule/schedule-filters";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -12,13 +9,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import {
 	ChevronLeft,
 	ChevronRight,
-	Loader2,
 	CalendarRange,
+	CalendarX2,
 } from "lucide-react";
-import { addDays, subDays, getDay, setDay } from "date-fns";
+import { addDays, subDays, setDay, parseISO, set } from "date-fns";
 import { useSession } from "@/context/session-context";
 import { useLessonsControllerFindFiltered } from "@/api/generated/endpoints/lessons/lessons";
 import {
@@ -29,92 +27,214 @@ import {
 	DAYS_OF_WEEK,
 	getCurrentDayEnum,
 	getDefaultFilters,
+	getWeekParity,
+	JS_DAY_TO_ENUM,
 } from "@/lib/schedule-defaults";
-
-const JS_DAY_TO_ENUM: Record<number, Day> = {
-	0: Day.sunday,
-	1: Day.monday,
-	2: Day.tuesday,
-	3: Day.wednesday,
-	4: Day.thursday,
-	5: Day.friday,
-	6: Day.saturday,
-};
+import { keepPreviousData } from "@tanstack/react-query";
+import { Route } from "@/routes/schedule";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@/components/ui/empty";
 
 export default function SchedulePage() {
 	const { user } = useSession();
+	const navigate = Route.useNavigate();
+	const search = Route.useSearch();
 
-	const [mode, setMode] = useState<FilterMode>("generic");
-	const [currentDate, setCurrentDate] = useState(new Date());
-
-	const defaultDay = getCurrentDayEnum();
-	const [genericDay, setGenericDay] = useState<Day>(defaultDay);
-	const [filters, setFilters] = useState<LessonsControllerFindFilteredParams>(
-		{}
+	const mode = search.mode ?? "generic";
+	const currentDate = useMemo(
+		() => (search.date ? parseISO(search.date) : new Date()),
+		[search.date]
 	);
+	const genericDay = search.day ?? getCurrentDayEnum();
 
-	useEffectEvent(() => {
-		if (user) {
-			setFilters(getDefaultFilters(user));
+	const filters = useMemo(() => {
+		const defaults = user ? getDefaultFilters(user) : { day: genericDay };
+
+		const base: LessonsControllerFindFilteredParams = {
+			classId: search.classId ?? defaults.classId,
+			teacherId: search.teacherId ?? defaults.teacherId,
+			subjectId: search.subjectId,
+			roomId: search.roomId,
+			ignoreWeek: search.ignoreWeek,
+		};
+
+		if (mode === "calendar") {
+			if (!search.timestamp && !search.from) {
+				return {
+					...base,
+					day: getCurrentDayEnum(currentDate),
+					week: search.ignoreWeek
+						? undefined
+						: getWeekParity(currentDate),
+					timestamp: undefined,
+					from: undefined,
+					to: undefined,
+				};
+			}
+
+			return {
+				...base,
+				timestamp: search.timestamp,
+				from: search.from,
+				to: search.to,
+				day: undefined,
+				week: undefined,
+			};
+		} else {
+			return {
+				...base,
+				day: search.day ?? defaults.day,
+				week: search.week,
+				timestamp: undefined,
+				from: undefined,
+				to: undefined,
+			};
 		}
+	}, [search, user, mode, genericDay, currentDate]);
+
+	const {
+		data: lessons,
+		isLoading,
+		isFetching,
+	} = useLessonsControllerFindFiltered(user?.schoolId ?? "", filters, {
+		query: {
+			enabled: !!user?.schoolId,
+			staleTime: 1000 * 60 * 1,
+			placeholderData: keepPreviousData,
+		},
 	});
 
-	const handleReset = useCallback(() => {
-		const defaults = getDefaultFilters(user);
-		setFilters(defaults);
+	const hasLessons = lessons && lessons.length > 0;
+	// if we are initially loading or if we are fetching and
+	// have no data yet, we show the skeleton
+	const showSkeleton = isLoading || (isFetching && !lessons);
 
-		setMode("generic");
-
-		const now = new Date();
-		setGenericDay(defaults.day || defaultDay);
-		setCurrentDate(now);
-	}, [user, defaultDay]);
-
-	const { data: lessons, isLoading } = useLessonsControllerFindFiltered(
-		user?.schoolId ?? "",
-		filters,
-		{
-			query: {
-				enabled: !!user?.schoolId,
-				staleTime: 1000 * 60 * 1,
-				placeholderData: previousData => previousData,
-			},
-		}
+	const updateSearch = useCallback(
+		(newParams: Partial<typeof search>) => {
+			navigate({
+				search: prev => ({ ...prev, ...newParams }),
+				replace: true,
+			});
+		},
+		[navigate]
 	);
 
-	// When date changes (calendar arrow nav), update generic day to match
-	const handleDateChange = (newDate: Date) => {
-		setCurrentDate(newDate);
+	const handleDateChange = useCallback(
+		(newDate: Date) => {
+			const dayEnum = getCurrentDayEnum(newDate);
+			const updates: Partial<typeof search> = {
+				date: newDate.toISOString(),
+				day: dayEnum,
+			};
 
-		const dayIndex = getDay(newDate);
-		const dayEnum = JS_DAY_TO_ENUM[dayIndex];
+			if (search.timestamp) {
+				const oldTs = parseISO(search.timestamp);
+				updates.timestamp = set(newDate, {
+					hours: oldTs.getHours(),
+					minutes: oldTs.getMinutes(),
+				}).toISOString();
+			}
 
-		if (dayEnum) {
-			setGenericDay(dayEnum);
-		}
-	};
+			if (search.from && search.to) {
+				const oldFrom = parseISO(search.from);
+				const oldTo = parseISO(search.to);
+				updates.from = set(newDate, {
+					hours: oldFrom.getHours(),
+					minutes: oldFrom.getMinutes(),
+				}).toISOString();
+				updates.to = set(newDate, {
+					hours: oldTo.getHours(),
+					minutes: oldTo.getMinutes(),
+				}).toISOString();
+			}
 
-	// When generic day changes (dropdown), update date to match that day in current week
-	const handleGenericDayChange = (day: Day) => {
-		setGenericDay(day);
+			updateSearch(updates);
+		},
+		[updateSearch, search]
+	);
 
-		const dayIndex = Number(
-			Object.keys(JS_DAY_TO_ENUM).find(key => JS_DAY_TO_ENUM[Number(key)] === day)
-		);
+	const handleGenericDayChange = useCallback(
+		(day: Day) => {
+			const dayIndex = Number(
+				Object.keys(JS_DAY_TO_ENUM).find(
+					key => JS_DAY_TO_ENUM[Number(key)] === day
+				)
+			);
 
-		if (!isNaN(dayIndex)) {
-			// Update currentDate to the selected day within the same week
-			const newDate = setDay(currentDate, dayIndex, { weekStartsOn: 1 });
-			setCurrentDate(newDate);
-		}
-	};
+			let newDateStr = undefined;
+			if (!isNaN(dayIndex)) {
+				const newDate = setDay(currentDate, dayIndex, {
+					weekStartsOn: 1,
+				});
+				newDateStr = newDate.toISOString();
+			}
+
+			updateSearch({
+				day,
+				date: newDateStr,
+			});
+		},
+		[currentDate, updateSearch]
+	);
+
+	const handleReset = useCallback(() => {
+		if (!user) return;
+		const defaults = getDefaultFilters(user);
+		const now = new Date();
+
+		navigate({
+			search: () => ({
+				mode: "generic",
+				day: defaults.day,
+				classId: defaults.classId,
+				teacherId: defaults.teacherId,
+				date: now.toISOString(),
+				timestamp: undefined,
+				from: undefined,
+				to: undefined,
+				subjectId: undefined,
+				roomId: undefined,
+				week: undefined,
+				ignoreWeek: undefined,
+			}),
+			replace: true,
+		});
+	}, [user, navigate]);
+
+	const handleSetFilters = useCallback(
+		(
+			updater:
+				| LessonsControllerFindFilteredParams
+				| ((
+						prev: LessonsControllerFindFilteredParams
+				  ) => LessonsControllerFindFilteredParams)
+		) => {
+			const nextFilters =
+				typeof updater === "function" ? updater(filters) : updater;
+			updateSearch(nextFilters);
+		},
+		[filters, updateSearch]
+	);
 
 	return (
 		<div className="flex flex-col h-full bg-background">
 			<div className="flex-1 flex flex-col w-full max-w-6xl mx-auto p-4 md:p-6 gap-4 min-h-0">
 				<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
 					<div>
-						<h1 className="text-2xl font-bold tracking-tight">Schedule</h1>
+						<div className="flex items-center gap-3">
+							<h1 className="text-2xl font-bold tracking-tight">
+								Schedule
+							</h1>
+							{isFetching && !isLoading && (
+								<Spinner className="text-muted-foreground transition-opacity" />
+							)}
+						</div>
 						<p className="text-muted-foreground text-sm">
 							View your upcoming classes.
 						</p>
@@ -126,12 +246,16 @@ export default function SchedulePage() {
 								<Button
 									variant="ghost"
 									size="icon"
-									onClick={() => handleDateChange(subDays(currentDate, 1))}
+									onClick={() =>
+										handleDateChange(
+											subDays(currentDate, 1)
+										)
+									}
 									className="h-8 w-8 hover:bg-muted hover:text-foreground">
 									<ChevronLeft className="h-4 w-4" />
 								</Button>
 
-								<div className="px-3 text-sm font-semibold min-w-25 text-center">
+								<div className="px-3 text-sm font-semibold min-w-28 text-center">
 									{currentDate.toLocaleDateString(undefined, {
 										weekday: "short",
 										month: "short",
@@ -142,7 +266,11 @@ export default function SchedulePage() {
 								<Button
 									variant="ghost"
 									size="icon"
-									onClick={() => handleDateChange(addDays(currentDate, 1))}
+									onClick={() =>
+										handleDateChange(
+											addDays(currentDate, 1)
+										)
+									}
 									className="h-8 w-8 hover:bg-muted hover:text-foreground">
 									<ChevronRight className="h-4 w-4" />
 								</Button>
@@ -152,20 +280,24 @@ export default function SchedulePage() {
 								<Select
 									value={genericDay}
 									onValueChange={handleGenericDayChange}>
-									<SelectTrigger className="h-8 min-w-35 border-none shadow-none font-semibold focus:ring-0">
+									<SelectTrigger className="h-8 min-w-36 border-none shadow-none font-semibold focus:ring-0">
 										<div className="flex items-center gap-2">
 											<CalendarRange className="h-4 w-4 text-muted-foreground" />
 											<SelectValue placeholder="Select Day">
-												<span className="capitalize">{genericDay}</span>
+												<span className="capitalize">
+													{genericDay}
+												</span>
 											</SelectValue>
 										</div>
 									</SelectTrigger>
 									<SelectContent align="end">
-										{DAYS_OF_WEEK.map(day => (
+										{DAYS_OF_WEEK.map(dayOption => (
 											<SelectItem
-												key={day}
-												value={day}>
-												<span className="capitalize">{day}</span>
+												key={dayOption}
+												value={dayOption}>
+												<span className="capitalize">
+													{dayOption}
+												</span>
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -180,9 +312,9 @@ export default function SchedulePage() {
 						date={currentDate}
 						setDate={handleDateChange}
 						filters={filters}
-						setFilters={setFilters}
+						setFilters={handleSetFilters}
 						mode={mode}
-						setMode={setMode}
+						setMode={newMode => updateSearch({ mode: newMode })}
 						genericDay={genericDay}
 						setGenericDay={handleGenericDayChange}
 						onReset={handleReset}
@@ -190,16 +322,66 @@ export default function SchedulePage() {
 				</div>
 
 				<div className="flex-1 min-h-0 flex flex-col relative mt-2">
-					{isLoading ? (
-						<div className="absolute inset-0 flex items-center justify-center">
-							<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						</div>
-					) : (
-						<DailyScheduleViewer
-							lessons={lessons ?? []}
-							date={currentDate}
-						/>
-					)}
+					<div className="relative h-full border rounded-md bg-background shadow-sm overflow-hidden">
+						{showSkeleton && (
+							<div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-[1px] flex items-center justify-center animate-in fade-in duration-300">
+								<div className="absolute inset-0 opacity-20 pointer-events-none grayscale">
+									<DailyScheduleViewer
+										lessons={[]}
+										date={currentDate}
+									/>
+								</div>
+								<div className="flex flex-col items-center gap-2 z-10">
+									<Spinner className="h-8 w-8 text-primary" />
+									<p className="text-xs text-muted-foreground font-medium">
+										Loading schedule...
+									</p>
+								</div>
+							</div>
+						)}
+
+						{!showSkeleton && !hasLessons ? (
+							<div className="h-full flex items-center justify-center bg-muted/5 animate-in fade-in zoom-in-95 duration-300">
+								<Empty>
+									<EmptyHeader>
+										<EmptyMedia variant="icon">
+											<CalendarX2 className="h-10 w-10 text-muted-foreground/50" />
+										</EmptyMedia>
+										<EmptyTitle>
+											No classes found
+										</EmptyTitle>
+										<EmptyDescription>
+											{mode === "calendar"
+												? "There are no classes scheduled for this specific date and time."
+												: `There are no classes scheduled for ${
+														genericDay
+															.charAt(0)
+															.toUpperCase() +
+														genericDay
+															.slice(1)
+															.toLowerCase()
+													}s.`}
+										</EmptyDescription>
+									</EmptyHeader>
+									<EmptyContent>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={handleReset}>
+											Reset Filters
+										</Button>
+									</EmptyContent>
+								</Empty>
+							</div>
+						) : (
+							<div className="h-full animate-in fade-in duration-500">
+								<DailyScheduleViewer
+									lessons={lessons ?? []}
+									date={currentDate}
+								/>
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

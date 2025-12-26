@@ -6,7 +6,6 @@ interface GeneralErrorProps extends React.HTMLAttributes<HTMLDivElement> {
 	message?: string;
 	minimal?: boolean;
 	icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-	// For custom buttons or links
 	children?: React.ReactNode;
 }
 

@@ -1,29 +1,25 @@
 import {
-	useRouteError,
-	isRouteErrorResponse,
 	Link,
-	useNavigate,
-} from "react-router";
+	useRouter,
+	type ErrorComponentProps,
+} from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, TriangleAlert } from "lucide-react";
 import { GeneralError } from "@/components/general-error";
+import { AuthError } from "@/components/auth-error";
+import { isAxiosError } from "axios";
 
-export default function ErrorPage() {
-	const error = useRouteError();
-	const navigate = useNavigate();
+export default function ErrorPage({ error }: ErrorComponentProps) {
+	const router = useRouter();
+
+	if (isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)) {
+		return <AuthError error={error} />;
+	}
 
 	let errorMessage = "An unexpected error has occurred.";
 	let errorTitle = "Unknown Error";
 
-	if (isRouteErrorResponse(error)) {
-		errorTitle = `${error.status}`;
-		errorMessage = error.statusText || error.data?.message;
-
-		if (error.status === 404) {
-			errorTitle = "404";
-			errorMessage = "Sorry, the page you are looking for does not exist.";
-		}
-	} else if (error instanceof Error) {
+	if (error instanceof Error) {
 		errorTitle = "Error";
 		errorMessage = error.message;
 	} else if (typeof error === "string") {
@@ -38,7 +34,7 @@ export default function ErrorPage() {
 			icon={TriangleAlert}>
 			<Button
 				variant="outline"
-				onClick={() => navigate(-1)}>
+				onClick={() => router.history.back()}>
 				<ArrowLeft className="mr-2 h-4 w-4" />
 				Go Back
 			</Button>
