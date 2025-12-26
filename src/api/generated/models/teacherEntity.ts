@@ -18,8 +18,6 @@ export interface TeacherEntity {
 	userId: string;
 	/** The teacher's populated user */
 	user?: UserEntity;
-	/** The teacher's subject identifiers */
-	subjectIds?: string[];
 	/** The teacher's populated subjects */
 	subjects?: SubjectEntity[];
 	/** The time the teacher was created */

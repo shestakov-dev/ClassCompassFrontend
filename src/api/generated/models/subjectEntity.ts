@@ -20,8 +20,6 @@ export interface SubjectEntity {
 	schoolId: string;
 	/** The subject's populated school */
 	school?: SchoolEntity;
-	/** The subject's teacher identifiers */
-	teacherIds?: string[];
 	/** The subject's populated teachers */
 	teachers?: TeacherEntity[];
 	/** The subject's creation date */
