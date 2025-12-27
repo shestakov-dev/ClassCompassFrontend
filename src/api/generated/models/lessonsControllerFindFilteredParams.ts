@@ -9,48 +9,48 @@ import type { LessonsControllerFindFilteredDay } from "./lessonsControllerFindFi
 import type { LessonsControllerFindFilteredWeek } from "./lessonsControllerFindFilteredWeek";
 
 export type LessonsControllerFindFilteredParams = {
-  /**
-   * The day of the week to filter lessons by
-   */
-  day?: LessonsControllerFindFilteredDay;
-  /**
-   * The week parity to filter lessons by
-   */
-  week?: LessonsControllerFindFilteredWeek;
-  /**
+	/**
+	 * The day of the week to filter lessons by
+	 */
+	day?: LessonsControllerFindFilteredDay;
+	/**
+	 * The week parity to filter lessons by
+	 */
+	week?: LessonsControllerFindFilteredWeek;
+	/**
  * The timestamp to filter lessons by;
 The date part is used to determine the week and day,
 the time part is used to filter lessons occurring at that time
  */
-  timestamp?: string;
-  /**
+	timestamp?: string;
+	/**
  * The start date to filter lessons from;
 Lessons occurring on or after this date will be included
  */
-  from?: string;
-  /**
+	from?: string;
+	/**
  * The end date to filter lessons to;
 Lessons occurring on or before this date will be included
  */
-  to?: string;
-  /**
-   * The class identifier to filter lessons by
-   */
-  classId?: string;
-  /**
-   * The subject identifier to filter lessons by
-   */
-  subjectId?: string;
-  /**
-   * The room identifier to filter lessons by
-   */
-  roomId?: string;
-  /**
-   * The teacher identifier to filter lessons by
-   */
-  teacherId?: string;
-  /**
-   * Whether to ignore the lesson week when filtering
-   */
-  ignoreWeek?: boolean;
+	to?: string;
+	/**
+	 * The class identifier to filter lessons by
+	 */
+	classId?: string;
+	/**
+	 * The subject identifier to filter lessons by
+	 */
+	subjectId?: string;
+	/**
+	 * The room identifier to filter lessons by
+	 */
+	roomId?: string;
+	/**
+	 * The teacher identifier to filter lessons by
+	 */
+	teacherId?: string;
+	/**
+	 * Whether to ignore the lesson week when filtering
+	 */
+	ignoreWeek?: boolean;
 };

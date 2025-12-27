@@ -7,15 +7,15 @@
  */
 
 export type LessonsControllerFindFilteredDay =
-  (typeof LessonsControllerFindFilteredDay)[keyof typeof LessonsControllerFindFilteredDay];
+	(typeof LessonsControllerFindFilteredDay)[keyof typeof LessonsControllerFindFilteredDay];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const LessonsControllerFindFilteredDay = {
-  monday: "monday",
-  tuesday: "tuesday",
-  wednesday: "wednesday",
-  thursday: "thursday",
-  friday: "friday",
-  saturday: "saturday",
-  sunday: "sunday",
+	monday: "monday",
+	tuesday: "tuesday",
+	wednesday: "wednesday",
+	thursday: "thursday",
+	friday: "friday",
+	saturday: "saturday",
+	sunday: "sunday",
 } as const;

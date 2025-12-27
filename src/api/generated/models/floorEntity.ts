@@ -6,33 +6,36 @@
  * OpenAPI spec version: 1.0
  */
 import type { BuildingEntity } from "./buildingEntity";
+import type { RoomEntity } from "./roomEntity";
 
 /**
  * A floor object
  */
 export interface FloorEntity {
-  /** The floor's unique identifier */
-  id: string;
-  /** The floor's number */
-  number: number;
-  /**
-   * The floor's description
-   * @nullable
-   */
-  description: string | null;
-  /** The floor's building identifier */
-  buildingId: string;
-  /** The floor's populated building */
-  building?: BuildingEntity;
-  /** The time the floor was created */
-  createdAt: string;
-  /** The time the floor was last updated */
-  updatedAt: string;
-  /** Whether the floor has been deleted */
-  deleted: boolean;
-  /**
-   * The time the floor was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The floor's unique identifier */
+	id: string;
+	/** The floor's number */
+	number: number;
+	/**
+	 * The floor's description
+	 * @nullable
+	 */
+	description: string | null;
+	/** The floor's building identifier */
+	buildingId: string;
+	/** The floor's populated building */
+	building?: BuildingEntity;
+	/** The floor's populated rooms */
+	rooms?: RoomEntity[];
+	/** The time the floor was created */
+	createdAt: string;
+	/** The time the floor was last updated */
+	updatedAt: string;
+	/** Whether the floor has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the floor was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

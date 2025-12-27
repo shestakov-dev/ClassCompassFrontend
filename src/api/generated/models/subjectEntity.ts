@@ -12,27 +12,25 @@ import type { TeacherEntity } from "./teacherEntity";
  * A subject object
  */
 export interface SubjectEntity {
-  /** The subject's unique identifier */
-  id: string;
-  /** The subject's name */
-  name: string;
-  /** The subject's associated school */
-  schoolId: string;
-  /** The subject's populated school */
-  school?: SchoolEntity;
-  /** The subject's teacher identifiers */
-  teacherIds?: string[];
-  /** The subject's populated teachers */
-  teachers?: TeacherEntity[];
-  /** The subject's creation date */
-  createdAt: string;
-  /** The subject's last update date */
-  updatedAt: string;
-  /** Whether the subject is deleted */
-  deleted: boolean;
-  /**
-   * The subject's deletion date
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The subject's unique identifier */
+	id: string;
+	/** The subject's name */
+	name: string;
+	/** The subject's associated school */
+	schoolId: string;
+	/** The subject's populated school */
+	school?: SchoolEntity;
+	/** The subject's populated teachers */
+	teachers?: TeacherEntity[];
+	/** The subject's creation date */
+	createdAt: string;
+	/** The subject's last update date */
+	updatedAt: string;
+	/** Whether the subject is deleted */
+	deleted: boolean;
+	/**
+	 * The subject's deletion date
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

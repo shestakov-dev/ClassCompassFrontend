@@ -4,12 +4,8 @@ import {
 	getLessonsControllerFindFilteredQueryKey,
 	lessonsControllerFindFiltered,
 } from "@/api/generated/endpoints/lessons/lessons";
-import {
-	LessonsControllerFindFilteredDay as Day,
-	LessonEntityLessonWeek,
-	type LessonsControllerFindFilteredParams,
-} from "@/api/generated/models";
-import { getDefaultFilters } from "@/lib/schedule-defaults";
+import { Day, LessonWeek } from "@/types/schedule";
+import { buildScheduleFilters } from "@/lib/schedule-utils";
 import {
 	getUsersControllerFindByIdentityIdQueryKey,
 	usersControllerFindByIdentityId,
@@ -17,21 +13,22 @@ import {
 import SchedulePage from "@/pages/SchedulePage";
 
 const scheduleSearchSchema = z.object({
-	mode: z.enum(["calendar", "generic"]).default("generic").optional(),
+	mode: z.enum(["date", "weekly"]).default("weekly").optional(),
 	date: z.iso.datetime().optional(),
 	day: z.enum(Day).optional(),
 	timestamp: z.iso.datetime().optional(),
 	from: z.iso.datetime().optional(),
 	to: z.iso.datetime().optional(),
-	classId: z.uuidv4().optional(),
-	teacherId: z.uuidv4().optional(),
-	subjectId: z.uuidv4().optional(),
-	roomId: z.uuidv4().optional(),
-	week: z.enum(LessonEntityLessonWeek).optional(),
+	classId: z.uuid().optional(),
+	teacherId: z.uuid().optional(),
+	subjectId: z.uuid().optional(),
+	roomId: z.uuid().optional(),
+	week: z.enum(LessonWeek).optional(),
 	ignoreWeek: z
 		.union([z.boolean(), z.literal("true"), z.literal("false")])
 		.transform(val => val === true || val === "true")
 		.optional(),
+	showAll: z.boolean().optional(),
 });
 
 export const Route = createFileRoute("/schedule")({
@@ -64,35 +61,7 @@ export const Route = createFileRoute("/schedule")({
 			return;
 		}
 
-		const defaults = getDefaultFilters(user);
-		const mode = search.mode ?? "generic";
-
-		// Base filters
-		const apiFilters: LessonsControllerFindFilteredParams = {
-			classId: search.classId ?? defaults.classId,
-			teacherId: search.teacherId ?? defaults.teacherId,
-			subjectId: search.subjectId,
-			roomId: search.roomId,
-			ignoreWeek: search.ignoreWeek,
-		};
-
-		if (mode === "calendar") {
-			apiFilters.timestamp = search.timestamp;
-			apiFilters.from = search.from;
-			apiFilters.to = search.to;
-
-			// Clear generic params
-			delete apiFilters.day;
-			delete apiFilters.week;
-		} else {
-			apiFilters.day = search.day ?? defaults.day;
-			apiFilters.week = search.week;
-
-			// Clear calendar params
-			delete apiFilters.timestamp;
-			delete apiFilters.from;
-			delete apiFilters.to;
-		}
+		const apiFilters = buildScheduleFilters(user, search);
 
 		queryClient.prefetchQuery({
 			queryKey: getLessonsControllerFindFilteredQueryKey(

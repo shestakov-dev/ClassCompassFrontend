@@ -10,10 +10,10 @@
  * The data required to update a subject
  */
 export interface UpdateSubjectDto {
-  /** The subject's name */
-  name?: string;
-  /** The subject's associated school */
-  schoolId?: string;
-  /** The subject's teacher identifiers */
-  teacherIds?: string[];
+	/** The subject's name */
+	name?: string;
+	/** The subject's associated school */
+	schoolId?: string;
+	/** The subject's teacher identifiers */
+	teacherIds?: string[];
 }

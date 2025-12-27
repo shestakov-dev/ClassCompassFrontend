@@ -19,17 +19,17 @@ import {
 import { addDays, subDays, setDay, parseISO, set } from "date-fns";
 import { useSession } from "@/context/session-context";
 import { useLessonsControllerFindFiltered } from "@/api/generated/endpoints/lessons/lessons";
+import { useClassesControllerFindAllBySchool } from "@/api/generated/endpoints/classes/classes";
+import { useSubjectsControllerFindAllBySchool } from "@/api/generated/endpoints/subjects/subjects";
+import { useTeachersControllerFindAllBySchool } from "@/api/generated/endpoints/teachers/teachers";
+import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
+import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
+import { Day, ALL_DAYS, DAY_TO_DAY_INDEX } from "@/types/schedule";
 import {
-	type LessonsControllerFindFilteredParams,
-	LessonsControllerFindFilteredDay as Day,
-} from "@/api/generated/models";
-import {
-	DAYS_OF_WEEK,
+	buildScheduleFilters,
 	getCurrentDayEnum,
-	getDefaultFilters,
-	getWeekParity,
-	JS_DAY_TO_ENUM,
-} from "@/lib/schedule-defaults";
+	isScheduleDefaultFilter,
+} from "@/lib/schedule-utils";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Route } from "@/routes/schedule";
 import {
@@ -40,13 +40,16 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
+import { cn } from "@/lib/utils";
+import { LessonListView } from "@/components/schedule/lesson-list-view";
 
 export default function SchedulePage() {
 	const { user } = useSession();
+
 	const navigate = Route.useNavigate();
 	const search = Route.useSearch();
 
-	const mode = search.mode ?? "generic";
+	const mode = search.mode ?? "weekly";
 	const currentDate = useMemo(
 		() => (search.date ? parseISO(search.date) : new Date()),
 		[search.date]
@@ -54,49 +57,12 @@ export default function SchedulePage() {
 	const genericDay = search.day ?? getCurrentDayEnum();
 
 	const filters = useMemo(() => {
-		const defaults = user ? getDefaultFilters(user) : { day: genericDay };
+		return buildScheduleFilters(user, search);
+	}, [search, user]);
 
-		const base: LessonsControllerFindFilteredParams = {
-			classId: search.classId ?? defaults.classId,
-			teacherId: search.teacherId ?? defaults.teacherId,
-			subjectId: search.subjectId,
-			roomId: search.roomId,
-			ignoreWeek: search.ignoreWeek,
-		};
-
-		if (mode === "calendar") {
-			if (!search.timestamp && !search.from) {
-				return {
-					...base,
-					day: getCurrentDayEnum(currentDate),
-					week: search.ignoreWeek
-						? undefined
-						: getWeekParity(currentDate),
-					timestamp: undefined,
-					from: undefined,
-					to: undefined,
-				};
-			}
-
-			return {
-				...base,
-				timestamp: search.timestamp,
-				from: search.from,
-				to: search.to,
-				day: undefined,
-				week: undefined,
-			};
-		} else {
-			return {
-				...base,
-				day: search.day ?? defaults.day,
-				week: search.week,
-				timestamp: undefined,
-				from: undefined,
-				to: undefined,
-			};
-		}
-	}, [search, user, mode, genericDay, currentDate]);
+	const isDefaultFilters = useMemo(() => {
+		return isScheduleDefaultFilter(user, filters, search);
+	}, [user, filters, search]);
 
 	const {
 		data: lessons,
@@ -110,9 +76,24 @@ export default function SchedulePage() {
 		},
 	});
 
+	const { data: classes } = useClassesControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+	const { data: subjects } = useSubjectsControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+	const { data: teachers } = useTeachersControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+	const { data: buildings } = useBuildingsControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+	);
+
 	const hasLessons = lessons && lessons.length > 0;
-	// if we are initially loading or if we are fetching and
-	// have no data yet, we show the skeleton
 	const showSkeleton = isLoading || (isFetching && !lessons);
 
 	const updateSearch = useCallback(
@@ -161,11 +142,7 @@ export default function SchedulePage() {
 
 	const handleGenericDayChange = useCallback(
 		(day: Day) => {
-			const dayIndex = Number(
-				Object.keys(JS_DAY_TO_ENUM).find(
-					key => JS_DAY_TO_ENUM[Number(key)] === day
-				)
-			);
+			const dayIndex = DAY_TO_DAY_INDEX[day];
 
 			let newDateStr = undefined;
 			if (!isNaN(dayIndex)) {
@@ -184,28 +161,26 @@ export default function SchedulePage() {
 	);
 
 	const handleReset = useCallback(() => {
-		if (!user) return;
-		const defaults = getDefaultFilters(user);
 		const now = new Date();
-
 		navigate({
 			search: () => ({
-				mode: "generic",
-				day: defaults.day,
-				classId: defaults.classId,
-				teacherId: defaults.teacherId,
+				mode: "weekly",
 				date: now.toISOString(),
-				timestamp: undefined,
-				from: undefined,
-				to: undefined,
+				showAll: undefined,
+				classId: undefined,
+				teacherId: undefined,
 				subjectId: undefined,
 				roomId: undefined,
 				week: undefined,
 				ignoreWeek: undefined,
+				timestamp: undefined,
+				from: undefined,
+				to: undefined,
+				day: undefined,
 			}),
 			replace: true,
 		});
-	}, [user, navigate]);
+	}, [navigate]);
 
 	const handleSetFilters = useCallback(
 		(
@@ -221,6 +196,10 @@ export default function SchedulePage() {
 		},
 		[filters, updateSearch]
 	);
+
+	const isSingularResource = useMemo(() => {
+		return !!(filters.classId || filters.teacherId || filters.roomId);
+	}, [filters]);
 
 	return (
 		<div className="flex flex-col h-full bg-background">
@@ -241,7 +220,7 @@ export default function SchedulePage() {
 					</div>
 
 					<div className="flex items-center gap-2 self-start md:self-auto">
-						{mode === "calendar" ? (
+						{mode === "date" ? (
 							<div className="flex items-center gap-1 bg-card border rounded-lg p-1 shadow-sm">
 								<Button
 									variant="ghost"
@@ -291,7 +270,7 @@ export default function SchedulePage() {
 										</div>
 									</SelectTrigger>
 									<SelectContent align="end">
-										{DAYS_OF_WEEK.map(dayOption => (
+										{ALL_DAYS.map(dayOption => (
 											<SelectItem
 												key={dayOption}
 												value={dayOption}>
@@ -318,12 +297,30 @@ export default function SchedulePage() {
 						genericDay={genericDay}
 						setGenericDay={handleGenericDayChange}
 						onReset={handleReset}
+						showReset={!isDefaultFilters}
+						options={{
+							classes,
+							subjects,
+							teachers,
+							buildings,
+						}}
+						onClearResource={resourceKey => {
+							updateSearch({
+								[resourceKey]: undefined,
+								showAll: true,
+							});
+						}}
 					/>
 				</div>
 
 				<div className="flex-1 min-h-0 flex flex-col relative mt-2">
-					<div className="relative h-full border rounded-md bg-background shadow-sm overflow-hidden">
-						{showSkeleton && (
+					<div
+						className={cn(
+							"relative h-full",
+							isSingularResource &&
+								"border rounded-md bg-background shadow-sm overflow-hidden"
+						)}>
+						{showSkeleton ? (
 							<div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-[1px] flex items-center justify-center animate-in fade-in duration-300">
 								<div className="absolute inset-0 opacity-20 pointer-events-none grayscale">
 									<DailyScheduleViewer
@@ -338,9 +335,7 @@ export default function SchedulePage() {
 									</p>
 								</div>
 							</div>
-						)}
-
-						{!showSkeleton && !hasLessons ? (
+						) : !hasLessons ? (
 							<div className="h-full flex items-center justify-center bg-muted/5 animate-in fade-in zoom-in-95 duration-300">
 								<Empty>
 									<EmptyHeader>
@@ -351,33 +346,37 @@ export default function SchedulePage() {
 											No classes found
 										</EmptyTitle>
 										<EmptyDescription>
-											{mode === "calendar"
-												? "There are no classes scheduled for this specific date and time."
-												: `There are no classes scheduled for ${
-														genericDay
-															.charAt(0)
-															.toUpperCase() +
-														genericDay
-															.slice(1)
-															.toLowerCase()
-													}s.`}
+											There are no classes scheduled for{" "}
+											{mode === "date"
+												? "this specific date and time"
+												: `${genericDay.charAt(0).toUpperCase()}${genericDay.slice(1).toLowerCase()}`}{" "}
+											with the current filters.
 										</EmptyDescription>
 									</EmptyHeader>
 									<EmptyContent>
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={handleReset}>
-											Reset Filters
-										</Button>
+										{!isDefaultFilters && (
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={handleReset}>
+												Reset Filters
+											</Button>
+										)}
 									</EmptyContent>
 								</Empty>
 							</div>
-						) : (
+						) : isSingularResource ? (
 							<div className="h-full animate-in fade-in duration-500">
 								<DailyScheduleViewer
 									lessons={lessons ?? []}
 									date={currentDate}
+								/>
+							</div>
+						) : (
+							<div className="h-full overflow-auto pr-2 animate-in fade-in duration-500">
+								<LessonListView
+									lessons={lessons ?? []}
+									currentDate={currentDate}
 								/>
 							</div>
 						)}

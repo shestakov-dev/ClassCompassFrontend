@@ -10,11 +10,11 @@
  * The lesson's week
  */
 export type CreateLessonDtoLessonWeek =
-  (typeof CreateLessonDtoLessonWeek)[keyof typeof CreateLessonDtoLessonWeek];
+	(typeof CreateLessonDtoLessonWeek)[keyof typeof CreateLessonDtoLessonWeek];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CreateLessonDtoLessonWeek = {
-  odd: "odd",
-  even: "even",
-  every: "every",
+	odd: "odd",
+	even: "even",
+	every: "every",
 } as const;

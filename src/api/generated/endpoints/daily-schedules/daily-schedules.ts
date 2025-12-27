@@ -7,24 +7,24 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
+	MutationFunction,
+	QueryClient,
+	QueryFunction,
+	QueryKey,
+	UndefinedInitialDataOptions,
+	UseMutationOptions,
+	UseMutationResult,
+	UseQueryOptions,
+	UseQueryResult,
 } from "@tanstack/react-query";
 
 import type {
-  CreateDailyScheduleDto,
-  DailyScheduleEntity,
-  UpdateDailyScheduleDto,
+	CreateDailyScheduleDto,
+	DailyScheduleEntity,
+	UpdateDailyScheduleDto,
 } from "../../models";
 
 import { customInstance } from "../../../mutators/custom-instance";
@@ -33,57 +33,57 @@ import { customInstance } from "../../../mutators/custom-instance";
  * @summary Create a new daily schedule
  */
 export const dailySchedulesControllerCreate = (
-  createDailyScheduleDto: CreateDailyScheduleDto,
-  signal?: AbortSignal,
+	createDailyScheduleDto: CreateDailyScheduleDto,
+	signal?: AbortSignal
 ) => {
-  return customInstance<DailyScheduleEntity>({
-    url: `https://api.classcompass.shestakov.app/daily-schedules`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createDailyScheduleDto,
-    signal,
-  });
+	return customInstance<DailyScheduleEntity>({
+		url: `https://api.classcompass.shestakov.app/daily-schedules`,
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		data: createDailyScheduleDto,
+		signal,
+	});
 };
 
 export const getDailySchedulesControllerCreateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
-    TError,
-    { data: CreateDailyScheduleDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
+		TError,
+		{ data: CreateDailyScheduleDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
-  TError,
-  { data: CreateDailyScheduleDto },
-  TContext
+	Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
+	TError,
+	{ data: CreateDailyScheduleDto },
+	TContext
 > => {
-  const mutationKey = ["dailySchedulesControllerCreate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["dailySchedulesControllerCreate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
-    { data: CreateDailyScheduleDto }
-  > = (props) => {
-    const { data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
+		{ data: CreateDailyScheduleDto }
+	> = props => {
+		const { data } = props ?? {};
 
-    return dailySchedulesControllerCreate(data);
-  };
+		return dailySchedulesControllerCreate(data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type DailySchedulesControllerCreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof dailySchedulesControllerCreate>>
+	Awaited<ReturnType<typeof dailySchedulesControllerCreate>>
 >;
 export type DailySchedulesControllerCreateMutationBody = CreateDailyScheduleDto;
 export type DailySchedulesControllerCreateMutationError = unknown;
@@ -92,422 +92,449 @@ export type DailySchedulesControllerCreateMutationError = unknown;
  * @summary Create a new daily schedule
  */
 export const useDailySchedulesControllerCreate = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
-      TError,
-      { data: CreateDailyScheduleDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
+			TError,
+			{ data: CreateDailyScheduleDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
-  TError,
-  { data: CreateDailyScheduleDto },
-  TContext
+	Awaited<ReturnType<typeof dailySchedulesControllerCreate>>,
+	TError,
+	{ data: CreateDailyScheduleDto },
+	TContext
 > => {
-  const mutationOptions =
-    getDailySchedulesControllerCreateMutationOptions(options);
+	const mutationOptions =
+		getDailySchedulesControllerCreateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Get all daily schedules for a class
  */
 export const dailySchedulesControllerFindAllByClass = (
-  classId: string,
-  signal?: AbortSignal,
+	classId: string,
+	signal?: AbortSignal
 ) => {
-  return customInstance<DailyScheduleEntity[]>({
-    url: `https://api.classcompass.shestakov.app/daily-schedules/class/${classId}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<DailyScheduleEntity[]>({
+		url: `https://api.classcompass.shestakov.app/daily-schedules/class/${classId}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getDailySchedulesControllerFindAllByClassQueryKey = (
-  classId?: string,
+	classId?: string
 ) => {
-  return [
-    `https://api.classcompass.shestakov.app/daily-schedules/class/${classId}`,
-  ] as const;
+	return [
+		`https://api.classcompass.shestakov.app/daily-schedules/class/${classId}`,
+	] as const;
 };
 
 export const getDailySchedulesControllerFindAllByClassQueryOptions = <
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<
+					ReturnType<typeof dailySchedulesControllerFindAllByClass>
+				>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getDailySchedulesControllerFindAllByClassQueryKey(classId);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getDailySchedulesControllerFindAllByClassQueryKey(classId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>
-  > = ({ signal }) => dailySchedulesControllerFindAllByClass(classId, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>
+	> = ({ signal }) => dailySchedulesControllerFindAllByClass(classId, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!classId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!classId,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type DailySchedulesControllerFindAllByClassQueryResult = NonNullable<
-  Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>
+	Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>
 >;
 export type DailySchedulesControllerFindAllByClassQueryError = unknown;
 
 export function useDailySchedulesControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-          TError,
-          Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<
+					ReturnType<typeof dailySchedulesControllerFindAllByClass>
+				>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<
+						ReturnType<
+							typeof dailySchedulesControllerFindAllByClass
+						>
+					>,
+					TError,
+					Awaited<
+						ReturnType<
+							typeof dailySchedulesControllerFindAllByClass
+						>
+					>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useDailySchedulesControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-          TError,
-          Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<
+					ReturnType<typeof dailySchedulesControllerFindAllByClass>
+				>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<
+						ReturnType<
+							typeof dailySchedulesControllerFindAllByClass
+						>
+					>,
+					TError,
+					Awaited<
+						ReturnType<
+							typeof dailySchedulesControllerFindAllByClass
+						>
+					>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useDailySchedulesControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<
+					ReturnType<typeof dailySchedulesControllerFindAllByClass>
+				>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get all daily schedules for a class
  */
 
 export function useDailySchedulesControllerFindAllByClass<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
+	TError = unknown,
 >(
-  classId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindAllByClass>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	classId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<
+					ReturnType<typeof dailySchedulesControllerFindAllByClass>
+				>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getDailySchedulesControllerFindAllByClassQueryOptions(
-    classId,
-    options,
-  );
+	const queryOptions = getDailySchedulesControllerFindAllByClassQueryOptions(
+		classId,
+		options
+	);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Get a daily schedule by ID
  */
 export const dailySchedulesControllerFindOne = (
-  id: string,
-  signal?: AbortSignal,
+	id: string,
+	signal?: AbortSignal
 ) => {
-  return customInstance<DailyScheduleEntity>({
-    url: `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<DailyScheduleEntity>({
+		url: `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getDailySchedulesControllerFindOneQueryKey = (id?: string) => {
-  return [
-    `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
-  ] as const;
+	return [
+		`https://api.classcompass.shestakov.app/daily-schedules/${id}`,
+	] as const;
 };
 
 export const getDailySchedulesControllerFindOneQueryOptions = <
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getDailySchedulesControllerFindOneQueryKey(id);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getDailySchedulesControllerFindOneQueryKey(id);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
-  > = ({ signal }) => dailySchedulesControllerFindOne(id, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
+	> = ({ signal }) => dailySchedulesControllerFindOne(id, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type DailySchedulesControllerFindOneQueryResult = NonNullable<
-  Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
+	Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
 >;
 export type DailySchedulesControllerFindOneQueryError = unknown;
 
 export function useDailySchedulesControllerFindOne<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useDailySchedulesControllerFindOne<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useDailySchedulesControllerFindOne<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get a daily schedule by ID
  */
 
 export function useDailySchedulesControllerFindOne<
-  TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof dailySchedulesControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getDailySchedulesControllerFindOneQueryOptions(
-    id,
-    options,
-  );
+	const queryOptions = getDailySchedulesControllerFindOneQueryOptions(
+		id,
+		options
+	);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Update a daily schedule by ID
  */
 export const dailySchedulesControllerUpdate = (
-  id: string,
-  updateDailyScheduleDto: UpdateDailyScheduleDto,
+	id: string,
+	updateDailyScheduleDto: UpdateDailyScheduleDto
 ) => {
-  return customInstance<DailyScheduleEntity>({
-    url: `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    data: updateDailyScheduleDto,
-  });
+	return customInstance<DailyScheduleEntity>({
+		url: `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		data: updateDailyScheduleDto,
+	});
 };
 
 export const getDailySchedulesControllerUpdateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
-    TError,
-    { id: string; data: UpdateDailyScheduleDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
+		TError,
+		{ id: string; data: UpdateDailyScheduleDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateDailyScheduleDto },
-  TContext
+	Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateDailyScheduleDto },
+	TContext
 > => {
-  const mutationKey = ["dailySchedulesControllerUpdate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["dailySchedulesControllerUpdate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
-    { id: string; data: UpdateDailyScheduleDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
+		{ id: string; data: UpdateDailyScheduleDto }
+	> = props => {
+		const { id, data } = props ?? {};
 
-    return dailySchedulesControllerUpdate(id, data);
-  };
+		return dailySchedulesControllerUpdate(id, data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type DailySchedulesControllerUpdateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>
+	Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>
 >;
 export type DailySchedulesControllerUpdateMutationBody = UpdateDailyScheduleDto;
 export type DailySchedulesControllerUpdateMutationError = unknown;
@@ -516,78 +543,78 @@ export type DailySchedulesControllerUpdateMutationError = unknown;
  * @summary Update a daily schedule by ID
  */
 export const useDailySchedulesControllerUpdate = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
-      TError,
-      { id: string; data: UpdateDailyScheduleDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateDailyScheduleDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateDailyScheduleDto },
-  TContext
+	Awaited<ReturnType<typeof dailySchedulesControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateDailyScheduleDto },
+	TContext
 > => {
-  const mutationOptions =
-    getDailySchedulesControllerUpdateMutationOptions(options);
+	const mutationOptions =
+		getDailySchedulesControllerUpdateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Delete a daily schedule by ID
  */
 export const dailySchedulesControllerRemove = (id: string) => {
-  return customInstance<DailyScheduleEntity>({
-    url: `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
-    method: "DELETE",
-  });
+	return customInstance<DailyScheduleEntity>({
+		url: `https://api.classcompass.shestakov.app/daily-schedules/${id}`,
+		method: "DELETE",
+	});
 };
 
 export const getDailySchedulesControllerRemoveMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
-    TError,
-    { id: string },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationKey = ["dailySchedulesControllerRemove"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["dailySchedulesControllerRemove"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
+		{ id: string }
+	> = props => {
+		const { id } = props ?? {};
 
-    return dailySchedulesControllerRemove(id);
-  };
+		return dailySchedulesControllerRemove(id);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type DailySchedulesControllerRemoveMutationResult = NonNullable<
-  Awaited<ReturnType<typeof dailySchedulesControllerRemove>>
+	Awaited<ReturnType<typeof dailySchedulesControllerRemove>>
 >;
 
 export type DailySchedulesControllerRemoveMutationError = unknown;
@@ -596,26 +623,26 @@ export type DailySchedulesControllerRemoveMutationError = unknown;
  * @summary Delete a daily schedule by ID
  */
 export const useDailySchedulesControllerRemove = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof dailySchedulesControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationOptions =
-    getDailySchedulesControllerRemoveMutationOptions(options);
+	const mutationOptions =
+		getDailySchedulesControllerRemoveMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };

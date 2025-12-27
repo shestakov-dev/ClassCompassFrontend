@@ -7,11 +7,11 @@
  */
 
 export type LessonsControllerFindFilteredWeek =
-  (typeof LessonsControllerFindFilteredWeek)[keyof typeof LessonsControllerFindFilteredWeek];
+	(typeof LessonsControllerFindFilteredWeek)[keyof typeof LessonsControllerFindFilteredWeek];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const LessonsControllerFindFilteredWeek = {
-  odd: "odd",
-  even: "even",
-  every: "every",
+	odd: "odd",
+	even: "even",
+	every: "every",
 } as const;

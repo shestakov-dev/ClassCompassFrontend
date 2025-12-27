@@ -10,12 +10,12 @@
  * The data required to create a new user
  */
 export interface CreateUserDto {
-  /** The user's first name */
-  firstName: string;
-  /** The user's last name */
-  lastName: string;
-  /** The user's email */
-  email: string;
-  /** The user's school identifier */
-  schoolId: string;
+	/** The user's first name */
+	firstName: string;
+	/** The user's last name */
+	lastName: string;
+	/** The user's email */
+	email: string;
+	/** The user's school identifier */
+	schoolId: string;
 }

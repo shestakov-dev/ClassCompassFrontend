@@ -11,20 +11,20 @@ import type { CreateLessonDtoLessonWeek } from "./createLessonDtoLessonWeek";
  * The data required to create a new lesson
  */
 export interface CreateLessonDto {
-  /** The lesson's week */
-  lessonWeek?: CreateLessonDtoLessonWeek;
-  /** The lesson's number in the daily schedule */
-  lessonNumber: number;
-  /** The lesson's start time */
-  startTime: string;
-  /** The lesson's end time */
-  endTime: string;
-  /** The lesson's room identifier */
-  roomId: string;
-  /** The lesson's teacher identifier */
-  teacherId: string;
-  /** The lesson's subject identifier */
-  subjectId: string;
-  /** The lesson's daily schedule identifier */
-  dailyScheduleId: string;
+	/** The lesson's week */
+	lessonWeek?: CreateLessonDtoLessonWeek;
+	/** The lesson's number in the daily schedule */
+	lessonNumber: number;
+	/** The lesson's start time */
+	startTime: string;
+	/** The lesson's end time */
+	endTime: string;
+	/** The lesson's room identifier */
+	roomId: string;
+	/** The lesson's teacher identifier */
+	teacherId: string;
+	/** The lesson's subject identifier */
+	subjectId: string;
+	/** The lesson's daily schedule identifier */
+	dailyScheduleId: string;
 }

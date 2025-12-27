@@ -7,18 +7,18 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
+	MutationFunction,
+	QueryClient,
+	QueryFunction,
+	QueryKey,
+	UndefinedInitialDataOptions,
+	UseMutationOptions,
+	UseMutationResult,
+	UseQueryOptions,
+	UseQueryResult,
 } from "@tanstack/react-query";
 
 import type { CreateFloorDto, FloorEntity, UpdateFloorDto } from "../../models";
@@ -29,57 +29,57 @@ import { customInstance } from "../../../mutators/custom-instance";
  * @summary Create a new floor
  */
 export const floorsControllerCreate = (
-  createFloorDto: CreateFloorDto,
-  signal?: AbortSignal,
+	createFloorDto: CreateFloorDto,
+	signal?: AbortSignal
 ) => {
-  return customInstance<FloorEntity>({
-    url: `https://api.classcompass.shestakov.app/floors`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createFloorDto,
-    signal,
-  });
+	return customInstance<FloorEntity>({
+		url: `https://api.classcompass.shestakov.app/floors`,
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		data: createFloorDto,
+		signal,
+	});
 };
 
 export const getFloorsControllerCreateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof floorsControllerCreate>>,
-    TError,
-    { data: CreateFloorDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof floorsControllerCreate>>,
+		TError,
+		{ data: CreateFloorDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof floorsControllerCreate>>,
-  TError,
-  { data: CreateFloorDto },
-  TContext
+	Awaited<ReturnType<typeof floorsControllerCreate>>,
+	TError,
+	{ data: CreateFloorDto },
+	TContext
 > => {
-  const mutationKey = ["floorsControllerCreate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["floorsControllerCreate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof floorsControllerCreate>>,
-    { data: CreateFloorDto }
-  > = (props) => {
-    const { data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof floorsControllerCreate>>,
+		{ data: CreateFloorDto }
+	> = props => {
+		const { data } = props ?? {};
 
-    return floorsControllerCreate(data);
-  };
+		return floorsControllerCreate(data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type FloorsControllerCreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof floorsControllerCreate>>
+	Awaited<ReturnType<typeof floorsControllerCreate>>
 >;
 export type FloorsControllerCreateMutationBody = CreateFloorDto;
 export type FloorsControllerCreateMutationError = unknown;
@@ -88,410 +88,418 @@ export type FloorsControllerCreateMutationError = unknown;
  * @summary Create a new floor
  */
 export const useFloorsControllerCreate = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof floorsControllerCreate>>,
-      TError,
-      { data: CreateFloorDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof floorsControllerCreate>>,
+			TError,
+			{ data: CreateFloorDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof floorsControllerCreate>>,
-  TError,
-  { data: CreateFloorDto },
-  TContext
+	Awaited<ReturnType<typeof floorsControllerCreate>>,
+	TError,
+	{ data: CreateFloorDto },
+	TContext
 > => {
-  const mutationOptions = getFloorsControllerCreateMutationOptions(options);
+	const mutationOptions = getFloorsControllerCreateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Get all floors for a building
  */
 export const floorsControllerFindAllByBuilding = (
-  buildingId: string,
-  signal?: AbortSignal,
+	buildingId: string,
+	signal?: AbortSignal
 ) => {
-  return customInstance<FloorEntity[]>({
-    url: `https://api.classcompass.shestakov.app/floors/building/${buildingId}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<FloorEntity[]>({
+		url: `https://api.classcompass.shestakov.app/floors/building/${buildingId}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getFloorsControllerFindAllByBuildingQueryKey = (
-  buildingId?: string,
+	buildingId?: string
 ) => {
-  return [
-    `https://api.classcompass.shestakov.app/floors/building/${buildingId}`,
-  ] as const;
+	return [
+		`https://api.classcompass.shestakov.app/floors/building/${buildingId}`,
+	] as const;
 };
 
 export const getFloorsControllerFindAllByBuildingQueryOptions = <
-  TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+	TError = unknown,
 >(
-  buildingId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	buildingId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getFloorsControllerFindAllByBuildingQueryKey(buildingId);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getFloorsControllerFindAllByBuildingQueryKey(buildingId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>
-  > = ({ signal }) => floorsControllerFindAllByBuilding(buildingId, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>
+	> = ({ signal }) => floorsControllerFindAllByBuilding(buildingId, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!buildingId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!buildingId,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type FloorsControllerFindAllByBuildingQueryResult = NonNullable<
-  Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>
+	Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>
 >;
 export type FloorsControllerFindAllByBuildingQueryError = unknown;
 
 export function useFloorsControllerFindAllByBuilding<
-  TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+	TError = unknown,
 >(
-  buildingId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-          TError,
-          Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	buildingId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<
+						ReturnType<typeof floorsControllerFindAllByBuilding>
+					>,
+					TError,
+					Awaited<
+						ReturnType<typeof floorsControllerFindAllByBuilding>
+					>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useFloorsControllerFindAllByBuilding<
-  TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+	TError = unknown,
 >(
-  buildingId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-          TError,
-          Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	buildingId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<
+						ReturnType<typeof floorsControllerFindAllByBuilding>
+					>,
+					TError,
+					Awaited<
+						ReturnType<typeof floorsControllerFindAllByBuilding>
+					>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useFloorsControllerFindAllByBuilding<
-  TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+	TError = unknown,
 >(
-  buildingId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	buildingId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get all floors for a building
  */
 
 export function useFloorsControllerFindAllByBuilding<
-  TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+	TError = unknown,
 >(
-  buildingId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	buildingId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindAllByBuilding>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getFloorsControllerFindAllByBuildingQueryOptions(
-    buildingId,
-    options,
-  );
+	const queryOptions = getFloorsControllerFindAllByBuildingQueryOptions(
+		buildingId,
+		options
+	);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Get a floor by ID
  */
 export const floorsControllerFindOne = (id: string, signal?: AbortSignal) => {
-  return customInstance<FloorEntity>({
-    url: `https://api.classcompass.shestakov.app/floors/${id}`,
-    method: "GET",
-    signal,
-  });
+	return customInstance<FloorEntity>({
+		url: `https://api.classcompass.shestakov.app/floors/${id}`,
+		method: "GET",
+		signal,
+	});
 };
 
 export const getFloorsControllerFindOneQueryKey = (id?: string) => {
-  return [`https://api.classcompass.shestakov.app/floors/${id}`] as const;
+	return [`https://api.classcompass.shestakov.app/floors/${id}`] as const;
 };
 
 export const getFloorsControllerFindOneQueryOptions = <
-  TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	}
 ) => {
-  const { query: queryOptions } = options ?? {};
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getFloorsControllerFindOneQueryKey(id);
+	const queryKey =
+		queryOptions?.queryKey ?? getFloorsControllerFindOneQueryKey(id);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof floorsControllerFindOne>>
-  > = ({ signal }) => floorsControllerFindOne(id, signal);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof floorsControllerFindOne>>
+	> = ({ signal }) => floorsControllerFindOne(id, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof floorsControllerFindOne>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof floorsControllerFindOne>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type FloorsControllerFindOneQueryResult = NonNullable<
-  Awaited<ReturnType<typeof floorsControllerFindOne>>
+	Awaited<ReturnType<typeof floorsControllerFindOne>>
 >;
 export type FloorsControllerFindOneQueryError = unknown;
 
 export function useFloorsControllerFindOne<
-  TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof floorsControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof floorsControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof floorsControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof floorsControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useFloorsControllerFindOne<
-  TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindOne>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof floorsControllerFindOne>>,
-          TError,
-          Awaited<ReturnType<typeof floorsControllerFindOne>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindOne>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof floorsControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof floorsControllerFindOne>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useFloorsControllerFindOne<
-  TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
  * @summary Get a floor by ID
  */
 
 export function useFloorsControllerFindOne<
-  TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
-  TError = unknown,
+	TData = Awaited<ReturnType<typeof floorsControllerFindOne>>,
+	TError = unknown,
 >(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof floorsControllerFindOne>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof floorsControllerFindOne>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getFloorsControllerFindOneQueryOptions(id, options);
+	const queryOptions = getFloorsControllerFindOneQueryOptions(id, options);
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey;
+	query.queryKey = queryOptions.queryKey;
 
-  return query;
+	return query;
 }
 
 /**
  * @summary Update a floor by ID
  */
 export const floorsControllerUpdate = (
-  id: string,
-  updateFloorDto: UpdateFloorDto,
+	id: string,
+	updateFloorDto: UpdateFloorDto
 ) => {
-  return customInstance<FloorEntity>({
-    url: `https://api.classcompass.shestakov.app/floors/${id}`,
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    data: updateFloorDto,
-  });
+	return customInstance<FloorEntity>({
+		url: `https://api.classcompass.shestakov.app/floors/${id}`,
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		data: updateFloorDto,
+	});
 };
 
 export const getFloorsControllerUpdateMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof floorsControllerUpdate>>,
-    TError,
-    { id: string; data: UpdateFloorDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof floorsControllerUpdate>>,
+		TError,
+		{ id: string; data: UpdateFloorDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof floorsControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateFloorDto },
-  TContext
+	Awaited<ReturnType<typeof floorsControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateFloorDto },
+	TContext
 > => {
-  const mutationKey = ["floorsControllerUpdate"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["floorsControllerUpdate"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof floorsControllerUpdate>>,
-    { id: string; data: UpdateFloorDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof floorsControllerUpdate>>,
+		{ id: string; data: UpdateFloorDto }
+	> = props => {
+		const { id, data } = props ?? {};
 
-    return floorsControllerUpdate(id, data);
-  };
+		return floorsControllerUpdate(id, data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type FloorsControllerUpdateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof floorsControllerUpdate>>
+	Awaited<ReturnType<typeof floorsControllerUpdate>>
 >;
 export type FloorsControllerUpdateMutationBody = UpdateFloorDto;
 export type FloorsControllerUpdateMutationError = unknown;
@@ -500,74 +508,74 @@ export type FloorsControllerUpdateMutationError = unknown;
  * @summary Update a floor by ID
  */
 export const useFloorsControllerUpdate = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof floorsControllerUpdate>>,
-      TError,
-      { id: string; data: UpdateFloorDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof floorsControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateFloorDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof floorsControllerUpdate>>,
-  TError,
-  { id: string; data: UpdateFloorDto },
-  TContext
+	Awaited<ReturnType<typeof floorsControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateFloorDto },
+	TContext
 > => {
-  const mutationOptions = getFloorsControllerUpdateMutationOptions(options);
+	const mutationOptions = getFloorsControllerUpdateMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };
 /**
  * @summary Delete a floor by ID
  */
 export const floorsControllerRemove = (id: string) => {
-  return customInstance<FloorEntity>({
-    url: `https://api.classcompass.shestakov.app/floors/${id}`,
-    method: "DELETE",
-  });
+	return customInstance<FloorEntity>({
+		url: `https://api.classcompass.shestakov.app/floors/${id}`,
+		method: "DELETE",
+	});
 };
 
 export const getFloorsControllerRemoveMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof floorsControllerRemove>>,
-    TError,
-    { id: string },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof floorsControllerRemove>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof floorsControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof floorsControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationKey = ["floorsControllerRemove"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["floorsControllerRemove"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof floorsControllerRemove>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof floorsControllerRemove>>,
+		{ id: string }
+	> = props => {
+		const { id } = props ?? {};
 
-    return floorsControllerRemove(id);
-  };
+		return floorsControllerRemove(id);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type FloorsControllerRemoveMutationResult = NonNullable<
-  Awaited<ReturnType<typeof floorsControllerRemove>>
+	Awaited<ReturnType<typeof floorsControllerRemove>>
 >;
 
 export type FloorsControllerRemoveMutationError = unknown;
@@ -576,22 +584,22 @@ export type FloorsControllerRemoveMutationError = unknown;
  * @summary Delete a floor by ID
  */
 export const useFloorsControllerRemove = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof floorsControllerRemove>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof floorsControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof floorsControllerRemove>>,
-  TError,
-  { id: string },
-  TContext
+	Awaited<ReturnType<typeof floorsControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
 > => {
-  const mutationOptions = getFloorsControllerRemoveMutationOptions(options);
+	const mutationOptions = getFloorsControllerRemoveMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };

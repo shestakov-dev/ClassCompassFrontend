@@ -11,8 +11,8 @@ import type { UpdateDailyScheduleDtoDay } from "./updateDailyScheduleDtoDay";
  * The data required to update a daily schedule
  */
 export interface UpdateDailyScheduleDto {
-  /** The day of the week for the schedule */
-  day?: UpdateDailyScheduleDtoDay;
-  /** The daily schedule's class identifier */
-  classId?: string;
+	/** The day of the week for the schedule */
+	day?: UpdateDailyScheduleDtoDay;
+	/** The daily schedule's class identifier */
+	classId?: string;
 }

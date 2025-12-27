@@ -1,0 +1,173 @@
+import {
+	type UserEntity,
+	type LessonsControllerFindFilteredParams,
+	type LessonEntity,
+} from "@/api/generated/models";
+import { addDays, getDay, getISOWeek, parseISO, set } from "date-fns";
+import {
+	Day,
+	LessonWeek,
+	DAY_INDEX_TO_DAY,
+	DAY_TO_DAY_INDEX,
+} from "@/types/schedule";
+import type { ScheduleEvent } from "@/components/schedule/daily-schedule-grid";
+
+export interface ScheduleSearchParams {
+	mode?: "date" | "weekly";
+	date?: string;
+	day?: Day;
+	timestamp?: string;
+	from?: string;
+	to?: string;
+	classId?: string;
+	teacherId?: string;
+	subjectId?: string;
+	roomId?: string;
+	week?: LessonWeek;
+	ignoreWeek?: boolean;
+	showAll?: boolean;
+}
+
+export const getCurrentDayEnum = (date: Date = new Date()): Day => {
+	return DAY_INDEX_TO_DAY[getDay(date)];
+};
+
+export const getWeekParity = (date: Date): LessonWeek => {
+	const weekNumber = getISOWeek(date);
+	return weekNumber % 2 === 0 ? LessonWeek.even : LessonWeek.odd;
+};
+
+export function transformLessonsToEvents(
+	lessons: LessonEntity[],
+	weekStart: Date
+): ScheduleEvent[] {
+	return lessons.map(lesson => {
+		const dayName = lesson.dailySchedule?.day ?? Day.monday;
+		const dayOffset = DAY_TO_DAY_INDEX[dayName];
+		const daysToAdd = dayOffset === 0 ? 6 : dayOffset - 1;
+		const targetDate = addDays(weekStart, daysToAdd);
+
+		const startTime = parseISO(lesson.startTime);
+		const endTime = parseISO(lesson.endTime);
+
+		return {
+			id: lesson.id,
+			start: set(targetDate, {
+				hours: startTime.getHours(),
+				minutes: startTime.getMinutes(),
+			}),
+			end: set(targetDate, {
+				hours: endTime.getHours(),
+				minutes: endTime.getMinutes(),
+			}),
+			subject: lesson.subject?.name ?? "Unknown Subject",
+			room: lesson.room?.name ?? "Unknown Room",
+			teacher: lesson.teacher?.user
+				? `${lesson.teacher.user.firstName} ${lesson.teacher.user.lastName}`
+				: "Unknown Teacher",
+			type: lesson.lessonWeek,
+		};
+	});
+}
+
+export const getDefaultFilters = (
+	user: UserEntity | null
+): LessonsControllerFindFilteredParams => {
+	const defaults: LessonsControllerFindFilteredParams = {
+		day: getCurrentDayEnum(),
+	};
+
+	if (user?.student) {
+		defaults.classId = user.student.classId;
+	} else if (user?.teacher) {
+		defaults.teacherId = user.teacher.id;
+	}
+
+	return defaults;
+};
+
+export const buildScheduleFilters = (
+	user: UserEntity | null,
+	search: ScheduleSearchParams
+): LessonsControllerFindFilteredParams => {
+	const defaults = getDefaultFilters(user);
+	const mode = search.mode ?? "weekly";
+
+	const applyDefaults =
+		!search.showAll &&
+		!search.classId &&
+		!search.teacherId &&
+		!search.roomId;
+
+	const base: LessonsControllerFindFilteredParams = applyDefaults
+		? { ...defaults }
+		: {};
+
+	if (search.classId) base.classId = search.classId;
+	if (search.teacherId) base.teacherId = search.teacherId;
+	if (search.subjectId) base.subjectId = search.subjectId;
+	if (search.roomId) base.roomId = search.roomId;
+	if (search.ignoreWeek !== undefined) base.ignoreWeek = search.ignoreWeek;
+
+	if (mode === "date") {
+		if (!search.timestamp && !search.from) {
+			const currentDate = search.date
+				? parseISO(search.date)
+				: new Date();
+
+			base.day = getCurrentDayEnum(currentDate);
+			base.week = search.ignoreWeek
+				? undefined
+				: getWeekParity(currentDate);
+
+			base.timestamp = undefined;
+			base.from = undefined;
+			base.to = undefined;
+		} else {
+			base.timestamp = search.timestamp;
+			base.from = search.from;
+			base.to = search.to;
+
+			base.day = undefined;
+			base.week = undefined;
+		}
+	} else {
+		base.day = search.day ?? base.day ?? getCurrentDayEnum();
+		base.week = search.week ?? base.week;
+
+		base.timestamp = undefined;
+		base.from = undefined;
+		base.to = undefined;
+	}
+
+	return base;
+};
+
+export const isScheduleDefaultFilter = (
+	user: UserEntity | null,
+	filters: LessonsControllerFindFilteredParams,
+	search: ScheduleSearchParams
+): boolean => {
+	if (search.mode !== "weekly" && search.mode !== undefined) return false;
+	if (search.showAll) return false;
+
+	const defaults = getDefaultFilters(user);
+
+	const keysToCheck: (keyof LessonsControllerFindFilteredParams)[] = [
+		"classId",
+		"teacherId",
+		"roomId",
+		"subjectId",
+		"ignoreWeek",
+		"day",
+		"week",
+	];
+
+	for (const key of keysToCheck) {
+		if (filters[key] !== defaults[key]) {
+			return false;
+		}
+	}
+
+	return true;
+};

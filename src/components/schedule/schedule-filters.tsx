@@ -18,7 +18,9 @@ import { Separator } from "@/components/ui/separator";
 import {
 	Select,
 	SelectContent,
+	SelectGroup,
 	SelectItem,
+	SelectLabel,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
@@ -33,39 +35,48 @@ import { DatePicker } from "@/components/date-picker";
 
 import {
 	type LessonsControllerFindFilteredParams,
-	LessonsControllerFindFilteredWeek as LessonWeek,
-	LessonsControllerFindFilteredDay as Day,
+	type ClassEntity,
+	type SubjectEntity,
+	type TeacherEntity,
+	type BuildingEntity,
 } from "@/api/generated/models";
 import {
 	useState,
 	type Dispatch,
 	type SetStateAction,
 	type MouseEvent,
+	useEffect,
 } from "react";
-import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-defaults";
+import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-utils";
+import {
+	Day,
+	LessonWeek,
+	type ScheduleMode,
+	type TimeSubMode,
+} from "@/types/schedule";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export interface FilterOptions {
-	classes?: { id: string; name: string }[];
-	subjects?: { id: string; name: string }[];
-	teachers?: { id: string; name: string }[];
-	rooms?: { id: string; name: string }[];
+	classes?: ClassEntity[];
+	subjects?: SubjectEntity[];
+	teachers?: TeacherEntity[];
+	buildings?: BuildingEntity[];
 }
-
-export type FilterMode = "calendar" | "generic";
-type TimeSubMode = "full-day" | "timestamp" | "range";
 
 interface ScheduleFiltersProps {
 	date: Date;
 	setDate: (date: Date) => void;
 	filters: LessonsControllerFindFilteredParams;
 	setFilters: Dispatch<SetStateAction<LessonsControllerFindFilteredParams>>;
-	mode: FilterMode;
-	setMode: (mode: FilterMode) => void;
+	mode: ScheduleMode;
+	setMode: (mode: ScheduleMode) => void;
 	genericDay: Day;
 	setGenericDay: (day: Day) => void;
 	onReset?: () => void;
+	showReset?: boolean;
 	options?: FilterOptions;
 	className?: string;
+	onClearResource?: (key: "classId" | "teacherId" | "roomId") => void;
 }
 
 export function ScheduleFilters({
@@ -78,8 +89,10 @@ export function ScheduleFilters({
 	genericDay,
 	setGenericDay,
 	onReset,
+	showReset = true,
 	options = {},
 	className,
+	onClearResource,
 }: ScheduleFiltersProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [timeSubMode, setTimeSubMode] = useState<TimeSubMode>("full-day");
@@ -90,35 +103,35 @@ export function ScheduleFilters({
 		LessonWeek.every
 	);
 
+	const debouncedAtTime = useDebounce(atTime, 500);
+	const debouncedRangeStart = useDebounce(rangeStart, 500);
+	const debouncedRangeEnd = useDebounce(rangeEnd, 500);
+
 	const computeParams = (
-		targetMode: FilterMode,
+		targetMode: ScheduleMode,
 		targetTimeSubMode: TimeSubMode,
 		targetAtTime: string,
 		targetRangeStart: string,
 		targetRangeEnd: string,
 		targetGenericDay: Day,
 		targetGenericWeek: LessonWeek,
-		targetDate: Date
-	): LessonsControllerFindFilteredParams => {
-		const nextParams: LessonsControllerFindFilteredParams = {
-			classId: filters.classId,
-			teacherId: filters.teacherId,
-			subjectId: filters.subjectId,
-			roomId: filters.roomId,
-		};
+		targetDate: Date,
+		currentIgnoreWeek: boolean | undefined
+	): Partial<LessonsControllerFindFilteredParams> => {
+		const nextParams: Partial<LessonsControllerFindFilteredParams> = {};
 
-		if (targetMode === "calendar") {
-			nextParams.ignoreWeek = filters.ignoreWeek;
+		if (targetMode === "date") {
+			nextParams.ignoreWeek = currentIgnoreWeek;
 
 			if (targetTimeSubMode === "full-day") {
 				nextParams.day = getCurrentDayEnum(targetDate);
-				nextParams.week = filters.ignoreWeek
+				nextParams.week = currentIgnoreWeek
 					? undefined
 					: getWeekParity(targetDate);
 
-				delete nextParams.timestamp;
-				delete nextParams.from;
-				delete nextParams.to;
+				nextParams.timestamp = undefined;
+				nextParams.from = undefined;
+				nextParams.to = undefined;
 			} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
 				const [hours, minutes] = targetAtTime.split(":").map(Number);
 				const dateWithTime = set(targetDate, {
@@ -130,10 +143,10 @@ export function ScheduleFilters({
 
 				nextParams.timestamp = dateWithTime.toISOString();
 
-				delete nextParams.from;
-				delete nextParams.to;
-				delete nextParams.day;
-				delete nextParams.week;
+				nextParams.from = undefined;
+				nextParams.to = undefined;
+				nextParams.day = undefined;
+				nextParams.week = undefined;
 			} else if (
 				targetTimeSubMode === "range" &&
 				targetRangeStart &&
@@ -162,9 +175,9 @@ export function ScheduleFilters({
 				nextParams.from = fromDate.toISOString();
 				nextParams.to = toDate.toISOString();
 
-				delete nextParams.timestamp;
-				delete nextParams.day;
-				delete nextParams.week;
+				nextParams.timestamp = undefined;
+				nextParams.day = undefined;
+				nextParams.week = undefined;
 			}
 		} else {
 			nextParams.day = targetGenericDay;
@@ -173,93 +186,109 @@ export function ScheduleFilters({
 					? undefined
 					: targetGenericWeek;
 
-			delete nextParams.timestamp;
-			delete nextParams.from;
-			delete nextParams.to;
-			delete nextParams.ignoreWeek;
+			nextParams.timestamp = undefined;
+			nextParams.from = undefined;
+			nextParams.to = undefined;
+			nextParams.ignoreWeek = undefined;
 		}
 
 		return nextParams;
 	};
 
-	const updateFilters = (
-		changes: Partial<{
-			timeSubMode: TimeSubMode;
-			atTime: string;
-			rangeStart: string;
-			rangeEnd: string;
-			genericWeek: LessonWeek;
-			genericDay: Day;
-			mode: FilterMode;
-		}>
-	) => {
-		const newTimeSubMode = changes.timeSubMode ?? timeSubMode;
-		const newAtTime = changes.atTime ?? atTime;
-		const newRangeStart = changes.rangeStart ?? rangeStart;
-		const newRangeEnd = changes.rangeEnd ?? rangeEnd;
-		const newGenericWeek = changes.genericWeek ?? genericWeek;
-		let newGenericDay = changes.genericDay ?? genericDay;
-		const newMode = changes.mode ?? mode;
-
-		if (changes.timeSubMode) setTimeSubMode(changes.timeSubMode);
-		if (changes.atTime) setAtTime(changes.atTime);
-		if (changes.rangeStart) setRangeStart(changes.rangeStart);
-		if (changes.rangeEnd) setRangeEnd(changes.rangeEnd);
-		if (changes.genericWeek) setGenericWeek(changes.genericWeek);
-		if (changes.genericDay) setGenericDay(changes.genericDay);
-		if (changes.mode) setMode(changes.mode);
-
-		if (changes.mode === "generic") {
-			const derivedDay = getCurrentDayEnum(date);
-
-			setGenericDay(derivedDay);
-			newGenericDay = derivedDay;
-		}
-
+	useEffect(() => {
 		const newParameters = computeParams(
-			newMode,
-			newTimeSubMode,
-			newAtTime,
-			newRangeStart,
-			newRangeEnd,
-			newGenericDay,
-			newGenericWeek,
-			date
+			mode,
+			timeSubMode,
+			debouncedAtTime,
+			debouncedRangeStart,
+			debouncedRangeEnd,
+			genericDay,
+			genericWeek,
+			date,
+			filters.ignoreWeek
 		);
 
 		setFilters(previousFilters => ({
 			...previousFilters,
 			...newParameters,
 		}));
+	}, [
+		mode,
+		timeSubMode,
+		debouncedAtTime,
+		debouncedRangeStart,
+		debouncedRangeEnd,
+		genericDay,
+		genericWeek,
+		date,
+		filters.ignoreWeek,
+		setFilters,
+	]);
+
+	const handleTimeSubModeChange = (value: string) => {
+		setTimeSubMode(value as TimeSubMode);
 	};
 
-	const handleTimeSubModeChange = (value: string) =>
-		updateFilters({ timeSubMode: value as TimeSubMode });
-	const handleAtTimeChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-		updateFilters({ atTime: event.target.value });
+	const handleAtTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setAtTime(event.target.value);
+	};
+
 	const handleRangeStartChange = (
 		event: React.ChangeEvent<HTMLInputElement>
-	) => updateFilters({ rangeStart: event.target.value });
-	const handleRangeEndChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-		updateFilters({ rangeEnd: event.target.value });
-	const handleGenericWeekChange = (value: string) =>
-		updateFilters({ genericWeek: value as LessonWeek });
+	) => {
+		setRangeStart(event.target.value);
+	};
+
+	const handleRangeEndChange = (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setRangeEnd(event.target.value);
+	};
+
+	const handleGenericWeekChange = (value: string) => {
+		setGenericWeek(value as LessonWeek);
+	};
+
 	const handleGenericDayChange = (value: string) => {
 		setGenericDay(value as Day);
-		updateFilters({ genericDay: value as Day });
 	};
-	const handleModeChange = (value: string) =>
-		updateFilters({ mode: value as FilterMode });
+
+	const handleModeChange = (value: string) => {
+		const newMode = value as ScheduleMode;
+
+		setMode(newMode);
+
+		if (newMode === "weekly") {
+			const derivedDay = getCurrentDayEnum(date);
+			setGenericDay(derivedDay);
+		}
+	};
 
 	const handleEntityChange = (
 		key: keyof LessonsControllerFindFilteredParams,
 		value: string
 	) => {
-		setFilters(previous => {
-			const next = { ...previous, [key]: value };
-			if (value === "all") delete next[key];
-			return next;
-		});
+		if (value === "all") {
+			// If the filter is a primary resource, use the clear handler
+			if (
+				(key === "classId" ||
+					key === "teacherId" ||
+					key === "roomId") &&
+				onClearResource
+			) {
+				onClearResource(key);
+			} else {
+				setFilters(previous => {
+					const next = { ...previous, [key]: undefined };
+					return next;
+				});
+			}
+		} else {
+			setFilters(previous => {
+				const next = { ...previous, [key]: value };
+				return next;
+			});
+		}
 	};
 
 	const toggleIgnoreWeek = (checked: boolean) => {
@@ -311,7 +340,7 @@ export function ScheduleFilters({
 					{!isOpen && (
 						<div className="hidden sm:flex items-center text-xs text-muted-foreground gap-2">
 							<Separator orientation="vertical" className="h-4" />
-							{mode === "calendar" ? (
+							{mode === "date" ? (
 								<span className="flex items-center gap-1">
 									<CalendarIcon className="h-3 w-3" />
 									{date.toLocaleDateString()}
@@ -329,7 +358,7 @@ export function ScheduleFilters({
 						</div>
 					)}
 				</div>
-				{(activeCount > 0 || onReset) && (
+				{showReset && onReset && (
 					<Button
 						variant="ghost"
 						size="sm"
@@ -353,13 +382,13 @@ export function ScheduleFilters({
 							className="w-full">
 							<TabsList className="w-full grid grid-cols-2">
 								<TabsTrigger
-									value="generic"
+									value="weekly"
 									className="flex items-center gap-2">
 									<CalendarRange className="h-4 w-4" /> Weekly
 									Schedule
 								</TabsTrigger>
 								<TabsTrigger
-									value="calendar"
+									value="date"
 									className="flex items-center gap-2">
 									<CalendarDays className="h-4 w-4" />{" "}
 									Specific Date
@@ -369,7 +398,7 @@ export function ScheduleFilters({
 					</div>
 
 					<div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-						{mode === "calendar" ? (
+						{mode === "date" ? (
 							<div className="space-y-3">
 								<Label className="text-xs font-medium">
 									Date & Time
@@ -476,7 +505,7 @@ export function ScheduleFilters({
 							</div>
 						)}
 
-						{mode === "calendar" && (
+						{mode === "date" && (
 							<div className="flex items-center justify-start sm:justify-end pt-8">
 								<div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-md border border-dashed">
 									<Switch
@@ -494,7 +523,7 @@ export function ScheduleFilters({
 						)}
 					</div>
 
-					{mode === "calendar" && timeSubMode !== "full-day" && (
+					{mode === "date" && timeSubMode !== "full-day" && (
 						<div className="bg-muted/30 p-3 rounded-md border border-dashed">
 							<div className="flex flex-wrap items-end gap-4">
 								<Clock className="h-4 w-4 text-muted-foreground mb-2.5" />
@@ -617,7 +646,7 @@ export function ScheduleFilters({
 											<SelectItem
 												key={item.id}
 												value={item.id}>
-												{item.name}
+												{`${item.user?.firstName} ${item.user?.lastName}`}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -637,12 +666,22 @@ export function ScheduleFilters({
 										<SelectItem value="all">
 											All Rooms
 										</SelectItem>
-										{options.rooms?.map(item => (
-											<SelectItem
-												key={item.id}
-												value={item.id}>
-												{item.name}
-											</SelectItem>
+										{options.buildings?.map(building => (
+											<SelectGroup key={building.id}>
+												<SelectLabel>
+													{building.name}
+												</SelectLabel>
+												{building.floors?.map(floor =>
+													floor.rooms?.map(room => (
+														<SelectItem
+															key={room.id}
+															value={room.id}>
+															{room.name} (Floor{" "}
+															{floor.number})
+														</SelectItem>
+													))
+												)}
+											</SelectGroup>
 										))}
 									</SelectContent>
 								</Select>

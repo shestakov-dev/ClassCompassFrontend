@@ -10,8 +10,8 @@
  * The data required to update a student
  */
 export interface UpdateStudentDto {
-  /** The student's user identifier */
-  userId?: string;
-  /** The student's class identifier */
-  classId?: string;
+	/** The student's user identifier */
+	userId?: string;
+	/** The student's class identifier */
+	classId?: string;
 }

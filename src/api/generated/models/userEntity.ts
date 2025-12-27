@@ -6,34 +6,46 @@
  * OpenAPI spec version: 1.0
  */
 import type { SchoolEntity } from "./schoolEntity";
+import type { UserEntityStudent } from "./userEntityStudent";
+import type { UserEntityTeacher } from "./userEntityTeacher";
 
 /**
  * A user object
  */
 export interface UserEntity {
-  /** The user's unique identifier */
-  id: string;
-  /** The user's Kratos identity ID */
-  identityId: string;
-  /** The user's first name */
-  firstName: string;
-  /** The user's last name */
-  lastName: string;
-  /** The user's email */
-  email: string;
-  /** The user's school identifier */
-  schoolId: string;
-  /** The user's populated school */
-  school?: SchoolEntity;
-  /** The time the user was created */
-  createdAt: string;
-  /** The time the user was last updated */
-  updatedAt: string;
-  /** Whether the user has been deleted */
-  deleted: boolean;
-  /**
-   * The time the user was deleted
-   * @nullable
-   */
-  deletedAt: string | null;
+	/** The user's unique identifier */
+	id: string;
+	/** The user's Kratos identity ID */
+	identityId: string;
+	/** The user's first name */
+	firstName: string;
+	/** The user's last name */
+	lastName: string;
+	/** The user's email */
+	email: string;
+	/** The user's school identifier */
+	schoolId: string;
+	/** The user's populated school */
+	school?: SchoolEntity;
+	/**
+	 * The user's populated student record
+	 * @nullable
+	 */
+	student?: UserEntityStudent;
+	/**
+	 * The user's populated teacher record
+	 * @nullable
+	 */
+	teacher?: UserEntityTeacher;
+	/** The time the user was created */
+	createdAt: string;
+	/** The time the user was last updated */
+	updatedAt: string;
+	/** Whether the user has been deleted */
+	deleted: boolean;
+	/**
+	 * The time the user was deleted
+	 * @nullable
+	 */
+	deletedAt: string | null;
 }

@@ -11,8 +11,8 @@ import type { CreateDailyScheduleDtoDay } from "./createDailyScheduleDtoDay";
  * The data required to create a new daily schedule
  */
 export interface CreateDailyScheduleDto {
-  /** The day of the week for the schedule */
-  day: CreateDailyScheduleDtoDay;
-  /** The daily schedule's class identifier */
-  classId: string;
+	/** The day of the week for the schedule */
+	day: CreateDailyScheduleDtoDay;
+	/** The daily schedule's class identifier */
+	classId: string;
 }

@@ -7,10 +7,10 @@
  */
 import { useMutation } from "@tanstack/react-query";
 import type {
-  MutationFunction,
-  QueryClient,
-  UseMutationOptions,
-  UseMutationResult,
+	MutationFunction,
+	QueryClient,
+	UseMutationOptions,
+	UseMutationResult,
 } from "@tanstack/react-query";
 
 import type { CreateInviteDto } from "../../models";
@@ -21,57 +21,57 @@ import { customInstance } from "../../../mutators/custom-instance";
  * @summary Create a new invite for a user to set up their account
  */
 export const invitesControllerCreateInvite = (
-  createInviteDto: CreateInviteDto,
-  signal?: AbortSignal,
+	createInviteDto: CreateInviteDto,
+	signal?: AbortSignal
 ) => {
-  return customInstance<void>({
-    url: `https://api.classcompass.shestakov.app/invites`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createInviteDto,
-    signal,
-  });
+	return customInstance<void>({
+		url: `https://api.classcompass.shestakov.app/invites`,
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		data: createInviteDto,
+		signal,
+	});
 };
 
 export const getInvitesControllerCreateInviteMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
-    TError,
-    { data: CreateInviteDto },
-    TContext
-  >;
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
+		TError,
+		{ data: CreateInviteDto },
+		TContext
+	>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
-  TError,
-  { data: CreateInviteDto },
-  TContext
+	Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
+	TError,
+	{ data: CreateInviteDto },
+	TContext
 > => {
-  const mutationKey = ["invitesControllerCreateInvite"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+	const mutationKey = ["invitesControllerCreateInvite"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
-    { data: CreateInviteDto }
-  > = (props) => {
-    const { data } = props ?? {};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
+		{ data: CreateInviteDto }
+	> = props => {
+		const { data } = props ?? {};
 
-    return invitesControllerCreateInvite(data);
-  };
+		return invitesControllerCreateInvite(data);
+	};
 
-  return { mutationFn, ...mutationOptions };
+	return { mutationFn, ...mutationOptions };
 };
 
 export type InvitesControllerCreateInviteMutationResult = NonNullable<
-  Awaited<ReturnType<typeof invitesControllerCreateInvite>>
+	Awaited<ReturnType<typeof invitesControllerCreateInvite>>
 >;
 export type InvitesControllerCreateInviteMutationBody = CreateInviteDto;
 export type InvitesControllerCreateInviteMutationError = unknown;
@@ -80,26 +80,26 @@ export type InvitesControllerCreateInviteMutationError = unknown;
  * @summary Create a new invite for a user to set up their account
  */
 export const useInvitesControllerCreateInvite = <
-  TError = unknown,
-  TContext = unknown,
+	TError = unknown,
+	TContext = unknown,
 >(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
-      TError,
-      { data: CreateInviteDto },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
+			TError,
+			{ data: CreateInviteDto },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
-  TError,
-  { data: CreateInviteDto },
-  TContext
+	Awaited<ReturnType<typeof invitesControllerCreateInvite>>,
+	TError,
+	{ data: CreateInviteDto },
+	TContext
 > => {
-  const mutationOptions =
-    getInvitesControllerCreateInviteMutationOptions(options);
+	const mutationOptions =
+		getInvitesControllerCreateInviteMutationOptions(options);
 
-  return useMutation(mutationOptions, queryClient);
+	return useMutation(mutationOptions, queryClient);
 };

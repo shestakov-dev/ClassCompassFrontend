@@ -10,15 +10,15 @@
  * The day of the week for the schedule
  */
 export type DailyScheduleEntityDay =
-  (typeof DailyScheduleEntityDay)[keyof typeof DailyScheduleEntityDay];
+	(typeof DailyScheduleEntityDay)[keyof typeof DailyScheduleEntityDay];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const DailyScheduleEntityDay = {
-  monday: "monday",
-  tuesday: "tuesday",
-  wednesday: "wednesday",
-  thursday: "thursday",
-  friday: "friday",
-  saturday: "saturday",
-  sunday: "sunday",
+	monday: "monday",
+	tuesday: "tuesday",
+	wednesday: "wednesday",
+	thursday: "thursday",
+	friday: "friday",
+	saturday: "saturday",
+	sunday: "sunday",
 } as const;

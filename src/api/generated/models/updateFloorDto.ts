@@ -10,10 +10,10 @@
  * The data required to update a floor
  */
 export interface UpdateFloorDto {
-  /** The floor's number */
-  number?: number;
-  /** The floor's description */
-  description?: string;
-  /** The floor's building identifier */
-  buildingId?: string;
+	/** The floor's number */
+	number?: number;
+	/** The floor's description */
+	description?: string;
+	/** The floor's building identifier */
+	buildingId?: string;
 }

@@ -11,7 +11,7 @@ import {
 	DialogTitle,
 	DialogDescription,
 } from "@/components/ui/dialog";
-import { transformLessonsToEvents } from "@/lib/schedule-mappers";
+import { transformLessonsToEvents } from "@/lib/schedule-utils";
 import type { LessonEntity } from "@/api/generated/models";
 
 interface DailyScheduleViewerProps {
@@ -23,7 +23,9 @@ export function DailyScheduleViewer({
 	lessons,
 	date,
 }: DailyScheduleViewerProps) {
-	const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
+	const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(
+		null
+	);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const events = useMemo(() => {
@@ -46,9 +48,7 @@ export function DailyScheduleViewer({
 				/>
 			</div>
 
-			<Dialog
-				open={isModalOpen}
-				onOpenChange={setIsModalOpen}>
+			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>{selectedEvent?.subject}</DialogTitle>
@@ -58,8 +58,11 @@ export function DailyScheduleViewer({
 							</span>
 							<span className="text-muted-foreground">•</span>
 							<span className="font-medium text-foreground">
-								{selectedEvent?.start && format(selectedEvent.start, "HH:mm")} -
-								{selectedEvent?.end && format(selectedEvent.end, "HH:mm")}
+								{selectedEvent?.start &&
+									format(selectedEvent.start, "HH:mm")}{" "}
+								-
+								{selectedEvent?.end &&
+									format(selectedEvent.end, "HH:mm")}
 							</span>
 						</DialogDescription>
 					</DialogHeader>
@@ -67,11 +70,17 @@ export function DailyScheduleViewer({
 					{selectedEvent && (
 						<div className="grid gap-3 py-2 text-sm">
 							<div className="flex justify-between border-b pb-2">
-								<span className="text-muted-foreground">Teacher</span>
-								<span className="font-medium">{selectedEvent.teacher}</span>
+								<span className="text-muted-foreground">
+									Teacher
+								</span>
+								<span className="font-medium">
+									{selectedEvent.teacher}
+								</span>
 							</div>
 							<div className="flex justify-between items-center">
-								<span className="text-muted-foreground">Week Type</span>
+								<span className="text-muted-foreground">
+									Week Type
+								</span>
 								<span className="capitalize inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
 									{selectedEvent.type}
 								</span>
