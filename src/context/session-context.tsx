@@ -50,7 +50,6 @@ export function SessionProvider({
 		{
 			query: {
 				enabled: isAuthenticated && !!identityId,
-				// Keep previous data while refetching to prevent flicker
 				placeholderData: keepPreviousData,
 			},
 		}
@@ -60,7 +59,8 @@ export function SessionProvider({
 		if (identityId) {
 			// Invalidate user data to ensure fresh data is fetched
 			await queryClient.invalidateQueries({
-				queryKey: getUsersControllerFindByIdentityIdQueryKey(identityId),
+				queryKey:
+					getUsersControllerFindByIdentityIdQueryKey(identityId),
 			});
 		}
 	};

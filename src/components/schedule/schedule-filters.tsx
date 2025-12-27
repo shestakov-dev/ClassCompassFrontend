@@ -46,7 +46,7 @@ import {
 	type SetStateAction,
 	type MouseEvent,
 } from "react";
-import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-defaults";
+import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-utils";
 import {
 	Day,
 	LessonWeek,
@@ -74,6 +74,7 @@ interface ScheduleFiltersProps {
 	showReset?: boolean;
 	options?: FilterOptions;
 	className?: string;
+	onClearResource?: (key: "classId" | "teacherId" | "roomId") => void;
 }
 
 export function ScheduleFilters({
@@ -89,6 +90,7 @@ export function ScheduleFilters({
 	showReset = true,
 	options = {},
 	className,
+	onClearResource,
 }: ScheduleFiltersProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [timeSubMode, setTimeSubMode] = useState<TimeSubMode>("full-day");
@@ -264,15 +266,27 @@ export function ScheduleFilters({
 		key: keyof LessonsControllerFindFilteredParams,
 		value: string
 	) => {
-		setFilters(previous => {
-			const next = { ...previous, [key]: value };
-
-			if (value === "all") {
-				next[key] = undefined;
+		if (value === "all") {
+			// If the filter is a primary resource, use the clear handler
+			if (
+				(key === "classId" ||
+					key === "teacherId" ||
+					key === "roomId") &&
+				onClearResource
+			) {
+				onClearResource(key);
+			} else {
+				setFilters(previous => {
+					const next = { ...previous, [key]: undefined };
+					return next;
+				});
 			}
-
-			return next;
-		});
+		} else {
+			setFilters(previous => {
+				const next = { ...previous, [key]: value };
+				return next;
+			});
+		}
 	};
 
 	const toggleIgnoreWeek = (checked: boolean) => {

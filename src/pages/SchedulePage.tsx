@@ -26,10 +26,10 @@ import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints
 import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
 import { Day, ALL_DAYS, DAY_TO_DAY_INDEX } from "@/types/schedule";
 import {
+	buildScheduleFilters,
 	getCurrentDayEnum,
-	getDefaultFilters,
-	getWeekParity,
-} from "@/lib/schedule-defaults";
+	isScheduleDefaultFilter,
+} from "@/lib/schedule-utils";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Route } from "@/routes/schedule";
 import {
@@ -40,9 +40,12 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
+import { cn } from "@/lib/utils";
+import { LessonListView } from "@/components/schedule/lesson-list-view";
 
 export default function SchedulePage() {
 	const { user } = useSession();
+
 	const navigate = Route.useNavigate();
 	const search = Route.useSearch();
 
@@ -54,66 +57,12 @@ export default function SchedulePage() {
 	const genericDay = search.day ?? getCurrentDayEnum();
 
 	const filters = useMemo(() => {
-		const defaults = user ? getDefaultFilters(user) : { day: genericDay };
-
-		const base: LessonsControllerFindFilteredParams = {
-			classId: search.classId ?? defaults.classId,
-			teacherId: search.teacherId ?? defaults.teacherId,
-			subjectId: search.subjectId,
-			roomId: search.roomId,
-			ignoreWeek: search.ignoreWeek,
-		};
-
-		if (mode === "date") {
-			if (!search.timestamp && !search.from) {
-				return {
-					...base,
-					day: getCurrentDayEnum(currentDate),
-					week: search.ignoreWeek
-						? undefined
-						: getWeekParity(currentDate),
-					timestamp: undefined,
-					from: undefined,
-					to: undefined,
-				};
-			}
-
-			return {
-				...base,
-				timestamp: search.timestamp,
-				from: search.from,
-				to: search.to,
-				day: undefined,
-				week: undefined,
-			};
-		} else {
-			return {
-				...base,
-				day: search.day ?? defaults.day,
-				week: search.week,
-				timestamp: undefined,
-				from: undefined,
-				to: undefined,
-			};
-		}
-	}, [search, user, mode, genericDay, currentDate]);
+		return buildScheduleFilters(user, search);
+	}, [search, user]);
 
 	const isDefaultFilters = useMemo(() => {
-		if (!user) return true;
-		const defaults = getDefaultFilters(user);
-
-		if (mode !== "weekly") return false;
-
-		if (filters.classId !== defaults.classId) return false;
-		if (filters.teacherId !== defaults.teacherId) return false;
-		if (filters.subjectId) return false;
-		if (filters.roomId) return false;
-		if (filters.week) return false;
-		if (filters.ignoreWeek) return false;
-		if (filters.day !== defaults.day) return false;
-
-		return true;
-	}, [user, filters, mode]);
+		return isScheduleDefaultFilter(user, filters, search);
+	}, [user, filters, search]);
 
 	const {
 		data: lessons,
@@ -145,8 +94,6 @@ export default function SchedulePage() {
 	);
 
 	const hasLessons = lessons && lessons.length > 0;
-	// if we are initially loading or if we are fetching and
-	// have no data yet, we show the skeleton
 	const showSkeleton = isLoading || (isFetching && !lessons);
 
 	const updateSearch = useCallback(
@@ -214,28 +161,26 @@ export default function SchedulePage() {
 	);
 
 	const handleReset = useCallback(() => {
-		if (!user) return;
-		const defaults = getDefaultFilters(user);
 		const now = new Date();
-
 		navigate({
 			search: () => ({
 				mode: "weekly",
-				day: defaults.day,
-				classId: defaults.classId,
-				teacherId: defaults.teacherId,
 				date: now.toISOString(),
-				timestamp: undefined,
-				from: undefined,
-				to: undefined,
+				showAll: undefined,
+				classId: undefined,
+				teacherId: undefined,
 				subjectId: undefined,
 				roomId: undefined,
 				week: undefined,
 				ignoreWeek: undefined,
+				timestamp: undefined,
+				from: undefined,
+				to: undefined,
+				day: undefined,
 			}),
 			replace: true,
 		});
-	}, [user, navigate]);
+	}, [navigate]);
 
 	const handleSetFilters = useCallback(
 		(
@@ -251,6 +196,10 @@ export default function SchedulePage() {
 		},
 		[filters, updateSearch]
 	);
+
+	const isSingularResource = useMemo(() => {
+		return !!(filters.classId || filters.teacherId || filters.roomId);
+	}, [filters]);
 
 	return (
 		<div className="flex flex-col h-full bg-background">
@@ -355,12 +304,23 @@ export default function SchedulePage() {
 							teachers,
 							buildings,
 						}}
+						onClearResource={resourceKey => {
+							updateSearch({
+								[resourceKey]: undefined,
+								showAll: true,
+							});
+						}}
 					/>
 				</div>
 
 				<div className="flex-1 min-h-0 flex flex-col relative mt-2">
-					<div className="relative h-full border rounded-md bg-background shadow-sm overflow-hidden">
-						{showSkeleton && (
+					<div
+						className={cn(
+							"relative h-full",
+							isSingularResource &&
+								"border rounded-md bg-background shadow-sm overflow-hidden"
+						)}>
+						{showSkeleton ? (
 							<div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-[1px] flex items-center justify-center animate-in fade-in duration-300">
 								<div className="absolute inset-0 opacity-20 pointer-events-none grayscale">
 									<DailyScheduleViewer
@@ -375,9 +335,7 @@ export default function SchedulePage() {
 									</p>
 								</div>
 							</div>
-						)}
-
-						{!showSkeleton && !hasLessons ? (
+						) : !hasLessons ? (
 							<div className="h-full flex items-center justify-center bg-muted/5 animate-in fade-in zoom-in-95 duration-300">
 								<Empty>
 									<EmptyHeader>
@@ -407,11 +365,18 @@ export default function SchedulePage() {
 									</EmptyContent>
 								</Empty>
 							</div>
-						) : (
+						) : isSingularResource ? (
 							<div className="h-full animate-in fade-in duration-500">
 								<DailyScheduleViewer
 									lessons={lessons ?? []}
 									date={currentDate}
+								/>
+							</div>
+						) : (
+							<div className="h-full overflow-auto pr-2 animate-in fade-in duration-500">
+								<LessonListView
+									lessons={lessons ?? []}
+									currentDate={currentDate}
 								/>
 							</div>
 						)}

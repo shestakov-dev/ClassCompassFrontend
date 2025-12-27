@@ -4,9 +4,8 @@ import {
 	getLessonsControllerFindFilteredQueryKey,
 	lessonsControllerFindFiltered,
 } from "@/api/generated/endpoints/lessons/lessons";
-import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
 import { Day, LessonWeek } from "@/types/schedule";
-import { getDefaultFilters } from "@/lib/schedule-defaults";
+import { buildScheduleFilters } from "@/lib/schedule-utils";
 import {
 	getUsersControllerFindByIdentityIdQueryKey,
 	usersControllerFindByIdentityId,
@@ -20,15 +19,16 @@ const scheduleSearchSchema = z.object({
 	timestamp: z.iso.datetime().optional(),
 	from: z.iso.datetime().optional(),
 	to: z.iso.datetime().optional(),
-	classId: z.uuidv4().optional(),
-	teacherId: z.uuidv4().optional(),
-	subjectId: z.uuidv4().optional(),
-	roomId: z.uuidv4().optional(),
+	classId: z.uuid().optional(),
+	teacherId: z.uuid().optional(),
+	subjectId: z.uuid().optional(),
+	roomId: z.uuid().optional(),
 	week: z.enum(LessonWeek).optional(),
 	ignoreWeek: z
 		.union([z.boolean(), z.literal("true"), z.literal("false")])
 		.transform(val => val === true || val === "true")
 		.optional(),
+	showAll: z.boolean().optional(),
 });
 
 export const Route = createFileRoute("/schedule")({
@@ -61,35 +61,7 @@ export const Route = createFileRoute("/schedule")({
 			return;
 		}
 
-		const defaults = getDefaultFilters(user);
-		const mode = search.mode ?? "weekly";
-
-		// Base filters
-		const apiFilters: LessonsControllerFindFilteredParams = {
-			classId: search.classId ?? defaults.classId,
-			teacherId: search.teacherId ?? defaults.teacherId,
-			subjectId: search.subjectId,
-			roomId: search.roomId,
-			ignoreWeek: search.ignoreWeek,
-		};
-
-		if (mode === "date") {
-			apiFilters.timestamp = search.timestamp;
-			apiFilters.from = search.from;
-			apiFilters.to = search.to;
-
-			// Clear generic params
-			apiFilters.day = undefined;
-			apiFilters.week = undefined;
-		} else {
-			apiFilters.day = search.day ?? defaults.day;
-			apiFilters.week = search.week;
-
-			// Clear calendar params
-			apiFilters.timestamp = undefined;
-			apiFilters.from = undefined;
-			apiFilters.to = undefined;
-		}
+		const apiFilters = buildScheduleFilters(user, search);
 
 		queryClient.prefetchQuery({
 			queryKey: getLessonsControllerFindFilteredQueryKey(
