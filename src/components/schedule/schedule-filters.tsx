@@ -45,6 +45,7 @@ import {
 	type Dispatch,
 	type SetStateAction,
 	type MouseEvent,
+	useEffect,
 } from "react";
 import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-utils";
 import {
@@ -53,6 +54,7 @@ import {
 	type ScheduleMode,
 	type TimeSubMode,
 } from "@/types/schedule";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export interface FilterOptions {
 	classes?: ClassEntity[];
@@ -101,6 +103,10 @@ export function ScheduleFilters({
 		LessonWeek.every
 	);
 
+	const debouncedAtTime = useDebounce(atTime, 500);
+	const debouncedRangeStart = useDebounce(rangeStart, 500);
+	const debouncedRangeEnd = useDebounce(rangeEnd, 500);
+
 	const computeParams = (
 		targetMode: ScheduleMode,
 		targetTimeSubMode: TimeSubMode,
@@ -109,21 +115,17 @@ export function ScheduleFilters({
 		targetRangeEnd: string,
 		targetGenericDay: Day,
 		targetGenericWeek: LessonWeek,
-		targetDate: Date
-	): LessonsControllerFindFilteredParams => {
-		const nextParams: LessonsControllerFindFilteredParams = {
-			classId: filters.classId,
-			teacherId: filters.teacherId,
-			subjectId: filters.subjectId,
-			roomId: filters.roomId,
-		};
+		targetDate: Date,
+		currentIgnoreWeek: boolean | undefined
+	): Partial<LessonsControllerFindFilteredParams> => {
+		const nextParams: Partial<LessonsControllerFindFilteredParams> = {};
 
 		if (targetMode === "date") {
-			nextParams.ignoreWeek = filters.ignoreWeek;
+			nextParams.ignoreWeek = currentIgnoreWeek;
 
 			if (targetTimeSubMode === "full-day") {
 				nextParams.day = getCurrentDayEnum(targetDate);
-				nextParams.week = filters.ignoreWeek
+				nextParams.week = currentIgnoreWeek
 					? undefined
 					: getWeekParity(targetDate);
 
@@ -193,74 +195,74 @@ export function ScheduleFilters({
 		return nextParams;
 	};
 
-	const updateFilters = (
-		changes: Partial<{
-			timeSubMode: TimeSubMode;
-			atTime: string;
-			rangeStart: string;
-			rangeEnd: string;
-			genericWeek: LessonWeek;
-			genericDay: Day;
-			mode: ScheduleMode;
-		}>
-	) => {
-		const newTimeSubMode = changes.timeSubMode ?? timeSubMode;
-		const newAtTime = changes.atTime ?? atTime;
-		const newRangeStart = changes.rangeStart ?? rangeStart;
-		const newRangeEnd = changes.rangeEnd ?? rangeEnd;
-		const newGenericWeek = changes.genericWeek ?? genericWeek;
-		let newGenericDay = changes.genericDay ?? genericDay;
-		const newMode = changes.mode ?? mode;
-
-		if (changes.timeSubMode) setTimeSubMode(changes.timeSubMode);
-		if (changes.atTime) setAtTime(changes.atTime);
-		if (changes.rangeStart) setRangeStart(changes.rangeStart);
-		if (changes.rangeEnd) setRangeEnd(changes.rangeEnd);
-		if (changes.genericWeek) setGenericWeek(changes.genericWeek);
-		if (changes.genericDay) setGenericDay(changes.genericDay);
-		if (changes.mode) setMode(changes.mode);
-
-		if (changes.mode === "weekly") {
-			const derivedDay = getCurrentDayEnum(date);
-
-			setGenericDay(derivedDay);
-			newGenericDay = derivedDay;
-		}
-
+	useEffect(() => {
 		const newParameters = computeParams(
-			newMode,
-			newTimeSubMode,
-			newAtTime,
-			newRangeStart,
-			newRangeEnd,
-			newGenericDay,
-			newGenericWeek,
-			date
+			mode,
+			timeSubMode,
+			debouncedAtTime,
+			debouncedRangeStart,
+			debouncedRangeEnd,
+			genericDay,
+			genericWeek,
+			date,
+			filters.ignoreWeek
 		);
 
 		setFilters(previousFilters => ({
 			...previousFilters,
 			...newParameters,
 		}));
+	}, [
+		mode,
+		timeSubMode,
+		debouncedAtTime,
+		debouncedRangeStart,
+		debouncedRangeEnd,
+		genericDay,
+		genericWeek,
+		date,
+		filters.ignoreWeek,
+		setFilters,
+	]);
+
+	const handleTimeSubModeChange = (value: string) => {
+		setTimeSubMode(value as TimeSubMode);
 	};
 
-	const handleTimeSubModeChange = (value: string) =>
-		updateFilters({ timeSubMode: value as TimeSubMode });
-	const handleAtTimeChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-		updateFilters({ atTime: event.target.value });
+	const handleAtTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setAtTime(event.target.value);
+	};
+
 	const handleRangeStartChange = (
 		event: React.ChangeEvent<HTMLInputElement>
-	) => updateFilters({ rangeStart: event.target.value });
-	const handleRangeEndChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-		updateFilters({ rangeEnd: event.target.value });
-	const handleGenericWeekChange = (value: string) =>
-		updateFilters({ genericWeek: value as LessonWeek });
+	) => {
+		setRangeStart(event.target.value);
+	};
+
+	const handleRangeEndChange = (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setRangeEnd(event.target.value);
+	};
+
+	const handleGenericWeekChange = (value: string) => {
+		setGenericWeek(value as LessonWeek);
+	};
+
 	const handleGenericDayChange = (value: string) => {
 		setGenericDay(value as Day);
-		updateFilters({ genericDay: value as Day });
 	};
-	const handleModeChange = (value: string) =>
-		updateFilters({ mode: value as ScheduleMode });
+
+	const handleModeChange = (value: string) => {
+		const newMode = value as ScheduleMode;
+
+		setMode(newMode);
+
+		if (newMode === "weekly") {
+			const derivedDay = getCurrentDayEnum(date);
+			setGenericDay(derivedDay);
+		}
+	};
 
 	const handleEntityChange = (
 		key: keyof LessonsControllerFindFilteredParams,
