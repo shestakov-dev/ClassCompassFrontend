@@ -1,4 +1,4 @@
-import { Building, Edit2, Trash2, Plus } from "lucide-react";
+import { Edit2, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashedButton } from "@/components/dashed-button";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import type {
 	DialogData,
 } from "@/types/infrastructure";
 
-interface SidebarProps {
+interface MobileMenuProps {
 	buildings: BuildingEntity[];
 	selectedId?: string;
 	onSelect: (id: string) => void;
@@ -19,32 +19,55 @@ interface SidebarProps {
 		data?: DialogData
 	) => void;
 	onDelete: (id: string, name: string) => void;
+	onClose: () => void;
 }
 
-export function InfrastructureSidebar({
+export function InfrastructureMobileMenu({
 	buildings,
 	selectedId,
 	onSelect,
 	onOpenDialog,
 	onDelete,
-}: SidebarProps) {
+	onClose,
+}: MobileMenuProps) {
+	const handleSelect = (id: string) => {
+		onSelect(id);
+		onClose();
+	};
+
+	const handleEdit = (event: React.MouseEvent, building: BuildingEntity) => {
+		event.stopPropagation();
+		onClose();
+		onOpenDialog("building", "edit", building);
+	};
+
+	const handleDelete = (
+		event: React.MouseEvent,
+		id: string,
+		name: string
+	) => {
+		event.stopPropagation();
+		onClose();
+		onDelete(id, name);
+	};
+
+	const handleCreate = () => {
+		onClose();
+		onOpenDialog("building", "create");
+	};
+
 	return (
-		<aside className="hidden md:flex w-64 flex-col border-r bg-card/50">
-			<div className="p-4 border-b h-14 flex items-center">
-				<h2 className="text-lg font-semibold flex items-center gap-2">
-					<Building className="w-5 h-5 text-primary" />
-					<span>Infrastructure</span>
-				</h2>
-			</div>
+		<div className="flex flex-col h-full">
 			<div className="flex-1 overflow-y-auto p-4 space-y-4">
 				<div className="space-y-1">
 					<h4 className="mb-2 px-2 text-xs font-semibold tracking-tight text-muted-foreground">
 						BUILDINGS
 					</h4>
+
 					{buildings.map(building => (
 						<div
 							key={building.id}
-							onClick={() => onSelect(building.id)}
+							onClick={() => handleSelect(building.id)}
 							className={cn(
 								"group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors cursor-pointer",
 								selectedId === building.id
@@ -57,26 +80,24 @@ export function InfrastructureSidebar({
 								<Button
 									variant="ghost"
 									size="icon-sm"
-									className="h-6 w-6"
-									onClick={event => {
-										event.stopPropagation();
-										onOpenDialog(
-											"building",
-											"edit",
-											building
-										);
-									}}>
+									className="h-6 w-6 hover:bg-accent hover:text-foreground"
+									onClick={event =>
+										handleEdit(event, building)
+									}>
 									<Edit2 className="h-3 w-3" />
 								</Button>
 
 								<Button
 									variant="ghost"
 									size="icon-sm"
-									className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
-									onClick={event => {
-										event.stopPropagation();
-										onDelete(building.id, building.name);
-									}}>
+									className="h-6 w-6 text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
+									onClick={event =>
+										handleDelete(
+											event,
+											building.id,
+											building.name
+										)
+									}>
 									<Trash2 className="h-3 w-3" />
 								</Button>
 							</div>
@@ -85,12 +106,12 @@ export function InfrastructureSidebar({
 				</div>
 
 				<DashedButton
-					onClick={() => onOpenDialog("building", "create")}
+					onClick={handleCreate}
 					className="w-full justify-start gap-2">
 					<Plus className="h-4 w-4" />
 					Add Building
 				</DashedButton>
 			</div>
-		</aside>
+		</div>
 	);
 }

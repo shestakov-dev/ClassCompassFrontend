@@ -54,9 +54,10 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 
 	const onError = (
 		_err: unknown,
-		_vars: unknown,
+		_variables: unknown,
 		context: MutationContext | undefined
 	) => {
+		// Rollback to the previous value if available
 		if (context?.previousData) {
 			queryClient.setQueryData(queryKey, context.previousData);
 		}
@@ -72,11 +73,11 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "create building",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					const tempBuilding: BuildingEntity = {
 						id: `temp-${Date.now()}`,
-						name: vars.data.name,
-						schoolId: vars.data.schoolId,
+						name: variables.data.name,
+						schoolId: variables.data.schoolId,
 						floors: [],
 						createdAt: new Date().toISOString(),
 						updatedAt: new Date().toISOString(),
@@ -99,10 +100,12 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "update building",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					return performOptimisticUpdate(old =>
-						old.map(b =>
-							b.id === vars.id ? { ...b, ...vars.data } : b
+						old.map(building =>
+							building.id === variables.id
+								? { ...building, ...variables.data }
+								: building
 						)
 					);
 				},
@@ -116,9 +119,9 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "delete building",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					return performOptimisticUpdate(old =>
-						old.filter(b => b.id !== vars.id)
+						old.filter(building => building.id !== variables.id)
 					);
 				},
 				onSuccess: () => toast.success("Building deleted"),
@@ -132,12 +135,12 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "create floor",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					const tempFloor: FloorEntity = {
 						id: `temp-${Date.now()}`,
-						number: vars.data.number,
-						description: vars.data.description || "",
-						buildingId: vars.data.buildingId,
+						number: variables.data.number,
+						description: variables.data.description || "",
+						buildingId: variables.data.buildingId,
 						rooms: [],
 						createdAt: new Date().toISOString(),
 						updatedAt: new Date().toISOString(),
@@ -147,7 +150,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 
 					return performOptimisticUpdate(old =>
 						old.map(building => {
-							if (building.id !== vars.data.buildingId)
+							if (building.id !== variables.data.buildingId)
 								return building;
 							return {
 								...building,
@@ -166,13 +169,13 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "update floor",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					return performOptimisticUpdate(old =>
 						old.map(building => ({
 							...building,
 							floors: building.floors?.map(floor =>
-								floor.id === vars.id
-									? { ...floor, ...vars.data }
+								floor.id === variables.id
+									? { ...floor, ...variables.data }
 									: floor
 							),
 						}))
@@ -188,12 +191,12 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "delete floor",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					return performOptimisticUpdate(old =>
 						old.map(building => ({
 							...building,
 							floors: building.floors?.filter(
-								f => f.id !== vars.id
+								f => f.id !== variables.id
 							),
 						}))
 					);
@@ -209,11 +212,11 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "create room",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					const tempRoom: RoomEntity = {
 						id: `temp-${Date.now()}`,
-						name: vars.data.name,
-						floorId: vars.data.floorId,
+						name: variables.data.name,
+						floorId: variables.data.floorId,
 						createdAt: new Date().toISOString(),
 						updatedAt: new Date().toISOString(),
 						deleted: false,
@@ -224,7 +227,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 						old.map(building => ({
 							...building,
 							floors: building.floors?.map(floor => {
-								if (floor.id !== vars.data.floorId)
+								if (floor.id !== variables.data.floorId)
 									return floor;
 								return {
 									...floor,
@@ -244,15 +247,15 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "update room",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					return performOptimisticUpdate(old =>
 						old.map(building => ({
 							...building,
 							floors: building.floors?.map(floor => ({
 								...floor,
 								rooms: floor.rooms?.map(room =>
-									room.id === vars.id
-										? { ...room, ...vars.data }
+									room.id === variables.id
+										? { ...room, ...variables.data }
 										: room
 								),
 							})),
@@ -269,14 +272,14 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				meta: {
 					operationContext: "delete room",
 				},
-				onMutate: async vars => {
+				onMutate: async variables => {
 					return performOptimisticUpdate(old =>
 						old.map(building => ({
 							...building,
 							floors: building.floors?.map(floor => ({
 								...floor,
 								rooms: floor.rooms?.filter(
-									r => r.id !== vars.id
+									r => r.id !== variables.id
 								),
 							})),
 						}))

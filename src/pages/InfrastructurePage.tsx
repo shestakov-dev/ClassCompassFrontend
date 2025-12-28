@@ -1,5 +1,5 @@
 import { useState, useEffect, useEffectEvent } from "react";
-import { Building, Edit2, Trash2, Plus, MoreVertical } from "lucide-react";
+import { Building, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Sheet,
@@ -8,13 +8,6 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { useSession } from "@/context/session-context";
 import { Route } from "@/routes/infrastructure";
 import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
@@ -24,6 +17,7 @@ import type {
 	RoomEntity,
 } from "@/api/generated/models";
 import { InfrastructureSidebar } from "@/components/infrastructure/infrastructure-sidebar";
+import { InfrastructureMobileMenu } from "@/components/infrastructure/infrastructure-mobile-menu";
 import {
 	FloorItem,
 	EmptyFloorState,
@@ -76,7 +70,9 @@ export default function InfrastructurePage() {
 	);
 
 	const mutations = useInfrastructureMutations(user?.schoolId);
-	const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
+	const selectedBuilding = buildings.find(
+		building => building.id === selectedBuildingId
+	);
 
 	// Select the first building if none is selected
 	useEffect(() => {
@@ -87,7 +83,7 @@ export default function InfrastructurePage() {
 
 	useEffectEvent(() => {
 		if (selectedBuilding?.floors) {
-			setOpenFloorIds(selectedBuilding.floors.map(f => f.id));
+			setOpenFloorIds(selectedBuilding.floors.map(floor => floor.id));
 		}
 	});
 
@@ -108,12 +104,12 @@ export default function InfrastructurePage() {
 		setDeleteConfirm({ open: true, type, id, name });
 	};
 
-	const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
 
 		const { type, mode, data, parentId } = dialogState;
 
-		const formData = new FormData(e.currentTarget);
+		const formData = new FormData(event.currentTarget);
 		const formValues = Object.fromEntries(formData.entries());
 
 		if (type === "building") {
@@ -173,7 +169,7 @@ export default function InfrastructurePage() {
 			mutations.deleteBuilding.mutate({ id });
 			if (selectedBuildingId === id)
 				setSelectedBuildingId(
-					buildings.find(b => b.id !== id)?.id ?? ""
+					buildings.find(building => building.id !== id)?.id ?? ""
 				);
 		} else if (type === "floor") mutations.deleteFloor.mutate({ id });
 		else if (type === "room") mutations.deleteRoom.mutate({ id });
@@ -181,22 +177,12 @@ export default function InfrastructurePage() {
 	};
 
 	const toggleFloor = (floorId: string) => {
-		setOpenFloorIds(prev =>
-			prev.includes(floorId)
-				? prev.filter(id => id !== floorId)
-				: [...prev, floorId]
+		setOpenFloorIds(previousIds =>
+			previousIds.includes(floorId)
+				? previousIds.filter(id => id !== floorId)
+				: [...previousIds, floorId]
 		);
 	};
-
-	// if (isLoading) {
-	// 	return (
-	// 		<div className="flex h-full items-center justify-center">
-	// 			<div className="animate-spin">
-	// 				<Building className="h-8 w-8 text-muted-foreground" />
-	// 			</div>
-	// 		</div>
-	// 	);
-	// }
 
 	return (
 		<div className="flex flex-1 w-full h-full bg-background text-foreground font-sans overflow-hidden">
@@ -230,96 +216,23 @@ export default function InfrastructurePage() {
 							</Button>
 						</SheetTrigger>
 						<SheetContent side="right" className="w-72">
-							<SheetHeader className="mb-4 text-left">
-								<SheetTitle>Buildings</SheetTitle>
+							<SheetHeader className="text-left">
+								<SheetTitle className="flex items-center gap-2">
+									<Building className="w-5 h-5 text-primary" />
+									<span>Infrastructure</span>
+								</SheetTitle>
 							</SheetHeader>
 
-							<div className="space-y-1 px-1">
-								{buildings.map(building => (
-									<div
-										key={building.id}
-										className={cn(
-											"flex items-center justify-between rounded-md transition-colors group",
-											selectedBuildingId === building.id
-												? "bg-secondary text-secondary-foreground"
-												: "hover:bg-muted/50"
-										)}>
-										<div
-											className="flex-1 flex items-center p-2 min-w-0 cursor-pointer"
-											onClick={() => {
-												setSelectedBuildingId(
-													building.id
-												);
-												setIsMobileMenuOpen(false);
-											}}>
-											<Building className="mr-2 h-4 w-4 shrink-0" />
-											<span className="truncate text-sm font-medium">
-												{building.name}
-											</span>
-										</div>
-
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon-sm"
-													className={cn(
-														"h-9 w-9 shrink-0 rounded-l-none",
-														selectedBuildingId ===
-															building.id
-															? "text-secondary-foreground hover:bg-secondary-foreground/10"
-															: "text-muted-foreground"
-													)}>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-
-											<DropdownMenuContent align="end">
-												<DropdownMenuItem
-													onClick={() => {
-														setIsMobileMenuOpen(
-															false
-														);
-														openDialog(
-															"building",
-															"edit",
-															building
-														);
-													}}>
-													<Edit2 className="mr-2 h-3.5 w-3.5" />{" "}
-													Edit
-												</DropdownMenuItem>
-
-												<DropdownMenuItem
-													onClick={() => {
-														setIsMobileMenuOpen(
-															false
-														);
-														handleDelete(
-															"building",
-															building.id,
-															building.name
-														);
-													}}
-													className="text-destructive focus:text-destructive">
-													<Trash2 className="mr-2 h-3.5 w-3.5 text-destructive" />{" "}
-													Delete
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</div>
-								))}
-
-								<DashedButton
-									onClick={() => {
-										setIsMobileMenuOpen(false);
-										openDialog("building", "create");
-									}}
-									className="w-full mt-4">
-									<Plus className="mr-2 h-4 w-4" />
-									Add Building
-								</DashedButton>
-							</div>
+							<InfrastructureMobileMenu
+								buildings={buildings}
+								selectedId={selectedBuildingId}
+								onSelect={setSelectedBuildingId}
+								onOpenDialog={openDialog}
+								onDelete={(id, name) =>
+									handleDelete("building", id, name)
+								}
+								onClose={() => setIsMobileMenuOpen(false)}
+							/>
 						</SheetContent>
 					</Sheet>
 				</div>

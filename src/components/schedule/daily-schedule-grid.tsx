@@ -62,8 +62,8 @@ const EventCard = ({ event, onClick }: EventCardProps) => {
 
 	return (
 		<div
-			onClick={e => {
-				e.stopPropagation();
+			onClick={clickEvent => {
+				clickEvent.stopPropagation();
 				onClick?.(event);
 			}}
 			className={cn(eventCardVariants({ variant }))}

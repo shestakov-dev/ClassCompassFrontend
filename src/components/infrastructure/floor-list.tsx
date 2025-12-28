@@ -90,8 +90,8 @@ export function FloorItem({
 	onEditFloor: () => void;
 	onDeleteFloor: () => void;
 	onAddRoom: () => void;
-	onEditRoom: (r: RoomEntity) => void;
-	onDeleteRoom: (r: RoomEntity) => void;
+	onEditRoom: (room: RoomEntity) => void;
+	onDeleteRoom: (room: RoomEntity) => void;
 }) {
 	return (
 		<Collapsible
@@ -136,8 +136,8 @@ export function FloorItem({
 						variant="ghost"
 						size="icon-sm"
 						className="text-muted-foreground hover:text-foreground hover:bg-accent"
-						onClick={e => {
-							e.stopPropagation();
+						onClick={event => {
+							event.stopPropagation();
 							onEditFloor();
 						}}>
 						<Edit2 className="h-4 w-4" />
@@ -146,8 +146,8 @@ export function FloorItem({
 						variant="ghost"
 						size="icon-sm"
 						className="text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
-						onClick={e => {
-							e.stopPropagation();
+						onClick={event => {
+							event.stopPropagation();
 							onDeleteFloor();
 						}}>
 						<Trash2 className="h-4 w-4" />
