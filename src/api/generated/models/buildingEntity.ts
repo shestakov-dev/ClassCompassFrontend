@@ -26,11 +26,4 @@ export interface BuildingEntity {
 	createdAt: string;
 	/** The date the building was last updated */
 	updatedAt: string;
-	/** Whether the building is deleted */
-	deleted: boolean;
-	/**
-	 * The date the building was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

@@ -26,11 +26,4 @@ export interface StudentEntity {
 	createdAt: string;
 	/** The time the student was last updated */
 	updatedAt: string;
-	/** Whether the student has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the student was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

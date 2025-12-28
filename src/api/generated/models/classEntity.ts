@@ -23,11 +23,4 @@ export interface ClassEntity {
 	createdAt: string;
 	/** The time the class was last updated */
 	updatedAt: string;
-	/** Whether the class has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the class was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

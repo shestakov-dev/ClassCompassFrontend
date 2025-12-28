@@ -18,11 +18,4 @@ export interface SchoolEntity {
 	createdAt: string;
 	/** The time the school was last updated */
 	updatedAt: string;
-	/** Whether the school has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the school was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

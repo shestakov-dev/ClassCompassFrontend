@@ -31,11 +31,4 @@ export interface FloorEntity {
 	createdAt: string;
 	/** The time the floor was last updated */
 	updatedAt: string;
-	/** Whether the floor has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the floor was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

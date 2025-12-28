@@ -45,11 +45,4 @@ export interface LessonEntity {
 	createdAt: string;
 	/** The time the lesson was last updated */
 	updatedAt: string;
-	/** Whether the lesson has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the lesson was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

@@ -24,11 +24,4 @@ export interface DailyScheduleEntity {
 	createdAt: string;
 	/** The time the daily schedule was last updated */
 	updatedAt: string;
-	/** Whether the daily schedule has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the daily schedule was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

@@ -24,11 +24,4 @@ export interface TeacherEntity {
 	createdAt: string;
 	/** The time the teacher was last updated */
 	updatedAt: string;
-	/** Whether the teacher has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the teacher was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

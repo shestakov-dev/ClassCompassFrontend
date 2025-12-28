@@ -23,11 +23,4 @@ export interface RoomEntity {
 	createdAt: string;
 	/** The time the room was last updated */
 	updatedAt: string;
-	/** Whether the room has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the room was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

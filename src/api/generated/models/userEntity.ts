@@ -41,11 +41,4 @@ export interface UserEntity {
 	createdAt: string;
 	/** The time the user was last updated */
 	updatedAt: string;
-	/** Whether the user has been deleted */
-	deleted: boolean;
-	/**
-	 * The time the user was deleted
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }

@@ -26,11 +26,4 @@ export interface SubjectEntity {
 	createdAt: string;
 	/** The subject's last update date */
 	updatedAt: string;
-	/** Whether the subject is deleted */
-	deleted: boolean;
-	/**
-	 * The subject's deletion date
-	 * @nullable
-	 */
-	deletedAt: string | null;
 }
