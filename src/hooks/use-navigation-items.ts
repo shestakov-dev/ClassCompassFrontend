@@ -41,6 +41,9 @@ export function useNavigationItems() {
 		{
 			query: {
 				enabled: !!user?.schoolId && !!user?.id,
+				meta: {
+					operationContext: "check admin status",
+				},
 			},
 		}
 	);
