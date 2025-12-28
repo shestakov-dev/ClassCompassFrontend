@@ -45,6 +45,7 @@ export default function InfrastructurePage() {
 	const { user } = useSession();
 	const { buildingId: selectedBuildingId } = Route.useSearch();
 	const navigate = Route.useNavigate();
+
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const [openFloorIds, setOpenFloorIds] = useState<string[]>([]);
 
@@ -62,15 +63,17 @@ export default function InfrastructurePage() {
 		name: "",
 	});
 
-	const { data: buildings = [], isLoading } =
-		useBuildingsControllerFindAllBySchool(user?.schoolId ?? "", {
+	const { data: buildings = [] } = useBuildingsControllerFindAllBySchool(
+		user?.schoolId ?? "",
+		{
 			query: {
 				enabled: !!user?.schoolId,
 				meta: {
 					operationContext: "load buildings",
 				},
 			},
-		});
+		}
+	);
 
 	const mutations = useInfrastructureMutations(user?.schoolId);
 	const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
@@ -185,12 +188,15 @@ export default function InfrastructurePage() {
 		);
 	};
 
-	if (isLoading)
-		return (
-			<div className="flex h-full items-center justify-center text-muted-foreground">
-				Loading infrastructure...
-			</div>
-		);
+	// if (isLoading) {
+	// 	return (
+	// 		<div className="flex h-full items-center justify-center">
+	// 			<div className="animate-spin">
+	// 				<Building className="h-8 w-8 text-muted-foreground" />
+	// 			</div>
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<div className="flex flex-1 w-full h-full bg-background text-foreground font-sans overflow-hidden">
