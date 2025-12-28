@@ -13,8 +13,6 @@ import type { UpdateLessonDtoLessonWeek } from "./updateLessonDtoLessonWeek";
 export interface UpdateLessonDto {
 	/** The lesson's week */
 	lessonWeek?: UpdateLessonDtoLessonWeek;
-	/** The lesson's number in the daily schedule */
-	lessonNumber?: number;
 	/** The lesson's start time */
 	startTime?: string;
 	/** The lesson's end time */
