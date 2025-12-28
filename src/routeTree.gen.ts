@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InfrastructureRouteImport } from './routes/infrastructure'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ScheduleRoute = ScheduleRouteImport.update({
@@ -29,6 +30,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InfrastructureRoute = InfrastructureRouteImport.update({
+  id: '/infrastructure',
+  path: '/infrastructure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/schedule': typeof ScheduleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/schedule': typeof ScheduleRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/schedule': typeof ScheduleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/logout' | '/schedule'
+  fullPaths: '/' | '/infrastructure' | '/login' | '/logout' | '/schedule'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/logout' | '/schedule'
-  id: '__root__' | '/' | '/login' | '/logout' | '/schedule'
+  to: '/' | '/infrastructure' | '/login' | '/logout' | '/schedule'
+  id: '__root__' | '/' | '/infrastructure' | '/login' | '/logout' | '/schedule'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  InfrastructureRoute: typeof InfrastructureRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   ScheduleRoute: typeof ScheduleRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/infrastructure': {
+      id: '/infrastructure'
+      path: '/infrastructure'
+      fullPath: '/infrastructure'
+      preLoaderRoute: typeof InfrastructureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  InfrastructureRoute: InfrastructureRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   ScheduleRoute: ScheduleRoute,

@@ -586,6 +586,185 @@ export const useSchoolsControllerRemove = <
 	return useMutation(mutationOptions, queryClient);
 };
 /**
+ * @summary Check if a user is an admin in a school
+ */
+export const schoolsControllerIsAdmin = (
+	id: string,
+	userId: string,
+	signal?: AbortSignal
+) => {
+	return customInstance<boolean>({
+		url: `https://api.classcompass.shestakov.app/schools/${id}/admins/${userId}`,
+		method: "GET",
+		signal,
+	});
+};
+
+export const getSchoolsControllerIsAdminQueryKey = (
+	id?: string,
+	userId?: string
+) => {
+	return [
+		`https://api.classcompass.shestakov.app/schools/${id}/admins/${userId}`,
+	] as const;
+};
+
+export const getSchoolsControllerIsAdminQueryOptions = <
+	TData = Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+	TError = unknown,
+>(
+	id: string,
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+				TError,
+				TData
+			>
+		>;
+	}
+) => {
+	const { query: queryOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ??
+		getSchoolsControllerIsAdminQueryKey(id, userId);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof schoolsControllerIsAdmin>>
+	> = ({ signal }) => schoolsControllerIsAdmin(id, userId, signal);
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!(id && userId),
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type SchoolsControllerIsAdminQueryResult = NonNullable<
+	Awaited<ReturnType<typeof schoolsControllerIsAdmin>>
+>;
+export type SchoolsControllerIsAdminQueryError = unknown;
+
+export function useSchoolsControllerIsAdmin<
+	TData = Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+	TError = unknown,
+>(
+	id: string,
+	userId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+					TError,
+					Awaited<ReturnType<typeof schoolsControllerIsAdmin>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSchoolsControllerIsAdmin<
+	TData = Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+	TError = unknown,
+>(
+	id: string,
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+					TError,
+					Awaited<ReturnType<typeof schoolsControllerIsAdmin>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSchoolsControllerIsAdmin<
+	TData = Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+	TError = unknown,
+>(
+	id: string,
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Check if a user is an admin in a school
+ */
+
+export function useSchoolsControllerIsAdmin<
+	TData = Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+	TError = unknown,
+>(
+	id: string,
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerIsAdmin>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getSchoolsControllerIsAdminQueryOptions(
+		id,
+		userId,
+		options
+	);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
  * @summary Promote a member to admin in a school
  */
 export const schoolsControllerPromoteToAdmin = (

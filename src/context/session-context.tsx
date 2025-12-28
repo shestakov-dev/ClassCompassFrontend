@@ -51,6 +51,9 @@ export function SessionProvider({
 			query: {
 				enabled: isAuthenticated && !!identityId,
 				placeholderData: keepPreviousData,
+				meta: {
+					operationContext: "load user data",
+				},
 			},
 		}
 	);
