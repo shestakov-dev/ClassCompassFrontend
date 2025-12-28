@@ -1,6 +1,6 @@
 import type { LinkProps } from "@tanstack/react-router";
 
-export type NavVisibility = "authenticated" | "guest";
+export type NavVisibility = "authenticated" | "guest" | "admin";
 
 export interface BaseNavItem {
 	title: string;

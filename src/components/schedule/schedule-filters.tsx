@@ -322,7 +322,7 @@ export function ScheduleFilters({
 						<Button
 							variant="ghost"
 							size="sm"
-							className="p-0 hover:bg-transparent h-auto font-semibold">
+							className="p-0 hover:bg-transparent h-auto font-semibold cursor-pointer">
 							<span className="flex items-center gap-2">
 								<Filter className="h-4 w-4 text-muted-foreground" />
 								<span>Filters</span>
