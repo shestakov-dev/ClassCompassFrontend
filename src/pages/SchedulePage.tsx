@@ -73,24 +73,59 @@ export default function SchedulePage() {
 			enabled: !!user?.schoolId,
 			staleTime: 1000 * 60 * 1,
 			placeholderData: keepPreviousData,
+			meta: {
+				operationContext: "load lessons",
+			},
 		},
 	});
 
 	const { data: classes } = useClassesControllerFindAllBySchool(
 		user?.schoolId ?? "",
-		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+		{
+			query: {
+				enabled: !!user?.schoolId,
+				staleTime: 1000 * 60 * 1,
+				meta: {
+					operationContext: "load classes",
+				},
+			},
+		}
 	);
 	const { data: subjects } = useSubjectsControllerFindAllBySchool(
 		user?.schoolId ?? "",
-		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+		{
+			query: {
+				enabled: !!user?.schoolId,
+				staleTime: 1000 * 60 * 1,
+				meta: {
+					operationContext: "load subjects",
+				},
+			},
+		}
 	);
 	const { data: teachers } = useTeachersControllerFindAllBySchool(
 		user?.schoolId ?? "",
-		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+		{
+			query: {
+				enabled: !!user?.schoolId,
+				staleTime: 1000 * 60 * 1,
+				meta: {
+					operationContext: "load teachers",
+				},
+			},
+		}
 	);
 	const { data: buildings } = useBuildingsControllerFindAllBySchool(
 		user?.schoolId ?? "",
-		{ query: { enabled: !!user?.schoolId, staleTime: 1000 * 60 * 1 } }
+		{
+			query: {
+				enabled: !!user?.schoolId,
+				staleTime: 1000 * 60 * 1,
+				meta: {
+					operationContext: "load buildings",
+				},
+			},
+		}
 	);
 
 	const hasLessons = lessons && lessons.length > 0;

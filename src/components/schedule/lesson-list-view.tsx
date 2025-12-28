@@ -27,8 +27,8 @@ interface LessonListViewProps {
 }
 
 const WEEK_BADGE_STYLES = {
-	[LessonWeek.odd]: "bg-chart-3 text-chart-3-foreground",
-	[LessonWeek.even]: "bg-chart-4 text-chart-4-foreground",
+	[LessonWeek.odd]: "bg-chart-3 text-white",
+	[LessonWeek.even]: "bg-chart-4 text-black",
 	[LessonWeek.every]: "bg-primary text-primary-foreground",
 };
 

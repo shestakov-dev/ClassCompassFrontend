@@ -49,7 +49,7 @@ export const Route = createFileRoute("/schedule")({
 		const identityId = session.identity?.id;
 
 		if (!identityId) {
-			return;
+			throw redirect({ to: "/login" });
 		}
 
 		const user = await queryClient.ensureQueryData({
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/schedule")({
 		});
 
 		if (!user.schoolId) {
-			return;
+			throw redirect({ to: "/" });
 		}
 
 		const apiFilters = buildScheduleFilters(user, search);

@@ -15,7 +15,18 @@ export const queryClient = new QueryClient({
 				return;
 			}
 
-			toast.error(getErrorMessage(error));
+			const errorMessage = getErrorMessage(error);
+			const operationContext = query.meta?.operationContext as
+				| string
+				| undefined;
+
+			if (operationContext) {
+				toast.error(`Failed to ${operationContext}`, {
+					description: errorMessage,
+				});
+			} else {
+				toast.error(errorMessage);
+			}
 		},
 	}),
 	mutationCache: new MutationCache({
@@ -24,7 +35,18 @@ export const queryClient = new QueryClient({
 				return;
 			}
 
-			toast.error(getErrorMessage(error));
+			const errorMessage = getErrorMessage(error);
+			const operationContext = mutation.meta?.operationContext as
+				| string
+				| undefined;
+
+			if (operationContext) {
+				toast.error(`Failed to ${operationContext}`, {
+					description: errorMessage,
+				});
+			} else {
+				toast.error(errorMessage);
+			}
 		},
 	}),
 });
