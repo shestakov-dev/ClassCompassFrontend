@@ -19,8 +19,6 @@ export interface LessonEntity {
 	lessonWeek: LessonEntityLessonWeek;
 	/** The lesson's unique identifier */
 	id: string;
-	/** The lesson's number in the daily schedule */
-	lessonNumber: number;
 	/** The lesson's start time */
 	startTime: string;
 	/** The lesson's end time */
