@@ -1,7 +1,7 @@
 import {
 	Filter,
 	X,
-	Calendar as CalendarIcon,
+	CalendarIcon,
 	ChevronsUpDown,
 	CalendarDays,
 	CalendarRange,
