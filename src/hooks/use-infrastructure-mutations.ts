@@ -137,7 +137,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 					const tempFloor: FloorEntity = {
 						id: `temp-${Date.now()}`,
 						number: variables.data.number,
-						description: variables.data.description || "",
+						description: variables.data.description ?? "",
 						buildingId: variables.data.buildingId,
 						rooms: [],
 						createdAt: new Date().toISOString(),
@@ -150,7 +150,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 								return building;
 							return {
 								...building,
-								floors: [...(building.floors || []), tempFloor],
+								floors: [...(building.floors ?? []), tempFloor],
 							};
 						})
 					);
