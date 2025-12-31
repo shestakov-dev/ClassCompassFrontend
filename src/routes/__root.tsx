@@ -1,15 +1,9 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Navbar } from "@/components/navbar";
-import type { QueryClient } from "@tanstack/react-query";
-import type { Session } from "@ory/client-fetch";
+import type { RouterContext } from "@/router";
 import ErrorPage from "@/pages/ErrorPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
-
-interface RouterContext {
-	queryClient: QueryClient;
-	session: Session | null;
-}
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	component: RootComponent,

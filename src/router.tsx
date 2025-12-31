@@ -1,12 +1,19 @@
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "@/routeTree.gen";
 import { queryClient } from "@/lib/query-client";
+import type { QueryClient } from "@tanstack/react-query";
+import type { Session } from "@ory/client-fetch";
+
+export interface RouterContext {
+	queryClient: QueryClient;
+	session: Session | null;
+}
 
 export const router = createRouter({
 	routeTree,
 	context: {
 		queryClient,
-		session: null!,
+		session: null,
 	},
 	defaultPreload: "intent",
 	defaultPreloadStaleTime: 0,

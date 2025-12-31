@@ -1,12 +1,8 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { requireGuest } from "@/lib/route-guards";
 import HomePage from "@/pages/HomePage";
 
 export const Route = createFileRoute("/")({
-	beforeLoad: ({ context }) => {
-		// If the user is logged in, redirect to the schedule page
-		if (context.session) {
-			throw redirect({ to: "/schedule" });
-		}
-	},
+	beforeLoad: ({ context }) => requireGuest(context),
 	component: HomePage,
 });

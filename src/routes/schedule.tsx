@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import {
 	getLessonsControllerFindFilteredQueryKey,
@@ -6,10 +6,7 @@ import {
 } from "@/api/generated/endpoints/lessons/lessons";
 import { Day, LessonWeek } from "@/types/schedule";
 import { buildScheduleFilters } from "@/lib/schedule-utils";
-import {
-	getUsersControllerFindByIdentityIdQueryKey,
-	usersControllerFindByIdentityId,
-} from "@/api/generated/endpoints/users/users";
+import { requireAuth } from "@/lib/route-guards";
 import SchedulePage from "@/pages/SchedulePage";
 
 const scheduleSearchSchema = z.object({
@@ -35,35 +32,15 @@ export const Route = createFileRoute("/schedule")({
 	validateSearch: search => scheduleSearchSchema.parse(search),
 	loaderDeps: ({ search }) => search,
 	loader: async ({
-		context: { queryClient, session },
+		context,
 		deps: search,
 		location,
 	}) => {
-		if (!session) {
-			throw redirect({
-				to: "/login",
-				search: { return_to: location.href },
-			});
-		}
-
-		const identityId = session.identity?.id;
-
-		if (!identityId) {
-			throw redirect({ to: "/login" });
-		}
-
-		const user = await queryClient.ensureQueryData({
-			queryKey: getUsersControllerFindByIdentityIdQueryKey(identityId),
-			queryFn: () => usersControllerFindByIdentityId(identityId),
-		});
-
-		if (!user.schoolId) {
-			throw redirect({ to: "/" });
-		}
+		const user = await requireAuth(context, location.href);
 
 		const apiFilters = buildScheduleFilters(user, search);
 
-		queryClient.prefetchQuery({
+		context.queryClient.prefetchQuery({
 			queryKey: getLessonsControllerFindFilteredQueryKey(
 				user.schoolId,
 				apiFilters
