@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
-import { getErrorMessage } from "./error-parsing";
+import { getErrorMessage } from "@/lib/error-parsing";
 import { toast } from "sonner";
 
 export const queryClient = new QueryClient({

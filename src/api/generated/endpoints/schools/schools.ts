@@ -25,6 +25,7 @@ import type {
 	CreateSchoolDto,
 	SchoolEntity,
 	UpdateSchoolDto,
+	UserEntity,
 } from "../../models";
 
 import { customInstance } from "../../../mutators/custom-instance";
@@ -586,6 +587,91 @@ export const useSchoolsControllerRemove = <
 	return useMutation(mutationOptions, queryClient);
 };
 /**
+ * @summary Promote a member to admin in a school
+ */
+export const schoolsControllerPromoteToAdmin = (
+	id: string,
+	userId: string,
+	signal?: AbortSignal
+) => {
+	return customInstance<void>({
+		url: `https://api.classcompass.shestakov.app/schools/${id}/admins/${userId}`,
+		method: "POST",
+		signal,
+	});
+};
+
+export const getSchoolsControllerPromoteToAdminMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
+		TError,
+		{ id: string; userId: string },
+		TContext
+	>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
+	TError,
+	{ id: string; userId: string },
+	TContext
+> => {
+	const mutationKey = ["schoolsControllerPromoteToAdmin"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
+		{ id: string; userId: string }
+	> = props => {
+		const { id, userId } = props ?? {};
+
+		return schoolsControllerPromoteToAdmin(id, userId);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type SchoolsControllerPromoteToAdminMutationResult = NonNullable<
+	Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>
+>;
+
+export type SchoolsControllerPromoteToAdminMutationError = unknown;
+
+/**
+ * @summary Promote a member to admin in a school
+ */
+export const useSchoolsControllerPromoteToAdmin = <
+	TError = unknown,
+	TContext = unknown,
+>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
+			TError,
+			{ id: string; userId: string },
+			TContext
+		>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
+	TError,
+	{ id: string; userId: string },
+	TContext
+> => {
+	const mutationOptions =
+		getSchoolsControllerPromoteToAdminMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Check if a user is an admin in a school
  */
 export const schoolsControllerIsAdmin = (
@@ -765,91 +851,6 @@ export function useSchoolsControllerIsAdmin<
 }
 
 /**
- * @summary Promote a member to admin in a school
- */
-export const schoolsControllerPromoteToAdmin = (
-	id: string,
-	userId: string,
-	signal?: AbortSignal
-) => {
-	return customInstance<void>({
-		url: `https://api.classcompass.shestakov.app/schools/${id}/admins/${userId}`,
-		method: "POST",
-		signal,
-	});
-};
-
-export const getSchoolsControllerPromoteToAdminMutationOptions = <
-	TError = unknown,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
-		TError,
-		{ id: string; userId: string },
-		TContext
-	>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
-	TError,
-	{ id: string; userId: string },
-	TContext
-> => {
-	const mutationKey = ["schoolsControllerPromoteToAdmin"];
-	const { mutation: mutationOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
-			? options
-			: { ...options, mutation: { ...options.mutation, mutationKey } }
-		: { mutation: { mutationKey } };
-
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
-		{ id: string; userId: string }
-	> = props => {
-		const { id, userId } = props ?? {};
-
-		return schoolsControllerPromoteToAdmin(id, userId);
-	};
-
-	return { mutationFn, ...mutationOptions };
-};
-
-export type SchoolsControllerPromoteToAdminMutationResult = NonNullable<
-	Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>
->;
-
-export type SchoolsControllerPromoteToAdminMutationError = unknown;
-
-/**
- * @summary Promote a member to admin in a school
- */
-export const useSchoolsControllerPromoteToAdmin = <
-	TError = unknown,
-	TContext = unknown,
->(
-	options?: {
-		mutation?: UseMutationOptions<
-			Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
-			TError,
-			{ id: string; userId: string },
-			TContext
-		>;
-	},
-	queryClient?: QueryClient
-): UseMutationResult<
-	Awaited<ReturnType<typeof schoolsControllerPromoteToAdmin>>,
-	TError,
-	{ id: string; userId: string },
-	TContext
-> => {
-	const mutationOptions =
-		getSchoolsControllerPromoteToAdminMutationOptions(options);
-
-	return useMutation(mutationOptions, queryClient);
-};
-/**
  * @summary Demote an admin to member in a school
  */
 export const schoolsControllerDemoteFromAdmin = (
@@ -932,3 +933,167 @@ export const useSchoolsControllerDemoteFromAdmin = <
 
 	return useMutation(mutationOptions, queryClient);
 };
+/**
+ * @summary Get all admins of a school
+ */
+export const schoolsControllerGetAdmins = (
+	id: string,
+	signal?: AbortSignal
+) => {
+	return customInstance<UserEntity[]>({
+		url: `https://api.classcompass.shestakov.app/schools/${id}/admins`,
+		method: "GET",
+		signal,
+	});
+};
+
+export const getSchoolsControllerGetAdminsQueryKey = (id?: string) => {
+	return [
+		`https://api.classcompass.shestakov.app/schools/${id}/admins`,
+	] as const;
+};
+
+export const getSchoolsControllerGetAdminsQueryOptions = <
+	TData = Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+				TError,
+				TData
+			>
+		>;
+	}
+) => {
+	const { query: queryOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getSchoolsControllerGetAdminsQueryKey(id);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof schoolsControllerGetAdmins>>
+	> = ({ signal }) => schoolsControllerGetAdmins(id, signal);
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type SchoolsControllerGetAdminsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof schoolsControllerGetAdmins>>
+>;
+export type SchoolsControllerGetAdminsQueryError = unknown;
+
+export function useSchoolsControllerGetAdmins<
+	TData = Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+	TError = unknown,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+					TError,
+					Awaited<ReturnType<typeof schoolsControllerGetAdmins>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSchoolsControllerGetAdmins<
+	TData = Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+					TError,
+					Awaited<ReturnType<typeof schoolsControllerGetAdmins>>
+				>,
+				"initialData"
+			>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSchoolsControllerGetAdmins<
+	TData = Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get all admins of a school
+ */
+
+export function useSchoolsControllerGetAdmins<
+	TData = Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof schoolsControllerGetAdmins>>,
+				TError,
+				TData
+			>
+		>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getSchoolsControllerGetAdminsQueryOptions(id, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}

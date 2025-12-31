@@ -20,6 +20,12 @@ export const NAV_ITEMS: readonly MainNavItem[] = [
 		visibility: "admin",
 		type: "link",
 	},
+	{
+		title: "Users",
+		href: "/users",
+		visibility: "admin",
+		type: "link",
+	},
 ] as const;
 
 export const NAV_BUTTONS: readonly NavButton[] = [
