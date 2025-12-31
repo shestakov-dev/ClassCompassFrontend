@@ -9,6 +9,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+	Empty,
+	EmptyHeader,
+	EmptyTitle,
+	EmptyDescription,
+	EmptyMedia,
+	EmptyContent,
+} from "@/components/ui/empty";
+import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
@@ -158,23 +166,25 @@ export function FloorItem({
 			<CollapsibleContent>
 				<div className="px-3 pb-4 pt-1">
 					{!floor.rooms || floor.rooms.length === 0 ? (
-						<div className="flex flex-col items-center justify-center py-8 px-4 border-2 border-dashed rounded-lg bg-muted/20 text-center">
-							<div className="bg-background p-3 rounded-full shadow-sm mb-3">
-								<DoorOpen className="h-6 w-6 text-muted-foreground" />
-							</div>
-							<h4 className="text-sm font-semibold mb-1">
-								No rooms yet
-							</h4>
-							<p className="text-xs text-muted-foreground mb-4 max-w-xs">
-								Add the first room to this floor.
-							</p>
-							<Button
-								onClick={onAddRoom}
-								size="sm"
-								className="gap-2">
-								<Plus className="h-3.5 w-3.5" /> Add Room
-							</Button>
-						</div>
+						<Empty className="border-dashed">
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<DoorOpen className="h-5 w-5" />
+								</EmptyMedia>
+								<EmptyTitle>No rooms yet</EmptyTitle>
+								<EmptyDescription>
+									Add the first room to this floor
+								</EmptyDescription>
+							</EmptyHeader>
+							<EmptyContent>
+								<Button
+									onClick={onAddRoom}
+									size="sm"
+									className="gap-2">
+									<Plus className="h-3.5 w-3.5" /> Add Room
+								</Button>
+							</EmptyContent>
+						</Empty>
 					) : (
 						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
 							{floor.rooms.map(room => (
@@ -205,20 +215,24 @@ export function EmptyFloorState({
 	onAddFirstFloor: () => void;
 }) {
 	return (
-		<div className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed rounded-xl bg-muted/20 text-center animate-in fade-in duration-500">
-			<div className="bg-background p-4 rounded-full shadow-sm mb-4">
-				<Layers className="h-8 w-8 text-muted-foreground/70" />
-			</div>
-			<h3 className="text-xl font-semibold mb-2">No floors yet</h3>
-			<p className="text-muted-foreground mb-8 max-w-sm">
-				This building is empty. Start by adding the first floor.
-			</p>
-			<Button
-				size="lg"
-				onClick={onAddFirstFloor}
-				className="w-full sm:w-auto min-w-35 cursor-pointer">
-				<Plus className="mr-2 h-4 w-4" /> Add First Floor
-			</Button>
-		</div>
+		<Empty className="border-dashed animate-in fade-in duration-500">
+			<EmptyHeader>
+				<EmptyMedia variant="icon">
+					<Layers className="h-6 w-6" />
+				</EmptyMedia>
+				<EmptyTitle>No floors yet</EmptyTitle>
+				<EmptyDescription>
+					This building is empty. Start by adding the first floor
+				</EmptyDescription>
+			</EmptyHeader>
+			<EmptyContent>
+				<Button
+					size="lg"
+					onClick={onAddFirstFloor}
+					className="w-full sm:w-auto min-w-35 cursor-pointer">
+					<Plus className="mr-2 h-4 w-4" /> Add First Floor
+				</Button>
+			</EmptyContent>
+		</Empty>
 	);
 }
