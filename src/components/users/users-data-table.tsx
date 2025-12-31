@@ -39,6 +39,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+	Empty,
+	EmptyHeader,
+	EmptyTitle,
+	EmptyDescription,
+	EmptyContent,
+} from "@/components/ui/empty";
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -99,8 +106,12 @@ function CombinedDataTableFilter<TData>({
 	const rolesColumn = table.getColumn("roles");
 	const adminColumn = table.getColumn("admin");
 
-	const rolesFilterValue = rolesColumn?.getFilterValue() as string[] | undefined;
-	const adminFilterValue = adminColumn?.getFilterValue() as string[] | undefined;
+	const rolesFilterValue = rolesColumn?.getFilterValue() as
+		| string[]
+		| undefined;
+	const adminFilterValue = adminColumn?.getFilterValue() as
+		| string[]
+		| undefined;
 
 	const selectedRoles = useMemo(
 		() => new Set(rolesFilterValue ?? []),
@@ -565,34 +576,34 @@ export function UsersDataTable<TData extends UserWithRoles, TValue>({
 						placeholder="Search users..."
 						value={globalFilter}
 						onChange={event => setGlobalFilter(event.target.value)}
-					className="h-8 w-full pl-8 pr-8"
-				/>
-				{globalFilter && (
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => setGlobalFilter("")}
-						className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent">
-						<X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-					</Button>
-				)}
-			</div>
-
-			{/* Action Row */}
-			<div className="flex flex-wrap gap-2 items-center justify-between">
-				{/* Left Side: Filter & Reset */}
-				<div className="flex items-center gap-2">
-					<CombinedDataTableFilter
-						table={table}
-						classes={classes}
-						subjects={subjects}
-						classFilter={classFilter}
-						setClassFilter={setClassFilter}
-						subjectFilter={subjectFilter}
-						setSubjectFilter={setSubjectFilter}
+						className="h-8 w-full pl-8 pr-8"
 					/>
+					{globalFilter && (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => setGlobalFilter("")}
+							className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent">
+							<X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+						</Button>
+					)}
+				</div>
 
-					{isFiltered && (
+				{/* Action Row */}
+				<div className="flex flex-wrap gap-2 items-center justify-between">
+					{/* Left Side: Filter & Reset */}
+					<div className="flex items-center gap-2">
+						<CombinedDataTableFilter
+							table={table}
+							classes={classes}
+							subjects={subjects}
+							classFilter={classFilter}
+							setClassFilter={setClassFilter}
+							subjectFilter={subjectFilter}
+							setSubjectFilter={setSubjectFilter}
+						/>
+
+						{isFiltered && (
 							<Button
 								variant="ghost"
 								onClick={() => {
@@ -683,8 +694,31 @@ export function UsersDataTable<TData extends UserWithRoles, TValue>({
 							<TableRow>
 								<TableCell
 									colSpan={columns.length}
-									className="h-24 text-center">
-									No users found.
+									className="h-60">
+									<Empty>
+										<EmptyHeader>
+											<EmptyTitle>
+												No users found
+											</EmptyTitle>
+											<EmptyDescription>
+												Try adjusting your filters or
+												search terms
+											</EmptyDescription>
+										</EmptyHeader>
+										<EmptyContent>
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => {
+													setGlobalFilter("");
+													table.resetColumnFilters();
+													setClassFilter([]);
+													setSubjectFilter([]);
+												}}>
+												Clear all filters
+											</Button>
+										</EmptyContent>
+									</Empty>
 								</TableCell>
 							</TableRow>
 						)}

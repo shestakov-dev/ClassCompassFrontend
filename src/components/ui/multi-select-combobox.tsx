@@ -24,6 +24,7 @@ import {
 export interface ComboboxItem {
 	value: string;
 	label: string;
+	secondaryLabel?: string;
 }
 
 interface MultiSelectComboboxProps {
@@ -151,20 +152,36 @@ export function MultiSelectCombobox({
 										onSelect={() =>
 											toggleSelection(item.value)
 										}>
-										<span className="truncate">
-											{item.label}
-										</span>
+										<div className="flex-1 truncate">
+											<div className="truncate">
+												{item.label}
+											</div>
+											{item.secondaryLabel && (
+												<div className="text-xs text-muted-foreground truncate">
+													({item.secondaryLabel})
+												</div>
+											)}
+										</div>
 										{selectedValues.includes(
 											item.value
 										) && (
 											<CheckIcon
 												size={16}
-												className="ml-auto"
+												className="ml-auto shrink-0"
 											/>
 										)}
 									</CommandItem>
 								))}
 							</CommandGroup>
+							{selectedValues.length > 0 && (
+								<CommandGroup className="border-t">
+									<CommandItem
+										onSelect={() => onChange([])}
+										className="justify-center text-center cursor-pointer text-destructive">
+										Clear All
+									</CommandItem>
+								</CommandGroup>
+							)}
 						</CommandList>
 					</Command>
 				</PopoverContent>

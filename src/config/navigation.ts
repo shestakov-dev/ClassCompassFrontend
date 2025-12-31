@@ -21,6 +21,12 @@ export const NAV_ITEMS: readonly MainNavItem[] = [
 		type: "link",
 	},
 	{
+		title: "Academics",
+		href: "/academics",
+		visibility: "admin",
+		type: "link",
+	},
+	{
 		title: "Users",
 		href: "/users",
 		visibility: "admin",
