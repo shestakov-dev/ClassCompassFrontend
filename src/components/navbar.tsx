@@ -43,29 +43,43 @@ export function Navbar() {
 								<NavigationMenuList>
 									{navGroups.map(item => (
 										<NavigationMenuItem key={item.title}>
-											<NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
+											<NavigationMenuTrigger>
+												{item.title}
+											</NavigationMenuTrigger>
 											<NavigationMenuContent>
 												<ul className="grid gap-3 p-6 md:w-100 lg:w-125 lg:grid-cols-[.75fr_1fr]">
 													{item.items.map(subItem => {
 														if (subItem.featured) {
 															return (
 																<li
-																	key={subItem.title}
+																	key={
+																		subItem.title
+																	}
 																	className="row-span-3">
-																	<NavigationMenuLink asChild>
+																	<NavigationMenuLink
+																		asChild>
 																		<Link
-																			to={subItem.href}
+																			to={
+																				subItem.href
+																			}
 																			className="flex h-full w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md hover:from-muted/60 hover:to-muted/80"
+																			onClick={e =>
+																				e.currentTarget.blur()
+																			}
 																			activeProps={{
 																				className:
-																					"from-primary/10 to-primary/20 text-primary hover:from-primary/20 hover:to-primary/30",
+																					"from-primary/10 to-primary/20 text-primary hover:from-primary/20 hover:to-primary/30 focus:from-primary/10 focus:to-primary/20",
 																			}}>
 																			<Compass className="h-6 w-6 text-primary" />
 																			<div className="mb-2 mt-4 text-lg font-medium">
-																				{subItem.title}
+																				{
+																					subItem.title
+																				}
 																			</div>
 																			<p className="text-sm leading-tight text-muted-foreground">
-																				{subItem.description}
+																				{
+																					subItem.description
+																				}
 																			</p>
 																		</Link>
 																	</NavigationMenuLink>
@@ -74,10 +88,18 @@ export function Navbar() {
 														}
 														return (
 															<ListItem
-																key={subItem.title}
-																href={subItem.href}
-																title={subItem.title}>
-																{subItem.description}
+																key={
+																	subItem.title
+																}
+																href={
+																	subItem.href
+																}
+																title={
+																	subItem.title
+																}>
+																{
+																	subItem.description
+																}
 															</ListItem>
 														);
 													})}
@@ -93,9 +115,10 @@ export function Navbar() {
 									key={item.title}
 									to={item.href}
 									className={navigationMenuTriggerStyle()}
+									onClick={e => e.currentTarget.blur()}
 									activeProps={{
 										className:
-											"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary",
+											"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary focus:bg-primary/10 focus:text-primary",
 									}}>
 									{item.title}
 								</Link>
@@ -112,9 +135,7 @@ export function Navbar() {
 				{/* Right Section */}
 				<div className="flex items-center gap-2">
 					{navButtons.map(item => (
-						<Link
-							key={item.href}
-							to={item.href}>
+						<Link key={item.href} to={item.href}>
 							<Button
 								variant={item.variant}
 								size="sm"
@@ -126,7 +147,9 @@ export function Navbar() {
 								variant={item.variant}
 								size="sm"
 								className="md:hidden">
-								{item.iconElement && <item.iconElement className="h-4 w-4" />}
+								{item.iconElement && (
+									<item.iconElement className="h-4 w-4" />
+								)}
 							</Button>
 						</Link>
 					))}
@@ -157,12 +180,15 @@ const ListItem = forwardRef<
 						"block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
 						className
 					)}
+					onClick={e => e.currentTarget.blur()}
 					activeProps={{
 						className:
-							"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary",
+							"bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary focus:bg-primary/10 focus:text-primary",
 					}}
 					{...props}>
-					<div className="text-sm font-medium leading-none">{title}</div>
+					<div className="text-sm font-medium leading-none">
+						{title}
+					</div>
 					<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
 						{children}
 					</p>
