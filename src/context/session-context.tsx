@@ -4,6 +4,10 @@ import {
 	getUsersControllerFindByIdentityIdQueryKey,
 	useUsersControllerFindByIdentityId,
 } from "@/api/generated/endpoints/users/users";
+import {
+	getSchoolsControllerIsAdminQueryKey,
+	useSchoolsControllerIsAdmin,
+} from "@/api/generated/endpoints/schools/schools";
 import type { AxiosError } from "axios";
 import type { Session } from "@ory/client-fetch";
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +18,7 @@ interface SessionContextType {
 	user: UserEntity | null;
 	isLoading: boolean;
 	error: AxiosError | null;
+	isAdmin: boolean;
 	refreshSession: () => Promise<void>;
 }
 
@@ -43,8 +48,8 @@ export function SessionProvider({
 
 	const {
 		data: user,
-		isLoading,
-		error,
+		isLoading: isLoadingUser,
+		error: userError,
 	} = useUsersControllerFindByIdentityId<UserEntity, AxiosError>(
 		identityId ?? "",
 		{
@@ -58,6 +63,29 @@ export function SessionProvider({
 		}
 	);
 
+	const {
+		data: isSchoolAdmin,
+		isLoading: isLoadingAdmin,
+		error: adminError,
+	} = useSchoolsControllerIsAdmin<boolean, AxiosError>(
+		user?.schoolId ?? "",
+		user?.id ?? "",
+		{
+			query: {
+				enabled: !!user?.schoolId && !!user?.id,
+				placeholderData: keepPreviousData,
+				retry: false,
+				meta: {
+					operationContext: "check admin status",
+				},
+			},
+		}
+	);
+
+	const isAdmin = isSchoolAdmin ?? false;
+	const isLoading = isLoadingUser || (!!user?.schoolId && isLoadingAdmin);
+	const error = userError ?? adminError;
+
 	const refreshSession = async () => {
 		if (identityId) {
 			// Invalidate user data to ensure fresh data is fetched
@@ -65,6 +93,16 @@ export function SessionProvider({
 				queryKey:
 					getUsersControllerFindByIdentityIdQueryKey(identityId),
 			});
+
+			// Also invalidate admin status if we have a user
+			if (user?.schoolId && user?.id) {
+				await queryClient.invalidateQueries({
+					queryKey: getSchoolsControllerIsAdminQueryKey(
+						user.schoolId,
+						user.id
+					),
+				});
+			}
 		}
 	};
 
@@ -76,6 +114,7 @@ export function SessionProvider({
 				user: user ?? null,
 				isLoading,
 				error,
+				isAdmin,
 				refreshSession,
 			}}>
 			{children}
