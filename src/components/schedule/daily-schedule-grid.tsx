@@ -1,24 +1,30 @@
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { differenceInMinutes, format, startOfDay } from "date-fns";
+import {
+	differenceInMinutes,
+	format,
+	startOfDay,
+	addDays,
+	parseISO,
+	set,
+	startOfWeek,
+} from "date-fns";
 import { useMemo } from "react";
-import { LessonEntityLessonWeek as LessonWeek } from "@/api/generated/models";
+import {
+	LessonEntityLessonWeek as LessonWeek,
+	type LessonEntity,
+} from "@/api/generated/models";
+import { DAY_TO_DAY_INDEX, Day } from "@/types/schedule";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-const SLOT_HEIGHT_PX = 80;
+const SLOT_HEIGHT_PX = 100;
 const COLUMN_GAP_PX = 8;
 const ROW_GAP_PX = 4;
 
-export type ScheduleEvent = {
-	id: string;
-	start: Date;
-	end: Date;
-	subject: string;
-	room: string;
-	teacher: string;
-	type: LessonWeek;
-};
-
-type LayoutEvent = ScheduleEvent & {
+type LayoutLesson = LessonEntity & {
+	computedStart: Date;
+	computedEnd: Date;
 	style: {
 		top: string;
 		height: string;
@@ -27,92 +33,143 @@ type LayoutEvent = ScheduleEvent & {
 	};
 };
 
-const eventCardVariants = cva(
-	"absolute z-10 flex flex-col gap-0.5 border-l-4 rounded-md px-2 py-1 text-xs text-foreground transition-all hover:brightness-95 hover:shadow-md cursor-pointer overflow-hidden",
-	{
-		variants: {
-			variant: {
-				default: "bg-primary/10 border-primary border-l-primary",
-				odd: "bg-chart-3/15 border-chart-3",
-				even: "bg-chart-4/15 border-chart-4",
-			},
+const lessonCardVariants = cva("", {
+	variants: {
+		variant: {
+			default: "border-l-primary",
+			odd: "border-l-chart-3",
+			even: "border-l-chart-4",
 		},
-		defaultVariants: {
-			variant: "default",
-		},
-	}
-);
+	},
+	defaultVariants: {
+		variant: "default",
+	},
+});
 
-interface EventCardProps {
-	event: LayoutEvent;
-	onClick?: (event: ScheduleEvent) => void;
+const weekBadgeVariants = cva("text-[9px] font-bold uppercase tracking-wider", {
+	variants: {
+		variant: {
+			default: "bg-primary/20 text-primary border-primary/30",
+			odd: "bg-chart-3/20 text-chart-3 border-chart-3/30",
+			even: "bg-chart-4/20 text-chart-4 border-chart-4/30",
+		},
+	},
+	defaultVariants: {
+		variant: "default",
+	},
+});
+
+interface LessonCardProps {
+	lesson: LayoutLesson;
+	onClick?: (lesson: LessonEntity) => void;
 }
 
-const EventCard = ({ event, onClick }: EventCardProps) => {
+const LessonCard = ({ lesson, onClick }: LessonCardProps) => {
 	const variantMap: Record<
 		string,
-		VariantProps<typeof eventCardVariants>["variant"]
+		VariantProps<typeof lessonCardVariants>["variant"]
 	> = {
 		[LessonWeek.odd]: "odd",
 		[LessonWeek.even]: "even",
 	};
 
-	const variant = variantMap[event.type] ?? "default";
-	const heightPx = parseFloat(event.style.height);
+	const variant = variantMap[lesson.lessonWeek] ?? "default";
+	const heightPx = parseFloat(lesson.style.height);
+
+	const subjectName = lesson.subject?.name ?? "Unknown Subject";
+	const roomName = lesson.room?.name ?? "Unknown Room";
+	const teacherName = lesson.teacher?.user
+		? `${lesson.teacher.user.firstName} ${lesson.teacher.user.lastName}`
+		: "Unknown Teacher";
+	const className = lesson.dailySchedule?.class?.name ?? "Unknown Class";
+
+	const startTime = parseISO(lesson.startTime);
+	const endTime = parseISO(lesson.endTime);
+	const timeRange = `${format(startTime, "HH:mm")} - ${format(endTime, "HH:mm")}`;
+
+	const weekBadgeText =
+		lesson.lessonWeek === LessonWeek.every
+			? "Every"
+			: lesson.lessonWeek === LessonWeek.odd
+				? "Odd"
+				: "Even";
 
 	return (
-		<div
+		<Card
 			onClick={clickEvent => {
 				clickEvent.stopPropagation();
-				onClick?.(event);
+				onClick?.(lesson);
 			}}
-			className={cn(eventCardVariants({ variant }))}
-			style={event.style}>
-			<div className="flex justify-between w-full font-semibold leading-none text-sm">
-				<span className="truncate">{event.subject}</span>
-				{heightPx > 40 && (
-					<span className="text-[10px] opacity-70 whitespace-nowrap pl-1">
-						{format(event.start, "HH:mm")}
-					</span>
-				)}
-			</div>
-
-			<div className="flex flex-col text-[11px] opacity-90 leading-tight gap-0.5 mt-1">
-				<div className="flex justify-between items-center">
-					<span className="truncate">{event.room}</span>
-					<span className="text-[9px] opacity-60">
-						{heightPx <= 40
-							? `${format(event.start, "HH:mm")} - ${format(event.end, "HH:mm")}`
-							: format(event.end, "HH:mm")}
-					</span>
-				</div>
-				{heightPx > 50 && (
-					<div className="truncate opacity-80">{event.teacher}</div>
-				)}
-			</div>
-
-			{heightPx > 70 && (
-				<div className="mt-auto self-start">
-					<span className="inline-block px-1 rounded-[2px] bg-primary/20 text-[9px] font-bold uppercase tracking-wider">
-						{event.type}
-					</span>
-				</div>
+			className={cn(
+				"absolute z-10 border-l-4 cursor-pointer transition-all hover:shadow-lg overflow-hidden",
+				"p-0 gap-0 shadow-sm flex flex-col justify-center",
+				lessonCardVariants({ variant })
 			)}
-		</div>
+			style={lesson.style}>
+			<CardHeader className="p-2 pb-1 gap-1">
+				<CardTitle className="text-base font-semibold truncate leading-tight">
+					{subjectName}
+				</CardTitle>
+				<div className="flex items-center gap-1.5 text-xs font-medium opacity-70">
+					<span>{timeRange}</span>
+					<Badge
+						variant="outline"
+						className={cn(
+							"h-4 px-1.5 text-[10px]",
+							weekBadgeVariants({ variant })
+						)}>
+						{weekBadgeText}
+					</Badge>
+				</div>
+			</CardHeader>
+
+			<CardContent className="p-2 pt-0 text-xs opacity-80 space-y-0.5">
+				<div className="truncate">{className}</div>
+				<div className="truncate">{roomName}</div>
+				{heightPx > 70 && (
+					<div className="truncate opacity-90">{teacherName}</div>
+				)}
+			</CardContent>
+		</Card>
 	);
 };
 
 interface TimeGridProps {
-	events: ScheduleEvent[];
+	lessons: LessonEntity[];
 	date: Date;
 	minHour?: number;
 	maxHour?: number;
-	onEventClick?: (event: ScheduleEvent) => void;
+	onLessonClick?: (lesson: LessonEntity) => void;
 }
 
-export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
+export const TimeGrid = ({ lessons, date, onLessonClick }: TimeGridProps) => {
+	// Compute display dates for each lesson
+	const lessonsWithDates = useMemo(() => {
+		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+		return lessons.map(lesson => {
+			const dayName = lesson.dailySchedule?.day ?? Day.monday;
+			const dayOffset = DAY_TO_DAY_INDEX[dayName];
+			const daysToAdd = dayOffset === 0 ? 6 : dayOffset - 1;
+			const targetDate = addDays(weekStart, daysToAdd);
+
+			const startTime = parseISO(lesson.startTime);
+			const endTime = parseISO(lesson.endTime);
+
+			return {
+				...lesson,
+				computedStart: set(targetDate, {
+					hours: startTime.getHours(),
+					minutes: startTime.getMinutes(),
+				}),
+				computedEnd: set(targetDate, {
+					hours: endTime.getHours(),
+					minutes: endTime.getMinutes(),
+				}),
+			};
+		});
+	}, [lessons, date]);
 	const { minHour, totalHours, ticks } = useMemo(() => {
-		if (events.length === 0) {
+		if (lessonsWithDates.length === 0) {
 			const minHour = 8;
 			const totalHours = 6;
 
@@ -126,9 +183,13 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 			};
 		}
 
-		const starts = events.map(event => event.start.getHours());
-		const ends = events.map(
-			event => event.end.getHours() + (event.end.getMinutes() > 0 ? 1 : 0)
+		const starts = lessonsWithDates.map(lesson =>
+			lesson.computedStart.getHours()
+		);
+		const ends = lessonsWithDates.map(
+			lesson =>
+				lesson.computedEnd.getHours() +
+				(lesson.computedEnd.getMinutes() > 0 ? 1 : 0)
 		);
 
 		const min = Math.max(0, Math.min(...starts) - 1);
@@ -140,61 +201,64 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 			totalHours: total,
 			ticks: Array.from({ length: total + 1 }, (_, i) => min + i),
 		};
-	}, [events]);
+	}, [lessonsWithDates]);
 
-	const layoutEvents = useMemo(() => {
-		if (!events.length) {
+	const layoutLessons = useMemo(() => {
+		if (!lessonsWithDates.length) {
 			return [];
 		}
 
-		const sorted = [...events].sort((a, b) => {
-			if (a.start.getTime() !== b.start.getTime()) {
-				return a.start.getTime() - b.start.getTime();
+		const sorted = [...lessonsWithDates].sort((a, b) => {
+			if (a.computedStart.getTime() !== b.computedStart.getTime()) {
+				return a.computedStart.getTime() - b.computedStart.getTime();
 			}
 
-			return b.end.getTime() - a.end.getTime();
+			return b.computedEnd.getTime() - a.computedEnd.getTime();
 		});
 
-		const result: LayoutEvent[] = [];
-		let cluster: ScheduleEvent[] = [];
+		const result: LayoutLesson[] = [];
+		let cluster: (typeof lessonsWithDates)[0][] = [];
 		let clusterEnd = 0;
 
-		const processCluster = (group: ScheduleEvent[]) => {
+		const processCluster = (group: (typeof lessonsWithDates)[0][]) => {
 			if (group.length === 0) {
 				return;
 			}
 
-			const columns: ScheduleEvent[][] = [];
-			for (const ev of group) {
+			const columns: (typeof lessonsWithDates)[0][][] = [];
+			for (const lesson of group) {
 				let placed = false;
 
 				for (let i = 0; i < columns.length; i++) {
 					const lastInCol = columns[i][columns[i].length - 1];
-					if (lastInCol.end.getTime() <= ev.start.getTime()) {
-						columns[i].push(ev);
+					if (
+						lastInCol.computedEnd.getTime() <=
+						lesson.computedStart.getTime()
+					) {
+						columns[i].push(lesson);
 						placed = true;
 						break;
 					}
 				}
 
 				if (!placed) {
-					columns.push([ev]);
+					columns.push([lesson]);
 				}
 			}
 
 			const widthPercent = 100 / columns.length;
 			columns.forEach((col, colIndex) => {
-				col.forEach(ev => {
+				col.forEach(lesson => {
 					const startMinutes =
-						(ev.start.getHours() - minHour) * 60 +
-						ev.start.getMinutes();
+						(lesson.computedStart.getHours() - minHour) * 60 +
+						lesson.computedStart.getMinutes();
 					const durationMinutes = differenceInMinutes(
-						ev.end,
-						ev.start
+						lesson.computedEnd,
+						lesson.computedStart
 					);
 
 					result.push({
-						...ev,
+						...lesson,
 						style: {
 							top: `${(startMinutes / 60) * SLOT_HEIGHT_PX}px`,
 							height: `${Math.max(
@@ -210,20 +274,23 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 			});
 		};
 
-		for (const ev of sorted) {
-			if (ev.start.getTime() < clusterEnd || cluster.length === 0) {
-				cluster.push(ev);
-				clusterEnd = Math.max(clusterEnd, ev.end.getTime());
+		for (const lesson of sorted) {
+			if (
+				lesson.computedStart.getTime() < clusterEnd ||
+				cluster.length === 0
+			) {
+				cluster.push(lesson);
+				clusterEnd = Math.max(clusterEnd, lesson.computedEnd.getTime());
 			} else {
 				processCluster(cluster);
-				cluster = [ev];
-				clusterEnd = ev.end.getTime();
+				cluster = [lesson];
+				clusterEnd = lesson.computedEnd.getTime();
 			}
 		}
 		processCluster(cluster);
 
 		return result;
-	}, [events, minHour]);
+	}, [lessonsWithDates, minHour]);
 
 	return (
 		<div className="flex relative h-full overflow-y-auto bg-background">
@@ -259,11 +326,11 @@ export const TimeGrid = ({ events, date, onEventClick }: TimeGridProps) => {
 						/>
 					))}
 
-					{layoutEvents.map(event => (
-						<EventCard
-							key={event.id}
-							event={event}
-							onClick={onEventClick}
+					{layoutLessons.map(lesson => (
+						<LessonCard
+							key={lesson.id}
+							lesson={lesson}
+							onClick={onLessonClick}
 						/>
 					))}
 

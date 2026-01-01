@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DailyScheduleViewer } from "@/components/schedule/daily-schedule-viewer";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
 import { Button } from "@/components/ui/button";
@@ -42,9 +42,43 @@ import {
 } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 import { LessonListView } from "@/components/schedule/lesson-list-view";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { cva, type VariantProps } from "class-variance-authority";
+import {
+	type LessonEntity,
+	LessonEntityLessonWeek as LessonWeek,
+} from "@/api/generated/models";
+import { format } from "date-fns";
+
+const weekBadgeVariants = cva(
+	"text-[10px] font-bold uppercase tracking-wider",
+	{
+		variants: {
+			variant: {
+				default: "bg-primary/20 text-primary border-primary/30",
+				odd: "bg-chart-3/20 text-chart-3 border-chart-3/30",
+				even: "bg-chart-4/20 text-chart-4 border-chart-4/30",
+			},
+		},
+		defaultVariants: {
+			variant: "default",
+		},
+	}
+);
 
 export default function SchedulePage() {
 	const { user } = useSession();
+	const [selectedLesson, setSelectedLesson] = useState<LessonEntity | null>(
+		null
+	);
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const navigate = Route.useNavigate();
 	const search = Route.useSearch();
@@ -236,6 +270,26 @@ export default function SchedulePage() {
 		return !!(filters.classId || filters.teacherId || filters.roomId);
 	}, [filters]);
 
+	const handleLessonClick = useCallback((lesson: LessonEntity) => {
+		setSelectedLesson(lesson);
+		setIsModalOpen(true);
+	}, []);
+
+	const getWeekBadgeVariant = (
+		lessonWeek: string
+	): VariantProps<typeof weekBadgeVariants>["variant"] => {
+		if (lessonWeek === LessonWeek.odd) return "odd";
+		if (lessonWeek === LessonWeek.even) return "even";
+		return "default";
+	};
+
+	const getWeekBadgeText = (lessonWeek: string) => {
+		if (lessonWeek === LessonWeek.every) return "Every Week";
+		if (lessonWeek === LessonWeek.odd) return "Odd Weeks";
+		if (lessonWeek === LessonWeek.even) return "Even Weeks";
+		return lessonWeek;
+	};
+
 	return (
 		<div className="flex flex-col h-full bg-background">
 			<div className="flex-1 flex flex-col w-full max-w-6xl mx-auto p-4 md:p-6 gap-4 min-h-0">
@@ -405,6 +459,7 @@ export default function SchedulePage() {
 								<DailyScheduleViewer
 									lessons={lessons ?? []}
 									date={currentDate}
+									onLessonClick={handleLessonClick}
 								/>
 							</div>
 						) : (
@@ -412,12 +467,88 @@ export default function SchedulePage() {
 								<LessonListView
 									lessons={lessons ?? []}
 									currentDate={currentDate}
+									onLessonClick={handleLessonClick}
 								/>
 							</div>
 						)}
 					</div>
 				</div>
 			</div>
+
+			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+				<DialogContent className="max-w-md">
+					<DialogHeader>
+						<DialogTitle className="text-xl">
+							{selectedLesson?.subject?.name || "Lesson Details"}
+						</DialogTitle>
+						<DialogDescription className="flex items-center gap-2 mt-2 flex-wrap">
+							<span className="bg-muted px-2.5 py-1 rounded text-sm font-medium capitalize">
+								{selectedLesson?.dailySchedule?.day || "N/A"}
+							</span>
+							<span className="bg-muted px-2.5 py-1 rounded text-sm font-medium">
+								{selectedLesson?.startTime &&
+									format(
+										parseISO(selectedLesson.startTime),
+										"HH:mm"
+									)}{" "}
+								-{" "}
+								{selectedLesson?.endTime &&
+									format(
+										parseISO(selectedLesson.endTime),
+										"HH:mm"
+									)}
+							</span>
+							{selectedLesson && (
+								<Badge
+									variant="outline"
+									className={cn(
+										weekBadgeVariants({
+											variant: getWeekBadgeVariant(
+												selectedLesson.lessonWeek
+											),
+										})
+									)}>
+									{getWeekBadgeText(
+										selectedLesson.lessonWeek
+									)}
+								</Badge>
+							)}
+						</DialogDescription>
+					</DialogHeader>
+
+					{selectedLesson && (
+						<div className="grid gap-3 py-2 text-sm">
+							<div className="flex justify-between border-b pb-2">
+								<span className="text-muted-foreground">
+									Class
+								</span>
+								<span className="font-medium">
+									{selectedLesson.dailySchedule?.class
+										?.name ?? "N/A"}
+								</span>
+							</div>
+							<div className="flex justify-between border-b pb-2">
+								<span className="text-muted-foreground">
+									Room
+								</span>
+								<span className="font-medium">
+									{selectedLesson.room?.name ?? "N/A"}
+								</span>
+							</div>
+							<div className="flex justify-between border-b pb-2">
+								<span className="text-muted-foreground">
+									Teacher
+								</span>
+								<span className="font-medium">
+									{selectedLesson.teacher?.user
+										? `${selectedLesson.teacher.user.firstName} ${selectedLesson.teacher.user.lastName}`
+										: "N/A"}
+								</span>
+							</div>
+						</div>
+					)}
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

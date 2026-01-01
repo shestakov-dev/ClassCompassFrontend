@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 interface LessonListViewProps {
 	lessons: LessonEntity[];
 	currentDate: Date;
+	onLessonClick?: (lesson: LessonEntity) => void;
 }
 
 const WEEK_BADGE_STYLES = {
@@ -32,7 +33,11 @@ const WEEK_BADGE_STYLES = {
 	[LessonWeek.every]: "bg-primary text-primary-foreground",
 };
 
-export function LessonListView({ lessons, currentDate }: LessonListViewProps) {
+export function LessonListView({
+	lessons,
+	currentDate,
+	onLessonClick,
+}: LessonListViewProps) {
 	const currentWeekParity = getWeekParity(currentDate);
 
 	// Group by time and then class id
@@ -133,21 +138,28 @@ export function LessonListView({ lessons, currentDate }: LessonListViewProps) {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{Object.values(classGroups).map(
-										groupLessons => {
-											const first = groupLessons[0];
-
-											return (
+									{Object.values(classGroups).flatMap(
+										groupLessons =>
+											groupLessons.map(lesson => (
 												<TableRow
-													key={first.id}
-													className="hover:bg-muted/30 border-b-border/40 last:border-0">
-													{/* Class Name (Merged Cell) */}
-													<TableCell className="font-medium align-top py-2 pl-4">
+													key={lesson.id}
+													onClick={() =>
+														onLessonClick?.(lesson)
+													}
+													className={cn(
+														"cursor-pointer hover:bg-muted/30 border-b-border/40 last:border-0 transition-colors",
+														!isLessonActive(
+															lesson,
+															currentWeekParity
+														) && "opacity-40"
+													)}>
+													{/* Class Name */}
+													<TableCell className="font-medium py-2 pl-4">
 														<Badge
 															variant="outline"
 															className="font-bold text-xs whitespace-nowrap">
 															{
-																first
+																lesson
 																	.dailySchedule
 																	?.class
 																	?.name
@@ -155,140 +167,72 @@ export function LessonListView({ lessons, currentDate }: LessonListViewProps) {
 														</Badge>
 													</TableCell>
 
-													<TableCell className="align-top p-0">
-														<div className="flex flex-col">
-															{groupLessons.map(
-																lesson => (
-																	<div
-																		key={
-																			lesson.id
-																		}
-																		className={cn(
-																			"px-4 py-2 flex items-center gap-2 min-h-10",
-																			!isLessonActive(
-																				lesson,
-																				currentWeekParity
-																			) &&
-																				"opacity-40"
-																		)}>
-																		<BookOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-																		<span className="text-sm truncate font-medium">
-																			{
-																				lesson
-																					.subject
-																					?.name
-																			}
-																		</span>
-																	</div>
-																)
-															)}
+													{/* Subject */}
+													<TableCell className="py-2">
+														<div className="flex items-center gap-2">
+															<BookOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+															<span className="text-sm truncate font-medium">
+																{
+																	lesson
+																		.subject
+																		?.name
+																}
+															</span>
 														</div>
 													</TableCell>
 
-													<TableCell className="align-top p-0">
-														<div className="flex flex-col">
-															{groupLessons.map(
-																lesson => (
-																	<div
-																		key={
-																			lesson.id
-																		}
-																		className={cn(
-																			"px-4 py-2 flex items-center gap-2 min-h-10",
-																			!isLessonActive(
-																				lesson,
-																				currentWeekParity
-																			) &&
-																				"opacity-40"
-																		)}>
-																		<User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-																		<span className="text-sm truncate">
-																			{
-																				lesson
-																					.teacher
-																					?.user
-																					?.firstName
-																			}{" "}
-																			{
-																				lesson
-																					.teacher
-																					?.user
-																					?.lastName
-																			}
-																		</span>
-																	</div>
-																)
-															)}
+													{/* Teacher */}
+													<TableCell className="py-2">
+														<div className="flex items-center gap-2">
+															<User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+															<span className="text-sm truncate">
+																{
+																	lesson
+																		.teacher
+																		?.user
+																		?.firstName
+																}{" "}
+																{
+																	lesson
+																		.teacher
+																		?.user
+																		?.lastName
+																}
+															</span>
 														</div>
 													</TableCell>
 
-													<TableCell className="align-top p-0">
-														<div className="flex flex-col">
-															{groupLessons.map(
-																lesson => (
-																	<div
-																		key={
-																			lesson.id
-																		}
-																		className={cn(
-																			"px-4 py-2 flex items-center gap-2 min-h-10",
-																			!isLessonActive(
-																				lesson,
-																				currentWeekParity
-																			) &&
-																				"opacity-40"
-																		)}>
-																		<MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-																		<span className="text-sm truncate">
-																			{
-																				lesson
-																					.room
-																					?.name
-																			}
-																		</span>
-																	</div>
-																)
-															)}
+													{/* Room */}
+													<TableCell className="py-2">
+														<div className="flex items-center gap-2">
+															<MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+															<span className="text-sm truncate">
+																{
+																	lesson.room
+																		?.name
+																}
+															</span>
 														</div>
 													</TableCell>
 
-													<TableCell className="align-top p-0 pr-4">
-														<div className="flex flex-col">
-															{groupLessons.map(
-																lesson => (
-																	<div
-																		key={
-																			lesson.id
-																		}
-																		className={cn(
-																			"pl-4 py-2 flex items-center justify-end min-h-10",
-																			!isLessonActive(
-																				lesson,
-																				currentWeekParity
-																			) &&
-																				"opacity-40"
-																		)}>
-																		<Badge
-																			className={cn(
-																				"text-[10px] uppercase font-bold border-none px-1.5 h-5 shadow-none",
-																				WEEK_BADGE_STYLES[
-																					lesson
-																						.lessonWeek
-																				]
-																			)}>
-																			{lesson.lessonWeek ===
-																			LessonWeek.every
-																				? "All"
-																				: lesson.lessonWeek}
-																		</Badge>
-																	</div>
-																)
-															)}
-														</div>
+													{/* Week */}
+													<TableCell className="py-2 pr-4 text-right">
+														<Badge
+															className={cn(
+																"text-[10px] uppercase font-bold border-none px-1.5 h-5 shadow-none",
+																WEEK_BADGE_STYLES[
+																	lesson
+																		.lessonWeek
+																]
+															)}>
+															{lesson.lessonWeek ===
+															LessonWeek.every
+																? "All"
+																: lesson.lessonWeek}
+														</Badge>
 													</TableCell>
 												</TableRow>
-											);
-										}
+											))
 									)}
 								</TableBody>
 							</Table>
