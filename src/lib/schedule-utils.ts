@@ -9,24 +9,9 @@ import {
 	LessonWeek,
 	DAY_INDEX_TO_DAY,
 	DAY_TO_DAY_INDEX,
+	type ScheduleSearchParams,
+	type ScheduleEvent,
 } from "@/types/schedule";
-import type { ScheduleEvent } from "@/components/schedule/daily-schedule-grid";
-
-export interface ScheduleSearchParams {
-	mode?: "date" | "weekly";
-	date?: string;
-	day?: Day;
-	timestamp?: string;
-	from?: string;
-	to?: string;
-	classId?: string;
-	teacherId?: string;
-	subjectId?: string;
-	roomId?: string;
-	week?: LessonWeek;
-	ignoreWeek?: boolean;
-	showAll?: boolean;
-}
 
 export const getCurrentDayEnum = (date: Date = new Date()): Day => {
 	return DAY_INDEX_TO_DAY[getDay(date)];

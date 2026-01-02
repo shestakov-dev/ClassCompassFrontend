@@ -2,6 +2,12 @@ import {
 	LessonsControllerFindFilteredDay as Day,
 	LessonsControllerFindFilteredWeek as LessonWeek,
 } from "@/api/generated/models";
+import type {
+	ClassEntity,
+	SubjectEntity,
+	TeacherEntity,
+	BuildingEntity,
+} from "@/api/generated/models";
 
 export { Day, LessonWeek };
 
@@ -37,3 +43,47 @@ export const ALL_DAYS = [
 	Day.saturday,
 	Day.sunday,
 ];
+
+export interface ScheduleSearchParams {
+	mode?: ScheduleMode;
+	date?: string;
+	day?: Day;
+	timestamp?: string;
+	from?: string;
+	to?: string;
+	classId?: string;
+	teacherId?: string;
+	subjectId?: string;
+	roomId?: string;
+	week?: LessonWeek;
+	ignoreWeek?: boolean;
+	showAll?: boolean;
+}
+
+export interface CreateLessonFormData {
+	day: Day;
+	classId: string;
+	subjectId: string;
+	teacherId: string;
+	roomId: string;
+	startTime: string;
+	endTime: string;
+	lessonWeek: LessonWeek;
+}
+
+export interface ScheduleEvent {
+	id: string;
+	start: Date;
+	end: Date;
+	subject: string;
+	room: string;
+	teacher: string;
+	type: string;
+}
+
+export interface FilterOptions {
+	classes?: ClassEntity[];
+	subjects?: SubjectEntity[];
+	teachers?: TeacherEntity[];
+	buildings?: BuildingEntity[];
+}

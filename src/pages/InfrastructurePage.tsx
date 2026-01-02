@@ -1,4 +1,4 @@
-import { useState, useEffect, useEffectEvent } from "react";
+import { useState, useEffect, useEffectEvent, type FormEvent } from "react";
 import { Building, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -104,7 +104,7 @@ export default function InfrastructurePage() {
 		setDeleteConfirm({ open: true, type, id, name });
 	};
 
-	const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleSave = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
 		const { type, mode, data, parentId } = dialogState;

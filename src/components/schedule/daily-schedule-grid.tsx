@@ -1,8 +1,5 @@
-import { cn } from "@/lib/utils";
-import { cva, type VariantProps } from "class-variance-authority";
 import {
 	differenceInMinutes,
-	format,
 	startOfDay,
 	addDays,
 	parseISO,
@@ -10,13 +7,9 @@ import {
 	startOfWeek,
 } from "date-fns";
 import { useMemo } from "react";
-import {
-	LessonEntityLessonWeek as LessonWeek,
-	type LessonEntity,
-} from "@/api/generated/models";
+import { type LessonEntity } from "@/api/generated/models";
 import { DAY_TO_DAY_INDEX, Day } from "@/types/schedule";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { LessonCard } from "@/components/schedule/lesson-card";
 
 const SLOT_HEIGHT_PX = 100;
 const COLUMN_GAP_PX = 8;
@@ -33,116 +26,21 @@ type LayoutLesson = LessonEntity & {
 	};
 };
 
-const lessonCardVariants = cva("", {
-	variants: {
-		variant: {
-			default: "border-l-primary",
-			odd: "border-l-chart-3",
-			even: "border-l-chart-4",
-		},
-	},
-	defaultVariants: {
-		variant: "default",
-	},
-});
-
-const weekBadgeVariants = cva("text-[9px] font-bold uppercase tracking-wider", {
-	variants: {
-		variant: {
-			default: "bg-primary/20 text-primary border-primary/30",
-			odd: "bg-chart-3/20 text-chart-3 border-chart-3/30",
-			even: "bg-chart-4/20 text-chart-4 border-chart-4/30",
-		},
-	},
-	defaultVariants: {
-		variant: "default",
-	},
-});
-
-interface LessonCardProps {
-	lesson: LayoutLesson;
-	onClick?: (lesson: LessonEntity) => void;
-}
-
-const LessonCard = ({ lesson, onClick }: LessonCardProps) => {
-	const variantMap: Record<
-		string,
-		VariantProps<typeof lessonCardVariants>["variant"]
-	> = {
-		[LessonWeek.odd]: "odd",
-		[LessonWeek.even]: "even",
-	};
-
-	const variant = variantMap[lesson.lessonWeek] ?? "default";
-	const heightPx = parseFloat(lesson.style.height);
-
-	const subjectName = lesson.subject?.name ?? "Unknown Subject";
-	const roomName = lesson.room?.name ?? "Unknown Room";
-	const teacherName = lesson.teacher?.user
-		? `${lesson.teacher.user.firstName} ${lesson.teacher.user.lastName}`
-		: "Unknown Teacher";
-	const className = lesson.dailySchedule?.class?.name ?? "Unknown Class";
-
-	const startTime = parseISO(lesson.startTime);
-	const endTime = parseISO(lesson.endTime);
-	const timeRange = `${format(startTime, "HH:mm")} - ${format(endTime, "HH:mm")}`;
-
-	const weekBadgeText =
-		lesson.lessonWeek === LessonWeek.every
-			? "Every"
-			: lesson.lessonWeek === LessonWeek.odd
-				? "Odd"
-				: "Even";
-
-	return (
-		<Card
-			onClick={clickEvent => {
-				clickEvent.stopPropagation();
-				onClick?.(lesson);
-			}}
-			className={cn(
-				"absolute z-10 border-l-4 cursor-pointer transition-all hover:shadow-lg overflow-hidden",
-				"p-0 gap-0 shadow-sm flex flex-col justify-center",
-				lessonCardVariants({ variant })
-			)}
-			style={lesson.style}>
-			<CardHeader className="p-2 pb-1 gap-1">
-				<CardTitle className="text-base font-semibold truncate leading-tight">
-					{subjectName}
-				</CardTitle>
-				<div className="flex items-center gap-1.5 text-xs font-medium opacity-70">
-					<span>{timeRange}</span>
-					<Badge
-						variant="outline"
-						className={cn(
-							"h-4 px-1.5 text-[10px]",
-							weekBadgeVariants({ variant })
-						)}>
-						{weekBadgeText}
-					</Badge>
-				</div>
-			</CardHeader>
-
-			<CardContent className="p-2 pt-0 text-xs opacity-80 space-y-0.5">
-				<div className="truncate">{className}</div>
-				<div className="truncate">{roomName}</div>
-				{heightPx > 70 && (
-					<div className="truncate opacity-90">{teacherName}</div>
-				)}
-			</CardContent>
-		</Card>
-	);
-};
-
 interface TimeGridProps {
 	lessons: LessonEntity[];
 	date: Date;
-	minHour?: number;
-	maxHour?: number;
 	onLessonClick?: (lesson: LessonEntity) => void;
+	onEdit?: (lesson: LessonEntity) => void;
+	onDelete?: (lesson: LessonEntity) => void;
 }
 
-export const TimeGrid = ({ lessons, date, onLessonClick }: TimeGridProps) => {
+export const TimeGrid = ({
+	lessons,
+	date,
+	onLessonClick,
+	onEdit,
+	onDelete,
+}: TimeGridProps) => {
 	// Compute display dates for each lesson
 	const lessonsWithDates = useMemo(() => {
 		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
@@ -331,6 +229,8 @@ export const TimeGrid = ({ lessons, date, onLessonClick }: TimeGridProps) => {
 							key={lesson.id}
 							lesson={lesson}
 							onClick={onLessonClick}
+							onEdit={onEdit}
+							onDelete={onDelete}
 						/>
 					))}
 

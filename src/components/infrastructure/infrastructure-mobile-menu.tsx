@@ -8,6 +8,7 @@ import type {
 	DialogMode,
 	DialogData,
 } from "@/types/infrastructure";
+import type { MouseEvent } from "react";
 
 interface MobileMenuProps {
 	buildings: BuildingEntity[];
@@ -35,17 +36,13 @@ export function InfrastructureMobileMenu({
 		onClose();
 	};
 
-	const handleEdit = (event: React.MouseEvent, building: BuildingEntity) => {
+	const handleEdit = (event: MouseEvent, building: BuildingEntity) => {
 		event.stopPropagation();
 		onClose();
 		onOpenDialog("building", "edit", building);
 	};
 
-	const handleDelete = (
-		event: React.MouseEvent,
-		id: string,
-		name: string
-	) => {
+	const handleDelete = (event: MouseEvent, id: string, name: string) => {
 		event.stopPropagation();
 		onClose();
 		onDelete(id, name);

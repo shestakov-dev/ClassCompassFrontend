@@ -13,30 +13,45 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Clock, MapPin, User, BookOpen, ChevronDown } from "lucide-react";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+	Clock,
+	MapPin,
+	User,
+	BookOpen,
+	ChevronDown,
+	MoreVertical,
+	Info,
+	Edit,
+	Trash2,
+} from "lucide-react";
 import type { LessonEntity } from "@/api/generated/models";
 import { cn } from "@/lib/utils";
 import { LessonWeek } from "@/types/schedule";
 import { getWeekParity } from "@/lib/schedule-utils";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { WeekBadge } from "@/components/schedule/week-badge";
 
 interface LessonListViewProps {
 	lessons: LessonEntity[];
 	currentDate: Date;
 	onLessonClick?: (lesson: LessonEntity) => void;
+	onEdit?: (lesson: LessonEntity) => void;
+	onDelete?: (lesson: LessonEntity) => void;
 }
-
-const WEEK_BADGE_STYLES = {
-	[LessonWeek.odd]: "bg-chart-3 text-white",
-	[LessonWeek.even]: "bg-chart-4 text-black",
-	[LessonWeek.every]: "bg-primary text-primary-foreground",
-};
 
 export function LessonListView({
 	lessons,
 	currentDate,
 	onLessonClick,
+	onEdit,
+	onDelete,
 }: LessonListViewProps) {
 	const currentWeekParity = getWeekParity(currentDate);
 
@@ -57,7 +72,7 @@ export function LessonListView({
 		sorted.forEach(lesson => {
 			// Group by strict time slot
 			const timeKey = `${lesson.startTime}|${lesson.endTime}`;
-			const classKey = lesson.dailySchedule?.class?.id ?? "unknown";
+			const classKey = lesson.dailySchedule?.classId ?? "unknown";
 
 			if (!timeGroups[timeKey]) {
 				timeGroups[timeKey] = {};
@@ -82,14 +97,13 @@ export function LessonListView({
 				const startDate = parseISO(startIso);
 				const endDate = parseISO(endIso);
 				const timeRange = `${format(startDate, "HH:mm")} - ${format(endDate, "HH:mm")}`;
-				const classCount = Object.keys(classGroups).length;
+				const lessonCount = Object.keys(classGroups).length;
 
 				return (
 					<Collapsible
 						key={timeKey}
 						defaultOpen
 						className="border-l-primary">
-						{/* Header / Trigger Area */}
 						<CollapsibleTrigger asChild>
 							<div className="flex items-center justify-between p-3 px-4 bg-muted/40 hover:bg-muted/60 transition-colors cursor-pointer group">
 								<div className="flex items-center gap-3">
@@ -100,8 +114,8 @@ export function LessonListView({
 									<Badge
 										variant="secondary"
 										className="font-normal text-[10px] h-5 px-2">
-										{classCount}{" "}
-										{classCount === 1 ? "Class" : "Classes"}
+										{lessonCount} Lesson
+										{lessonCount > 1 && "s"}
 									</Badge>
 								</div>
 
@@ -115,7 +129,6 @@ export function LessonListView({
 							</div>
 						</CollapsibleTrigger>
 
-						{/* Content Table */}
 						<CollapsibleContent>
 							<Table>
 								<TableHeader>
@@ -123,17 +136,20 @@ export function LessonListView({
 										<TableHead className="w-[15%] pl-4 h-9 text-xs font-semibold">
 											Class
 										</TableHead>
-										<TableHead className="w-[30%] h-9 text-xs font-semibold">
+										<TableHead className="w-[25%] h-9 text-xs font-semibold">
 											Subject
 										</TableHead>
-										<TableHead className="w-[25%] h-9 text-xs font-semibold">
+										<TableHead className="w-[20%] h-9 text-xs font-semibold">
 											Teacher
 										</TableHead>
-										<TableHead className="w-[20%] h-9 text-xs font-semibold">
+										<TableHead className="w-[15%] h-9 text-xs font-semibold">
 											Room
 										</TableHead>
-										<TableHead className="w-[10%] pr-4 h-9 text-xs font-semibold text-right">
+										<TableHead className="w-[10%] h-9 text-xs font-semibold text-right">
 											Week
+										</TableHead>
+										<TableHead className="w-[15%] pr-4 h-9 text-xs font-semibold text-right">
+											Actions
 										</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -153,7 +169,6 @@ export function LessonListView({
 															currentWeekParity
 														) && "opacity-40"
 													)}>
-													{/* Class Name */}
 													<TableCell className="font-medium py-2 pl-4">
 														<Badge
 															variant="outline"
@@ -167,7 +182,6 @@ export function LessonListView({
 														</Badge>
 													</TableCell>
 
-													{/* Subject */}
 													<TableCell className="py-2">
 														<div className="flex items-center gap-2">
 															<BookOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -181,7 +195,6 @@ export function LessonListView({
 														</div>
 													</TableCell>
 
-													{/* Teacher */}
 													<TableCell className="py-2">
 														<div className="flex items-center gap-2">
 															<User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -202,7 +215,6 @@ export function LessonListView({
 														</div>
 													</TableCell>
 
-													{/* Room */}
 													<TableCell className="py-2">
 														<div className="flex items-center gap-2">
 															<MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -215,21 +227,65 @@ export function LessonListView({
 														</div>
 													</TableCell>
 
-													{/* Week */}
+													<TableCell className="py-2 text-right">
+														<WeekBadge
+															lessonWeek={
+																lesson.lessonWeek
+															}
+															format="short"
+															solid
+															className="text-[10px] px-1.5 h-5"
+														/>
+													</TableCell>
+
 													<TableCell className="py-2 pr-4 text-right">
-														<Badge
-															className={cn(
-																"text-[10px] uppercase font-bold border-none px-1.5 h-5 shadow-none",
-																WEEK_BADGE_STYLES[
-																	lesson
-																		.lessonWeek
-																]
-															)}>
-															{lesson.lessonWeek ===
-															LessonWeek.every
-																? "All"
-																: lesson.lessonWeek}
-														</Badge>
+														<DropdownMenu>
+															<DropdownMenuTrigger
+																asChild>
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	className="h-7 w-7"
+																	onClick={e =>
+																		e.stopPropagation()
+																	}>
+																	<MoreVertical className="h-3.5 w-3.5" />
+																</Button>
+															</DropdownMenuTrigger>
+															<DropdownMenuContent align="end">
+																<DropdownMenuItem
+																	onClick={e => {
+																		e.stopPropagation();
+																		onLessonClick?.(
+																			lesson
+																		);
+																	}}>
+																	<Info className="h-4 w-4 mr-2" />
+																	Info
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	onClick={e => {
+																		e.stopPropagation();
+																		onEdit?.(
+																			lesson
+																		);
+																	}}>
+																	<Edit className="h-4 w-4 mr-2" />
+																	Edit
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	onClick={e => {
+																		e.stopPropagation();
+																		onDelete?.(
+																			lesson
+																		);
+																	}}
+																	className="text-destructive focus:text-destructive">
+																	<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
+																	Delete
+																</DropdownMenuItem>
+															</DropdownMenuContent>
+														</DropdownMenu>
 													</TableCell>
 												</TableRow>
 											))

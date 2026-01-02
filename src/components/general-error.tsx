@@ -1,12 +1,13 @@
 import { cn } from "@/lib/utils";
 import { TriangleAlert } from "lucide-react";
+import type { ComponentType, HTMLAttributes, ReactNode, SVGProps } from "react";
 
-interface GeneralErrorProps extends React.HTMLAttributes<HTMLDivElement> {
+interface GeneralErrorProps extends HTMLAttributes<HTMLDivElement> {
 	title?: string;
 	message?: string;
 	minimal?: boolean;
-	icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-	children?: React.ReactNode;
+	icon?: ComponentType<SVGProps<SVGSVGElement>>;
+	children?: ReactNode;
 }
 
 export function GeneralError({

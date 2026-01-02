@@ -95,7 +95,7 @@ export function SessionProvider({
 			});
 
 			// Also invalidate admin status if we have a user
-			if (user?.schoolId && user?.id) {
+			if (user) {
 				await queryClient.invalidateQueries({
 					queryKey: getSchoolsControllerIsAdminQueryKey(
 						user.schoolId,
