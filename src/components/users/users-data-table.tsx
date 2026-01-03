@@ -561,8 +561,17 @@ export function UsersDataTable<TData extends UserWithRoles, TValue>({
 
 	const selectedRows = table.getFilteredSelectedRowModel().rows;
 	const selectedUsers = selectedRows.map(row => row.original);
+
+	// Determine if any filters are applied (excluding search bar)
 	const isFiltered =
 		table.getState().columnFilters.length > 0 ||
+		classFilter.length > 0 ||
+		subjectFilter.length > 0;
+
+	// This includes the search bar as well
+	const hasActiveFilters =
+		globalFilter.length > 0 ||
+		columnFilters.length > 0 ||
 		classFilter.length > 0 ||
 		subjectFilter.length > 0;
 
@@ -706,17 +715,19 @@ export function UsersDataTable<TData extends UserWithRoles, TValue>({
 											</EmptyDescription>
 										</EmptyHeader>
 										<EmptyContent>
-											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => {
-													setGlobalFilter("");
-													table.resetColumnFilters();
-													setClassFilter([]);
-													setSubjectFilter([]);
-												}}>
-												Clear all filters
-											</Button>
+											{hasActiveFilters && (
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => {
+														setGlobalFilter("");
+														table.resetColumnFilters();
+														setClassFilter([]);
+														setSubjectFilter([]);
+													}}>
+													Clear all filters
+												</Button>
+											)}
 										</EmptyContent>
 									</Empty>
 								</TableCell>

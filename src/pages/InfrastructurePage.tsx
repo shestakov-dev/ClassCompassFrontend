@@ -8,7 +8,8 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
-import { useSession } from "@/context/session-context";
+import { useSchool } from "@/context/school-context";
+import { SchoolRequired } from "@/components/school-required";
 import { Route } from "@/routes/infrastructure";
 import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
 import type {
@@ -36,7 +37,7 @@ import type {
 } from "@/types/infrastructure";
 
 export default function InfrastructurePage() {
-	const { user } = useSession();
+	const { schoolId } = useSchool();
 	const { buildingId: selectedBuildingId } = Route.useSearch();
 	const navigate = Route.useNavigate();
 
@@ -58,10 +59,10 @@ export default function InfrastructurePage() {
 	});
 
 	const { data: buildings = [] } = useBuildingsControllerFindAllBySchool(
-		user?.schoolId ?? "",
+		schoolId!,
 		{
 			query: {
-				enabled: !!user?.schoolId,
+				enabled: !!schoolId,
 				meta: {
 					operationContext: "load buildings",
 				},
@@ -69,7 +70,7 @@ export default function InfrastructurePage() {
 		}
 	);
 
-	const mutations = useInfrastructureMutations(user?.schoolId);
+	const mutations = useInfrastructureMutations(schoolId!);
 	const selectedBuilding = buildings.find(
 		building => building.id === selectedBuildingId
 	);
@@ -117,7 +118,7 @@ export default function InfrastructurePage() {
 				mutations.createBuilding.mutate({
 					data: {
 						name: formValues.name as string,
-						schoolId: user?.schoolId ?? "",
+						schoolId: schoolId!,
 					},
 				});
 			} else {
@@ -185,177 +186,182 @@ export default function InfrastructurePage() {
 	};
 
 	return (
-		<div className="flex flex-1 w-full h-full bg-background text-foreground font-sans overflow-hidden">
-			<InfrastructureSidebar
-				buildings={buildings}
-				selectedId={selectedBuildingId}
-				onSelect={setSelectedBuildingId}
-				onOpenDialog={openDialog}
-				onDelete={(id, name) => handleDelete("building", id, name)}
-			/>
+		<SchoolRequired>
+			<div className="flex flex-1 w-full h-full bg-background text-foreground font-sans overflow-hidden">
+				<InfrastructureSidebar
+					buildings={buildings}
+					selectedId={selectedBuildingId}
+					onSelect={setSelectedBuildingId}
+					onOpenDialog={openDialog}
+					onDelete={(id, name) => handleDelete("building", id, name)}
+				/>
 
-			{/* Content Area */}
-			<div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-				{/* Header / Top Bar */}
-				<div className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6 shrink-0">
-					<div className="flex items-center flex-1 min-w-0">
-						<h1 className="text-lg font-semibold truncate">
-							{selectedBuilding
-								? selectedBuilding.name
-								: "Infrastructure Dashboard"}
-						</h1>
+				{/* Content Area */}
+				<div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+					{/* Header / Top Bar */}
+					<div className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6 shrink-0">
+						<div className="flex items-center flex-1 min-w-0">
+							<h1 className="text-lg font-semibold truncate">
+								{selectedBuilding
+									? selectedBuilding.name
+									: "Infrastructure Dashboard"}
+							</h1>
+						</div>
+
+						{/* Mobile Menu */}
+						<Sheet
+							open={isMobileMenuOpen}
+							onOpenChange={setIsMobileMenuOpen}>
+							<SheetTrigger asChild>
+								<Button size="icon" className="md:hidden">
+									<Building className="h-4 w-4" />
+								</Button>
+							</SheetTrigger>
+							<SheetContent side="right" className="w-72">
+								<SheetHeader className="text-left">
+									<SheetTitle className="flex items-center gap-2">
+										<Building className="w-5 h-5 text-primary" />
+										<span>Infrastructure</span>
+									</SheetTitle>
+								</SheetHeader>
+
+								<InfrastructureMobileMenu
+									buildings={buildings}
+									selectedId={selectedBuildingId}
+									onSelect={setSelectedBuildingId}
+									onOpenDialog={openDialog}
+									onDelete={(id, name) =>
+										handleDelete("building", id, name)
+									}
+									onClose={() => setIsMobileMenuOpen(false)}
+								/>
+							</SheetContent>
+						</Sheet>
 					</div>
 
-					{/* Mobile Menu */}
-					<Sheet
-						open={isMobileMenuOpen}
-						onOpenChange={setIsMobileMenuOpen}>
-						<SheetTrigger asChild>
-							<Button size="icon" className="md:hidden">
-								<Building className="h-4 w-4" />
-							</Button>
-						</SheetTrigger>
-						<SheetContent side="right" className="w-72">
-							<SheetHeader className="text-left">
-								<SheetTitle className="flex items-center gap-2">
-									<Building className="w-5 h-5 text-primary" />
-									<span>Infrastructure</span>
-								</SheetTitle>
-							</SheetHeader>
+					{/* List Content */}
+					<div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-muted/5">
+						{!selectedBuilding ? (
+							<div className="flex flex-col h-full items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-300">
+								<div className="rounded-full bg-muted p-6 mb-6">
+									<Building className="h-10 w-10 text-muted-foreground" />
+								</div>
 
-							<InfrastructureMobileMenu
-								buildings={buildings}
-								selectedId={selectedBuildingId}
-								onSelect={setSelectedBuildingId}
-								onOpenDialog={openDialog}
-								onDelete={(id, name) =>
-									handleDelete("building", id, name)
-								}
-								onClose={() => setIsMobileMenuOpen(false)}
-							/>
-						</SheetContent>
-					</Sheet>
-				</div>
+								<h3 className="text-lg font-semibold mb-2">
+									No Building Selected
+								</h3>
 
-				{/* List Content */}
-				<div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-muted/5">
-					{!selectedBuilding ? (
-						<div className="flex flex-col h-full items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-300">
-							<div className="rounded-full bg-muted p-6 mb-6">
-								<Building className="h-10 w-10 text-muted-foreground" />
-							</div>
+								<p className="text-muted-foreground max-w-sm mb-6">
+									Select an existing building or create a new
+									one.
+								</p>
 
-							<h3 className="text-lg font-semibold mb-2">
-								No Building Selected
-							</h3>
-
-							<p className="text-muted-foreground max-w-sm mb-6">
-								Select an existing building or create a new one.
-							</p>
-
-							<Button
-								onClick={() => openDialog("building", "create")}
-								className="gap-2">
-								<Plus className="h-4 w-4" /> Create Building
-							</Button>
-						</div>
-					) : (
-						<div className="max-w-6xl mx-auto pb-10 space-y-4">
-							{!selectedBuilding.floors?.length ? (
-								<EmptyFloorState
-									onAddFirstFloor={() =>
-										openDialog("floor", "create")
+								<Button
+									onClick={() =>
+										openDialog("building", "create")
 									}
-								/>
-							) : (
-								<>
-									{selectedBuilding.floors
-										.slice()
-										.sort((a, b) => a.number - b.number)
-										.map(floor => (
-											<FloorItem
-												key={floor.id}
-												floor={floor}
-												isOpen={openFloorIds.includes(
-													floor.id
-												)}
-												onToggle={() =>
-													toggleFloor(floor.id)
-												}
-												onEditFloor={() =>
-													openDialog(
-														"floor",
-														"edit",
-														floor,
-														selectedBuilding.id
-													)
-												}
-												onDeleteFloor={() =>
-													handleDelete(
-														"floor",
-														floor.id,
-														`Floor ${floor.number}`
-													)
-												}
-												onAddRoom={() =>
-													openDialog(
-														"room",
-														"create",
-														{},
-														floor.id
-													)
-												}
-												onEditRoom={room =>
-													openDialog(
-														"room",
-														"edit",
-														room,
-														floor.id
-													)
-												}
-												onDeleteRoom={room =>
-													handleDelete(
-														"room",
-														room.id,
-														room.name
-													)
-												}
-											/>
-										))}
-									<DashedButton
-										onClick={() =>
+									className="gap-2">
+									<Plus className="h-4 w-4" /> Create Building
+								</Button>
+							</div>
+						) : (
+							<div className="max-w-6xl mx-auto pb-10 space-y-4">
+								{!selectedBuilding.floors?.length ? (
+									<EmptyFloorState
+										onAddFirstFloor={() =>
 											openDialog("floor", "create")
 										}
-										className="w-full h-12 mt-6">
-										<Plus className="mr-2 h-4 w-4" />
-										Add Floor
-									</DashedButton>
-								</>
-							)}
-						</div>
-					)}
+									/>
+								) : (
+									<>
+										{selectedBuilding.floors
+											.slice()
+											.sort((a, b) => a.number - b.number)
+											.map(floor => (
+												<FloorItem
+													key={floor.id}
+													floor={floor}
+													isOpen={openFloorIds.includes(
+														floor.id
+													)}
+													onToggle={() =>
+														toggleFloor(floor.id)
+													}
+													onEditFloor={() =>
+														openDialog(
+															"floor",
+															"edit",
+															floor,
+															selectedBuilding.id
+														)
+													}
+													onDeleteFloor={() =>
+														handleDelete(
+															"floor",
+															floor.id,
+															`Floor ${floor.number}`
+														)
+													}
+													onAddRoom={() =>
+														openDialog(
+															"room",
+															"create",
+															{},
+															floor.id
+														)
+													}
+													onEditRoom={room =>
+														openDialog(
+															"room",
+															"edit",
+															room,
+															floor.id
+														)
+													}
+													onDeleteRoom={room =>
+														handleDelete(
+															"room",
+															room.id,
+															room.name
+														)
+													}
+												/>
+											))}
+										<DashedButton
+											onClick={() =>
+												openDialog("floor", "create")
+											}
+											className="w-full h-12 mt-6">
+											<Plus className="mr-2 h-4 w-4" />
+											Add Floor
+										</DashedButton>
+									</>
+								)}
+							</div>
+						)}
+					</div>
 				</div>
+
+				<InfrastructureDialogs
+					open={dialogState.open}
+					onOpenChange={open =>
+						setDialogState(prev => ({ ...prev, open }))
+					}
+					type={dialogState.type}
+					mode={dialogState.mode}
+					data={dialogState.data}
+					onSubmit={handleSave}
+				/>
+
+				<DeleteConfirmation
+					open={deleteConfirm.open}
+					onOpenChange={open =>
+						setDeleteConfirm(prev => ({ ...prev, open }))
+					}
+					name={deleteConfirm.name}
+					onConfirm={confirmDelete}
+				/>
 			</div>
-
-			<InfrastructureDialogs
-				open={dialogState.open}
-				onOpenChange={open =>
-					setDialogState(prev => ({ ...prev, open }))
-				}
-				type={dialogState.type}
-				mode={dialogState.mode}
-				data={dialogState.data}
-				onSubmit={handleSave}
-			/>
-
-			<DeleteConfirmation
-				open={deleteConfirm.open}
-				onOpenChange={open =>
-					setDeleteConfirm(prev => ({ ...prev, open }))
-				}
-				name={deleteConfirm.name}
-				onConfirm={confirmDelete}
-			/>
-		</div>
+		</SchoolRequired>
 	);
 }

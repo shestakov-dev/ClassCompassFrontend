@@ -20,6 +20,7 @@ import {
 import { MobileNav } from "@/components/mobile-nav";
 import { Logo } from "@/components/logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
+import { SchoolSelector } from "@/components/school-selector";
 
 export function Navbar() {
 	const { navGroups, navLinks, navButtons } = useNavigationItems();
@@ -134,6 +135,8 @@ export function Navbar() {
 
 				{/* Right Section */}
 				<div className="flex items-center gap-2">
+					<SchoolSelector />
+
 					{navButtons.map(item => (
 						<Link key={item.href} to={item.href}>
 							<Button

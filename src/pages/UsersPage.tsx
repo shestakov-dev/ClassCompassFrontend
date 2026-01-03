@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useSession } from "@/context/session-context";
+import { useSchool } from "@/context/school-context";
+import { SchoolRequired } from "@/components/school-required";
 import {
 	getUsersControllerFindAllBySchoolQueryKey,
 	useUsersControllerCreate,
@@ -48,6 +50,7 @@ import type { UpdateUserDto } from "@/api/generated/models/updateUserDto";
 
 export default function UsersPage() {
 	const { user: currentUser } = useSession();
+	const { schoolId } = useSchool();
 	const queryClient = useQueryClient();
 
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -62,41 +65,35 @@ export default function UsersPage() {
 	const [isBulkInvite, setIsBulkInvite] = useState(false);
 	const [bulkInviteUsers, setBulkInviteUsers] = useState<UserWithRoles[]>([]);
 
-	const { data: users = [] } = useUsersControllerFindAllBySchool(
-		currentUser?.schoolId ?? "",
-		{
-			query: {
-				enabled: !!currentUser?.schoolId,
-			},
-		}
-	);
+	const { data: users = [] } = useUsersControllerFindAllBySchool(schoolId!, {
+		query: {
+			enabled: !!schoolId,
+		},
+	});
 
 	const { data: classes = [] } = useClassesControllerFindAllBySchool(
-		currentUser?.schoolId ?? "",
+		schoolId!,
 		{
 			query: {
-				enabled: !!currentUser?.schoolId,
+				enabled: !!schoolId,
 			},
 		}
 	);
 
 	const { data: subjects = [] } = useSubjectsControllerFindAllBySchool(
-		currentUser?.schoolId ?? "",
+		schoolId!,
 		{
 			query: {
-				enabled: !!currentUser?.schoolId,
+				enabled: !!schoolId,
 			},
 		}
 	);
 
-	const { data: adminUsers = [] } = useSchoolsControllerGetAdmins(
-		currentUser?.schoolId ?? "",
-		{
-			query: {
-				enabled: !!currentUser?.schoolId,
-			},
-		}
-	);
+	const { data: adminUsers = [] } = useSchoolsControllerGetAdmins(schoolId!, {
+		query: {
+			enabled: !!schoolId,
+		},
+	});
 
 	// Add isAdmin property to users based on adminUsers list
 	const usersWithAdminStatus = useMemo(() => {
@@ -112,7 +109,7 @@ export default function UsersPage() {
 		if (!selectedUser) return;
 
 		const updatedUsers = queryClient.getQueryData<typeof users>(
-			getUsersControllerFindAllBySchoolQueryKey(currentUser?.schoolId)
+			getUsersControllerFindAllBySchoolQueryKey(schoolId!)
 		);
 
 		const updatedUser = updatedUsers?.find(
@@ -138,9 +135,8 @@ export default function UsersPage() {
 				toast.success("User created successfully");
 
 				queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				setCreateDialogOpen(false);
@@ -157,9 +153,8 @@ export default function UsersPage() {
 				toast.success("User updated successfully");
 
 				queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				setEditDialogOpen(false);
@@ -176,9 +171,8 @@ export default function UsersPage() {
 				toast.success("User deleted successfully");
 
 				queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				setDeleteDialogOpen(false);
@@ -195,9 +189,7 @@ export default function UsersPage() {
 				toast.success("Admin role granted successfully");
 
 				queryClient.invalidateQueries({
-					queryKey: getSchoolsControllerGetAdminsQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey: getSchoolsControllerGetAdminsQueryKey(schoolId!),
 				});
 			},
 		},
@@ -212,9 +204,7 @@ export default function UsersPage() {
 				toast.success("Admin role removed successfully");
 
 				queryClient.invalidateQueries({
-					queryKey: getSchoolsControllerGetAdminsQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey: getSchoolsControllerGetAdminsQueryKey(schoolId!),
 				});
 			},
 		},
@@ -242,9 +232,8 @@ export default function UsersPage() {
 				toast.success("Student role added successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				updateSelectedUserFromCache();
@@ -261,17 +250,14 @@ export default function UsersPage() {
 				toast.success("Student role removed successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				// Update the selected user with fresh data
 				if (selectedUser) {
 					const updatedUsers = queryClient.getQueryData<typeof users>(
-						getUsersControllerFindAllBySchoolQueryKey(
-							currentUser?.schoolId
-						)
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
 					);
 
 					const updatedUser = updatedUsers?.find(
@@ -302,17 +288,14 @@ export default function UsersPage() {
 				toast.success("Student updated successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				// Update the selected user with fresh data
 				if (selectedUser) {
 					const updatedUsers = queryClient.getQueryData<typeof users>(
-						getUsersControllerFindAllBySchoolQueryKey(
-							currentUser?.schoolId
-						)
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
 					);
 
 					const updatedUser = updatedUsers?.find(
@@ -343,16 +326,13 @@ export default function UsersPage() {
 				toast.success("Teacher role added successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				if (selectedUser) {
 					const updatedUsers = queryClient.getQueryData<typeof users>(
-						getUsersControllerFindAllBySchoolQueryKey(
-							currentUser?.schoolId
-						)
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
 					);
 
 					const updatedUser = updatedUsers?.find(
@@ -383,16 +363,13 @@ export default function UsersPage() {
 				toast.success("Teacher role removed successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				if (selectedUser) {
 					const updatedUsers = queryClient.getQueryData<typeof users>(
-						getUsersControllerFindAllBySchoolQueryKey(
-							currentUser?.schoolId
-						)
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
 					);
 
 					const updatedUser = updatedUsers?.find(
@@ -423,16 +400,13 @@ export default function UsersPage() {
 				toast.success("Teacher updated successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
-					),
+					queryKey:
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
 				});
 
 				if (selectedUser) {
 					const updatedUsers = queryClient.getQueryData<typeof users>(
-						getUsersControllerFindAllBySchoolQueryKey(
-							currentUser?.schoolId
-						)
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
 					);
 
 					const updatedUser = updatedUsers?.find(
@@ -473,16 +447,16 @@ export default function UsersPage() {
 	};
 
 	const handleConfirmToggleAdmin = () => {
-		if (!currentUser?.schoolId || !selectedUser) return;
+		if (!schoolId || !selectedUser) return;
 
 		if (selectedUser.isAdmin) {
 			demoteFromAdminMutation.mutate({
-				id: currentUser.schoolId,
+				id: schoolId,
 				userId: selectedUser.id,
 			});
 		} else {
 			promoteToAdminMutation.mutate({
-				id: currentUser.schoolId,
+				id: schoolId,
 				userId: selectedUser.id,
 			});
 		}
@@ -604,79 +578,83 @@ export default function UsersPage() {
 	});
 
 	return (
-		<div className="container mx-auto space-y-6 py-10">
-			<div className="px-2 sm:px-4">
-				<h1 className="text-3xl font-bold tracking-tight">
-					User Management
-				</h1>
-				<p className="text-muted-foreground">
-					Manage users, assign roles, and send invitations.
-				</p>
+		<SchoolRequired>
+			<div className="container mx-auto space-y-6 py-10">
+				<div className="px-2 sm:px-4">
+					<h1 className="text-3xl font-bold tracking-tight">
+						User Management
+					</h1>
+					<p className="text-muted-foreground">
+						Manage users, assign roles, and send invitations.
+					</p>
+				</div>
+
+				<UsersDataTable
+					columns={columns}
+					data={usersWithAdminStatus}
+					onCreateUser={() => setCreateDialogOpen(true)}
+					onBulkInvite={handleBulkInvite}
+					classes={classes}
+					subjects={subjects}
+				/>
+
+				<CreateUserDialog
+					open={createDialogOpen}
+					onOpenChange={setCreateDialogOpen}
+					onSubmit={handleCreateUser}
+					schoolId={schoolId!}
+				/>
+
+				<EditUserDialog
+					open={editDialogOpen}
+					onOpenChange={setEditDialogOpen}
+					onSubmit={handleEditUser}
+					user={selectedUser}
+				/>
+
+				<DeleteUserDialog
+					open={deleteDialogOpen}
+					onOpenChange={setDeleteDialogOpen}
+					onConfirm={handleDeleteUser}
+					user={selectedUser}
+				/>
+
+				<ToggleAdminDialog
+					open={toggleAdminDialogOpen}
+					onOpenChange={setToggleAdminDialogOpen}
+					onConfirm={handleConfirmToggleAdmin}
+					user={selectedUser}
+					currentUser={
+						currentUser
+							? (usersWithAdminStatus.find(
+									user => user.id === currentUser.id
+							  ) ?? null)
+							: null
+					}
+				/>
+
+				<InviteUserDialog
+					open={inviteDialogOpen}
+					onOpenChange={setInviteDialogOpen}
+					onConfirm={handleInviteUser}
+					user={selectedUser}
+					isBulk={isBulkInvite}
+				/>
+
+				<ManageRolesDialog
+					open={manageRolesDialogOpen}
+					onOpenChange={setManageRolesDialogOpen}
+					user={selectedUser}
+					classes={classes}
+					subjects={subjects}
+					onAddStudent={handleAddStudent}
+					onRemoveStudent={handleRemoveStudent}
+					onUpdateStudent={handleUpdateStudent}
+					onAddTeacher={handleAddTeacher}
+					onRemoveTeacher={handleRemoveTeacher}
+					onUpdateTeacher={handleUpdateTeacher}
+				/>
 			</div>
-
-			<UsersDataTable
-				columns={columns}
-				data={usersWithAdminStatus}
-				onCreateUser={() => setCreateDialogOpen(true)}
-				onBulkInvite={handleBulkInvite}
-				classes={classes}
-				subjects={subjects}
-			/>
-
-			<CreateUserDialog
-				open={createDialogOpen}
-				onOpenChange={setCreateDialogOpen}
-				onSubmit={handleCreateUser}
-				schoolId={currentUser!.schoolId}
-			/>
-
-			<EditUserDialog
-				open={editDialogOpen}
-				onOpenChange={setEditDialogOpen}
-				onSubmit={handleEditUser}
-				user={selectedUser}
-			/>
-
-			<DeleteUserDialog
-				open={deleteDialogOpen}
-				onOpenChange={setDeleteDialogOpen}
-				onConfirm={handleDeleteUser}
-				user={selectedUser}
-			/>
-
-			<ToggleAdminDialog
-				open={toggleAdminDialogOpen}
-				onOpenChange={setToggleAdminDialogOpen}
-				onConfirm={handleConfirmToggleAdmin}
-				user={selectedUser}
-				currentUser={
-					usersWithAdminStatus.find(
-						user => user.id === currentUser!.id
-					) ?? null
-				}
-			/>
-
-			<InviteUserDialog
-				open={inviteDialogOpen}
-				onOpenChange={setInviteDialogOpen}
-				onConfirm={handleInviteUser}
-				user={selectedUser}
-				isBulk={isBulkInvite}
-			/>
-
-			<ManageRolesDialog
-				open={manageRolesDialogOpen}
-				onOpenChange={setManageRolesDialogOpen}
-				user={selectedUser}
-				classes={classes}
-				subjects={subjects}
-				onAddStudent={handleAddStudent}
-				onRemoveStudent={handleRemoveStudent}
-				onUpdateStudent={handleUpdateStudent}
-				onAddTeacher={handleAddTeacher}
-				onRemoveTeacher={handleRemoveTeacher}
-				onUpdateTeacher={handleUpdateTeacher}
-			/>
-		</div>
+		</SchoolRequired>
 	);
 }

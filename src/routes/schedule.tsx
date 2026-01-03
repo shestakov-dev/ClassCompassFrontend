@@ -8,6 +8,7 @@ import { Day, LessonWeek } from "@/types/schedule";
 import { buildScheduleFilters } from "@/lib/schedule-utils";
 import { requireAuth } from "@/lib/route-guards";
 import SchedulePage from "@/pages/SchedulePage";
+import { getSchoolId } from "@/lib/school-utils";
 
 const scheduleSearchSchema = z.object({
 	mode: z.enum(["date", "weekly"]).default("weekly").optional(),
@@ -34,15 +35,20 @@ export const Route = createFileRoute("/schedule")({
 	loader: async ({ context, deps: search, location }) => {
 		const user = await requireAuth(context, location.href);
 
+		const schoolId = getSchoolId(context.session, user);
+
+		if (!schoolId) {
+			return;
+		}
+
 		const apiFilters = buildScheduleFilters(user, search);
 
 		context.queryClient.prefetchQuery({
 			queryKey: getLessonsControllerFindFilteredQueryKey(
-				user.schoolId,
+				schoolId,
 				apiFilters
 			),
-			queryFn: () =>
-				lessonsControllerFindFiltered(user.schoolId!, apiFilters),
+			queryFn: () => lessonsControllerFindFiltered(schoolId, apiFilters),
 		});
 	},
 	component: SchedulePage,

@@ -8,6 +8,11 @@ import {
 	getSchoolsControllerIsAdminQueryKey,
 	schoolsControllerIsAdmin,
 } from "@/api/generated/endpoints/schools/schools";
+import {
+	isValidSession,
+	getIdentityId,
+	isPlatformAdmin,
+} from "@/lib/session-utils";
 
 export function requireGuest({ session }: RouterContext) {
 	if (session) {
@@ -19,17 +24,22 @@ export async function requireAuth(
 	{ queryClient, session }: RouterContext,
 	returnTo?: string
 ) {
-	if (!session) {
+	if (!isValidSession(session)) {
 		throw redirect({
 			to: "/login",
 			search: returnTo ? { return_to: returnTo } : undefined,
 		});
 	}
 
-	const identityId = session.identity?.id;
+	const identityId = getIdentityId(session);
 
 	if (!identityId) {
 		throw redirect({ to: "/login" });
+	}
+
+	// Platform admins don't have user records
+	if (isPlatformAdmin(session)) {
+		return null;
 	}
 
 	// Fetch and return user data
@@ -49,6 +59,16 @@ export async function requireAdmin(context: RouterContext, returnTo?: string) {
 	// First ensure user is authenticated
 	const user = await requireAuth(context, returnTo);
 
+	// Platform admins have full access
+	if (isPlatformAdmin(context.session)) {
+		return null;
+	}
+
+	// User must exist for school admin check
+	if (!user) {
+		throw redirect({ to: "/" });
+	}
+
 	// Check admin status
 	const isAdmin = await context.queryClient.ensureQueryData({
 		queryKey: getSchoolsControllerIsAdminQueryKey(user.schoolId, user.id),
@@ -60,4 +80,16 @@ export async function requireAdmin(context: RouterContext, returnTo?: string) {
 	}
 
 	return user;
+}
+
+export async function requirePlatformAdmin(
+	{ session }: RouterContext,
+	returnTo?: string
+) {
+	if (!isValidSession(session) || !isPlatformAdmin(session)) {
+		throw redirect({
+			to: "/login",
+			search: returnTo ? { return_to: returnTo } : undefined,
+		});
+	}
 }
