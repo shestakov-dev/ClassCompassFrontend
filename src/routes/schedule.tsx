@@ -31,11 +31,7 @@ const scheduleSearchSchema = z.object({
 export const Route = createFileRoute("/schedule")({
 	validateSearch: search => scheduleSearchSchema.parse(search),
 	loaderDeps: ({ search }) => search,
-	loader: async ({
-		context,
-		deps: search,
-		location,
-	}) => {
+	loader: async ({ context, deps: search, location }) => {
 		const user = await requireAuth(context, location.href);
 
 		const apiFilters = buildScheduleFilters(user, search);

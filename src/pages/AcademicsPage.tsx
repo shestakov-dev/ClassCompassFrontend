@@ -383,17 +383,24 @@ export default function AcademicsPage() {
 				onValueChange={setActiveTab}
 				className="w-full">
 				<div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
-					<TabsList className="grid w-full lg:w-auto lg:min-w-100 grid-cols-2 h-12">
+					<TabsList className="relative grid w-full lg:w-auto lg:min-w-100 grid-cols-2 h-12">
+						<div
+							className={`absolute inset-y-1 rounded-md transition-all duration-300 ease-out ${
+								activeTab === "classes"
+									? "left-1 right-1/2 mr-1 bg-chart-4"
+									: "left-1/2 right-1 ml-1 bg-chart-3"
+							}`}
+						/>
 						<TabsTrigger
 							value="classes"
-							className="gap-2 h-full data-[state=active]:bg-chart-4! data-[state=active]:text-white dark:data-[state=active]:text-white">
+							className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
 							<GraduationCap className="h-4 w-4" />
 							Classes
 						</TabsTrigger>
 
 						<TabsTrigger
 							value="subjects"
-							className="gap-2 h-full data-[state=active]:bg-chart-3! data-[state=active]:text-white dark:data-[state=active]:text-white">
+							className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
 							<BookOpen className="h-4 w-4" />
 							Subjects
 						</TabsTrigger>

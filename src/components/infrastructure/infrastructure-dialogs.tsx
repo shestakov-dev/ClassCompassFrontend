@@ -19,6 +19,7 @@ import type {
 	DialogMode,
 	DialogData,
 } from "@/types/infrastructure";
+import type { FormEvent } from "react";
 
 interface InfrastructureDialogsProps {
 	open: boolean;
@@ -26,7 +27,7 @@ interface InfrastructureDialogsProps {
 	type: DialogType;
 	mode: DialogMode;
 	data: DialogData;
-	onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+	onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }
 
 export function InfrastructureDialogs({

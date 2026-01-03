@@ -9,14 +9,15 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import type { ComponentProps } from "react";
 
 interface DatePickerProps {
 	date: Date;
 	setDate: (date: Date) => void;
 	className?: string;
 	align?: "center" | "start" | "end";
-	variant?: React.ComponentProps<typeof Button>["variant"];
-	size?: React.ComponentProps<typeof Button>["size"];
+	variant?: ComponentProps<typeof Button>["variant"];
+	size?: ComponentProps<typeof Button>["size"];
 }
 
 export function DatePicker({
@@ -46,13 +47,13 @@ export function DatePicker({
 					{date ? format(date, "PPP") : <span>Pick a date</span>}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent
-				className="w-auto p-0"
-				align={align}>
+			<PopoverContent className="w-auto p-0" align={align}>
 				<Calendar
 					mode="single"
 					selected={date}
-					onSelect={selectedDate => selectedDate && setDate(selectedDate)}
+					onSelect={selectedDate =>
+						selectedDate && setDate(selectedDate)
+					}
 				/>
 			</PopoverContent>
 		</Popover>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DailyScheduleViewer } from "@/components/schedule/daily-schedule-viewer";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
 import { Button } from "@/components/ui/button";
@@ -15,22 +15,42 @@ import {
 	ChevronRight,
 	CalendarRange,
 	CalendarX2,
+	Plus,
 } from "lucide-react";
 import { addDays, subDays, setDay, parseISO, set } from "date-fns";
 import { useSession } from "@/context/session-context";
-import { useLessonsControllerFindFiltered } from "@/api/generated/endpoints/lessons/lessons";
+import {
+	useLessonsControllerFindFiltered,
+	useLessonsControllerCreate,
+	useLessonsControllerUpdate,
+	useLessonsControllerRemove,
+	getLessonsControllerFindFilteredQueryKey,
+} from "@/api/generated/endpoints/lessons/lessons";
 import { useClassesControllerFindAllBySchool } from "@/api/generated/endpoints/classes/classes";
+import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
 import { useSubjectsControllerFindAllBySchool } from "@/api/generated/endpoints/subjects/subjects";
 import { useTeachersControllerFindAllBySchool } from "@/api/generated/endpoints/teachers/teachers";
-import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
-import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
-import { Day, ALL_DAYS, DAY_TO_DAY_INDEX } from "@/types/schedule";
+import {
+	useDailySchedulesControllerCreate,
+	getDailySchedulesControllerFindAllByClassQueryKey,
+	dailySchedulesControllerFindAllByClass,
+} from "@/api/generated/endpoints/daily-schedules/daily-schedules";
+import {
+	Day,
+	ALL_DAYS,
+	DAY_TO_DAY_INDEX,
+	type CreateLessonFormData,
+} from "@/types/schedule";
 import {
 	buildScheduleFilters,
 	getCurrentDayEnum,
 	isScheduleDefaultFilter,
 } from "@/lib/schedule-utils";
-import { keepPreviousData } from "@tanstack/react-query";
+import { toast } from "sonner";
+import type { LessonsControllerFindFilteredParams } from "@/api/generated/models/lessonsControllerFindFilteredParams";
+import type { UpdateLessonDto } from "@/api/generated/models/updateLessonDto";
+import type { LessonEntity } from "@/api/generated/models";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { Route } from "@/routes/schedule";
 import {
 	Empty,
@@ -42,10 +62,23 @@ import {
 } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 import { LessonListView } from "@/components/schedule/lesson-list-view";
+import {
+	CreateLessonDialog,
+	EditLessonDialog,
+	DeleteLessonDialog,
+	LessonDetailsDialog,
+} from "@/components/schedule/lesson-dialogs";
 
 export default function SchedulePage() {
-	const { user } = useSession();
-
+	const { user, isAdmin } = useSession();
+	const queryClient = useQueryClient();
+	const [selectedLesson, setSelectedLesson] = useState<LessonEntity | null>(
+		null
+	);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [createDialogOpen, setCreateDialogOpen] = useState(false);
+	const [editDialogOpen, setEditDialogOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const navigate = Route.useNavigate();
 	const search = Route.useSearch();
 
@@ -55,14 +88,14 @@ export default function SchedulePage() {
 		[search.date]
 	);
 	const genericDay = search.day ?? getCurrentDayEnum();
-
-	const filters = useMemo(() => {
-		return buildScheduleFilters(user, search);
-	}, [search, user]);
-
-	const isDefaultFilters = useMemo(() => {
-		return isScheduleDefaultFilter(user, filters, search);
-	}, [user, filters, search]);
+	const filters = useMemo(
+		() => buildScheduleFilters(user, search),
+		[search, user]
+	);
+	const isDefaultFilters = useMemo(
+		() => isScheduleDefaultFilter(user, filters, search),
+		[user, filters, search]
+	);
 
 	const {
 		data: lessons,
@@ -73,21 +106,16 @@ export default function SchedulePage() {
 			enabled: !!user?.schoolId,
 			staleTime: 1000 * 60 * 1,
 			placeholderData: keepPreviousData,
-			meta: {
-				operationContext: "load lessons",
-			},
+			meta: { operationContext: "load lessons" },
 		},
 	});
-
 	const { data: classes } = useClassesControllerFindAllBySchool(
 		user?.schoolId ?? "",
 		{
 			query: {
 				enabled: !!user?.schoolId,
 				staleTime: 1000 * 60 * 1,
-				meta: {
-					operationContext: "load classes",
-				},
+				meta: { operationContext: "load classes" },
 			},
 		}
 	);
@@ -97,9 +125,7 @@ export default function SchedulePage() {
 			query: {
 				enabled: !!user?.schoolId,
 				staleTime: 1000 * 60 * 1,
-				meta: {
-					operationContext: "load subjects",
-				},
+				meta: { operationContext: "load subjects" },
 			},
 		}
 	);
@@ -109,9 +135,7 @@ export default function SchedulePage() {
 			query: {
 				enabled: !!user?.schoolId,
 				staleTime: 1000 * 60 * 1,
-				meta: {
-					operationContext: "load teachers",
-				},
+				meta: { operationContext: "load teachers" },
 			},
 		}
 	);
@@ -121,9 +145,7 @@ export default function SchedulePage() {
 			query: {
 				enabled: !!user?.schoolId,
 				staleTime: 1000 * 60 * 1,
-				meta: {
-					operationContext: "load buildings",
-				},
+				meta: { operationContext: "load buildings" },
 			},
 		}
 	);
@@ -236,6 +258,162 @@ export default function SchedulePage() {
 		return !!(filters.classId || filters.teacherId || filters.roomId);
 	}, [filters]);
 
+	const handleLessonClick = useCallback((lesson: LessonEntity) => {
+		setSelectedLesson(lesson);
+		setIsModalOpen(true);
+	}, []);
+
+	const createLessonMutation = useLessonsControllerCreate({
+		mutation: {
+			onSuccess: () => {
+				toast.success("Lesson created successfully");
+				queryClient.invalidateQueries({
+					queryKey: getLessonsControllerFindFilteredQueryKey(
+						user?.schoolId ?? "",
+						filters
+					),
+				});
+				setCreateDialogOpen(false);
+			},
+			onError: () => {
+				toast.error("Failed to create lesson");
+			},
+		},
+	});
+	const updateLessonMutation = useLessonsControllerUpdate({
+		mutation: {
+			onSuccess: () => {
+				toast.success("Lesson updated successfully");
+				queryClient.invalidateQueries({
+					queryKey: getLessonsControllerFindFilteredQueryKey(
+						user?.schoolId ?? "",
+						filters
+					),
+				});
+				setEditDialogOpen(false);
+				setSelectedLesson(null);
+			},
+		},
+	});
+	const deleteLessonMutation = useLessonsControllerRemove({
+		mutation: {
+			onSuccess: () => {
+				toast.success("Lesson deleted successfully");
+				queryClient.invalidateQueries({
+					queryKey: getLessonsControllerFindFilteredQueryKey(
+						user?.schoolId ?? "",
+						filters
+					),
+				});
+				setIsModalOpen(false);
+				setSelectedLesson(null);
+			},
+		},
+	});
+
+	const createDailyScheduleMutation = useDailySchedulesControllerCreate();
+
+	const findOrCreateDailySchedule = async (
+		classId: string,
+		day: Day
+	): Promise<string> => {
+		const queryKey =
+			getDailySchedulesControllerFindAllByClassQueryKey(classId);
+
+		const schedules = await queryClient.fetchQuery({
+			queryKey,
+			queryFn: ({ signal }) =>
+				dailySchedulesControllerFindAllByClass(classId, signal),
+		});
+
+		const found = schedules.find(ds => ds.day === day);
+		if (found) return found.id;
+
+		const created = await createDailyScheduleMutation.mutateAsync({
+			data: { classId, day: day as Day },
+		});
+
+		queryClient.invalidateQueries({ queryKey });
+
+		return created.id;
+	};
+
+	const handleCreateLesson = async (data: CreateLessonFormData) => {
+		const { day, classId, lessonWeek, ...rest } = data;
+		if (!day || !classId) {
+			toast.error("Class and day are required");
+			return;
+		}
+		try {
+			const dailyScheduleId = await findOrCreateDailySchedule(
+				classId,
+				day
+			);
+			createLessonMutation.mutate({
+				data: {
+					...rest,
+					lessonWeek,
+					dailyScheduleId,
+				},
+			});
+		} catch {
+			toast.error("Failed to resolve daily schedule");
+		}
+	};
+
+	const handleDeleteLesson = () => {
+		if (selectedLesson) {
+			deleteLessonMutation.mutate({ id: selectedLesson.id });
+		}
+	};
+
+	const handleEditLesson = async (
+		data: UpdateLessonDto & { day?: string; classId?: string }
+	) => {
+		if (!selectedLesson) return;
+
+		if (data.day && data.classId) {
+			try {
+				const dailyScheduleId = await findOrCreateDailySchedule(
+					data.classId,
+					data.day as Day
+				);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { day: _day, classId: _classId, ...updateData } = data;
+				updateLessonMutation.mutate({
+					id: selectedLesson.id,
+					data: { ...updateData, dailyScheduleId },
+				});
+			} catch {
+				toast.error("Failed to resolve daily schedule");
+			}
+		} else {
+			updateLessonMutation.mutate({ id: selectedLesson.id, data });
+		}
+	};
+
+	const handleEditClick = (lesson: LessonEntity) => {
+		setSelectedLesson(lesson);
+		setEditDialogOpen(true);
+	};
+
+	const handleDeleteClick = (lesson: LessonEntity) => {
+		setSelectedLesson(lesson);
+		setDeleteDialogOpen(true);
+	};
+
+	const createLessonDefaults = useMemo(() => {
+		const isValidDay = Object.values(Day).includes(genericDay);
+
+		return {
+			day: isValidDay ? genericDay : undefined,
+			classId: filters.classId,
+			subjectId: filters.subjectId,
+			teacherId: filters.teacherId,
+			roomId: filters.roomId,
+		};
+	}, [filters, genericDay]);
+
 	return (
 		<div className="flex flex-col h-full bg-background">
 			<div className="flex-1 flex flex-col w-full max-w-6xl mx-auto p-4 md:p-6 gap-4 min-h-0">
@@ -250,10 +428,27 @@ export default function SchedulePage() {
 							)}
 						</div>
 						<p className="text-muted-foreground text-sm">
-							View your upcoming classes.
+							View your upcoming classes
 						</p>
 					</div>
 
+					<div className="flex items-center gap-2">
+						{isAdmin && (
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => {
+									setCreateDialogOpen(true);
+								}}
+								className="gap-2">
+								<Plus className="h-4 w-4" />
+								New Lesson
+							</Button>
+						)}
+					</div>
+				</div>
+
+				<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
 					<div className="flex items-center gap-2 self-start md:self-auto">
 						{mode === "date" ? (
 							<div className="flex items-center gap-1 bg-card border rounded-lg p-1 shadow-sm">
@@ -321,7 +516,7 @@ export default function SchedulePage() {
 					</div>
 				</div>
 
-				<div className="shrink-0">
+				<div className="flex items-center justify-between gap-4 shrink-0">
 					<ScheduleFilters
 						date={currentDate}
 						setDate={handleDateChange}
@@ -405,6 +600,9 @@ export default function SchedulePage() {
 								<DailyScheduleViewer
 									lessons={lessons ?? []}
 									date={currentDate}
+									onLessonClick={handleLessonClick}
+									onEdit={handleEditClick}
+									onDelete={handleDeleteClick}
 								/>
 							</div>
 						) : (
@@ -412,12 +610,64 @@ export default function SchedulePage() {
 								<LessonListView
 									lessons={lessons ?? []}
 									currentDate={currentDate}
+									onLessonClick={handleLessonClick}
+									onEdit={handleEditClick}
+									onDelete={handleDeleteClick}
 								/>
 							</div>
 						)}
 					</div>
 				</div>
 			</div>
+
+			<LessonDetailsDialog
+				open={isModalOpen}
+				onOpenChange={setIsModalOpen}
+				lesson={selectedLesson}
+				onEdit={() => {
+					setEditDialogOpen(true);
+				}}
+				onDelete={() => {
+					setDeleteDialogOpen(true);
+				}}
+			/>
+
+			<CreateLessonDialog
+				open={createDialogOpen}
+				onOpenChange={setCreateDialogOpen}
+				onSubmit={handleCreateLesson}
+				isLoading={createLessonMutation.isPending}
+				defaultValues={createLessonDefaults}
+				options={{
+					classes,
+					subjects,
+					teachers,
+					buildings,
+					dailySchedules: undefined,
+				}}
+			/>
+
+			<EditLessonDialog
+				open={editDialogOpen}
+				onOpenChange={setEditDialogOpen}
+				onSubmit={handleEditLesson}
+				isLoading={updateLessonMutation.isPending}
+				lesson={selectedLesson}
+				options={{
+					classes,
+					subjects,
+					teachers,
+					buildings,
+				}}
+			/>
+
+			<DeleteLessonDialog
+				open={deleteDialogOpen}
+				onOpenChange={setDeleteDialogOpen}
+				onConfirm={handleDeleteLesson}
+				isLoading={deleteLessonMutation.isPending}
+				lesson={selectedLesson}
+			/>
 		</div>
 	);
 }

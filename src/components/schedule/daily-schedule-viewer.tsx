@@ -1,9 +1,6 @@
-import { useState, useMemo } from "react";
-import {
-	TimeGrid,
-	type ScheduleEvent,
-} from "@/components/schedule/daily-schedule-grid";
-import { startOfWeek, format } from "date-fns";
+import { useState } from "react";
+import { TimeGrid } from "@/components/schedule/daily-schedule-grid";
+import { format, parseISO } from "date-fns";
 import {
 	Dialog,
 	DialogContent,
@@ -11,84 +8,118 @@ import {
 	DialogTitle,
 	DialogDescription,
 } from "@/components/ui/dialog";
-import { transformLessonsToEvents } from "@/lib/schedule-utils";
-import type { LessonEntity } from "@/api/generated/models";
+import { type LessonEntity } from "@/api/generated/models";
+import { WeekBadge } from "@/components/schedule/week-badge";
 
 interface DailyScheduleViewerProps {
 	lessons: LessonEntity[];
 	date: Date;
+	onLessonClick?: (lesson: LessonEntity) => void;
+	onEdit?: (lesson: LessonEntity) => void;
+	onDelete?: (lesson: LessonEntity) => void;
 }
 
 export function DailyScheduleViewer({
 	lessons,
 	date,
+	onLessonClick: externalOnLessonClick,
+	onEdit,
+	onDelete,
 }: DailyScheduleViewerProps) {
-	const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(
+	const [selectedLesson, setSelectedLesson] = useState<LessonEntity | null>(
 		null
 	);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
-	const events = useMemo(() => {
-		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-		return transformLessonsToEvents(lessons, weekStart);
-	}, [lessons, date]);
-
-	const handleEventClick = (event: ScheduleEvent) => {
-		setSelectedEvent(event);
-		setIsModalOpen(true);
+	const handleLessonClick = (lesson: LessonEntity) => {
+		if (externalOnLessonClick) {
+			externalOnLessonClick(lesson);
+		} else {
+			setSelectedLesson(lesson);
+			setIsModalOpen(true);
+		}
 	};
 
 	return (
 		<div className="h-full flex flex-col">
 			<div className="flex-1 min-h-0 relative border rounded-md bg-background shadow-sm overflow-hidden">
 				<TimeGrid
-					events={events}
+					lessons={lessons}
 					date={date}
-					onEventClick={handleEventClick}
+					onLessonClick={handleLessonClick}
+					onEdit={onEdit}
+					onDelete={onDelete}
 				/>
 			</div>
 
-			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>{selectedEvent?.subject}</DialogTitle>
-						<DialogDescription className="flex items-center gap-2 mt-2">
-							<span className="font-mono bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide">
-								{selectedEvent?.room}
-							</span>
-							<span className="text-muted-foreground">•</span>
-							<span className="font-medium text-foreground">
-								{selectedEvent?.start &&
-									format(selectedEvent.start, "HH:mm")}{" "}
-								-
-								{selectedEvent?.end &&
-									format(selectedEvent.end, "HH:mm")}
-							</span>
-						</DialogDescription>
-					</DialogHeader>
+			{!externalOnLessonClick && (
+				<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+					<DialogContent className="max-w-md">
+						<DialogHeader>
+							<DialogTitle className="text-xl">
+								{selectedLesson?.subject?.name ??
+									"Lesson Details"}
+							</DialogTitle>
+							<DialogDescription className="flex items-center gap-2 mt-2 flex-wrap">
+								<span className="bg-muted px-2.5 py-1 rounded text-sm font-medium capitalize">
+									{selectedLesson?.dailySchedule?.day ??
+										"N/A"}
+								</span>
+								<span className="bg-muted px-2.5 py-1 rounded text-sm font-medium">
+									{selectedLesson?.startTime &&
+										format(
+											parseISO(selectedLesson.startTime),
+											"HH:mm"
+										)}{" "}
+									-{" "}
+									{selectedLesson?.endTime &&
+										format(
+											parseISO(selectedLesson.endTime),
+											"HH:mm"
+										)}
+								</span>
+								{selectedLesson && (
+									<WeekBadge
+										lessonWeek={selectedLesson.lessonWeek}
+									/>
+								)}
+							</DialogDescription>
+						</DialogHeader>
 
-					{selectedEvent && (
-						<div className="grid gap-3 py-2 text-sm">
-							<div className="flex justify-between border-b pb-2">
-								<span className="text-muted-foreground">
-									Teacher
-								</span>
-								<span className="font-medium">
-									{selectedEvent.teacher}
-								</span>
+						{selectedLesson && (
+							<div className="grid gap-3 py-2 text-sm">
+								<div className="flex justify-between border-b pb-2">
+									<span className="text-muted-foreground">
+										Class
+									</span>
+									<span className="font-medium">
+										{selectedLesson.dailySchedule?.class
+											?.name ?? "N/A"}
+									</span>
+								</div>
+								<div className="flex justify-between border-b pb-2">
+									<span className="text-muted-foreground">
+										Room
+									</span>
+									<span className="font-medium">
+										{selectedLesson.room?.name ?? "N/A"}
+									</span>
+								</div>
+								<div className="flex justify-between border-b pb-2">
+									<span className="text-muted-foreground">
+										Teacher
+									</span>
+									<span className="font-medium">
+										{selectedLesson.teacher?.user
+											? `${selectedLesson.teacher.user.firstName} ${selectedLesson.teacher.user.lastName}`
+											: "N/A"}
+									</span>
+								</div>
 							</div>
-							<div className="flex justify-between items-center">
-								<span className="text-muted-foreground">
-									Week Type
-								</span>
-								<span className="capitalize inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
-									{selectedEvent.type}
-								</span>
-							</div>
-						</div>
-					)}
-				</DialogContent>
-			</Dialog>
+						)}
+					</DialogContent>
+				</Dialog>
+			)}
 		</div>
 	);
 }

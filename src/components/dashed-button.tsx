@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 interface DashedButtonProps {
 	onClick: () => void;
-	children: React.ReactNode;
+	children: ReactNode;
 	className?: string;
 }
 

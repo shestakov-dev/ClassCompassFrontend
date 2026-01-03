@@ -1,4 +1,5 @@
 import type { LinkProps } from "@tanstack/react-router";
+import type { ComponentType, SVGProps } from "react";
 
 export type NavVisibility = "authenticated" | "guest" | "admin";
 
@@ -32,7 +33,7 @@ export type NavButton = BaseNavItem & {
 		| "secondary"
 		| "ghost"
 		| "link";
-	iconElement?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+	iconElement?: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
 export type MainNavItem = NavGroup | NavLink;

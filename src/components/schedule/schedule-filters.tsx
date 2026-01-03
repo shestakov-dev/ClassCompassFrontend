@@ -8,7 +8,6 @@ import {
 	Clock,
 } from "lucide-react";
 import { set } from "date-fns";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,20 +31,14 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/date-picker";
-
-import {
-	type LessonsControllerFindFilteredParams,
-	type ClassEntity,
-	type SubjectEntity,
-	type TeacherEntity,
-	type BuildingEntity,
-} from "@/api/generated/models";
+import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
 import {
 	useState,
 	type Dispatch,
 	type SetStateAction,
 	type MouseEvent,
 	useEffect,
+	type ChangeEvent,
 } from "react";
 import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-utils";
 import {
@@ -53,15 +46,9 @@ import {
 	LessonWeek,
 	type ScheduleMode,
 	type TimeSubMode,
+	type FilterOptions,
 } from "@/types/schedule";
 import { useDebounce } from "@/hooks/use-debounce";
-
-export interface FilterOptions {
-	classes?: ClassEntity[];
-	subjects?: SubjectEntity[];
-	teachers?: TeacherEntity[];
-	buildings?: BuildingEntity[];
-}
 
 interface ScheduleFiltersProps {
 	date: Date;
@@ -229,19 +216,15 @@ export function ScheduleFilters({
 		setTimeSubMode(value as TimeSubMode);
 	};
 
-	const handleAtTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleAtTimeChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setAtTime(event.target.value);
 	};
 
-	const handleRangeStartChange = (
-		event: React.ChangeEvent<HTMLInputElement>
-	) => {
+	const handleRangeStartChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setRangeStart(event.target.value);
 	};
 
-	const handleRangeEndChange = (
-		event: React.ChangeEvent<HTMLInputElement>
-	) => {
+	const handleRangeEndChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setRangeEnd(event.target.value);
 	};
 

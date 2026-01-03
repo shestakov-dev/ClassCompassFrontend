@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useState, type FormEvent } from "react";
 
 import {
 	Dialog,
@@ -45,7 +45,7 @@ export function CreateClassDialog({
 		}
 	}, [open]);
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
 		onSubmit({ name, schoolId });
 	};
@@ -124,7 +124,7 @@ export function EditClassDialog({
 		}
 	}, [classData, open]);
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
 
 		onSubmit({ name });
