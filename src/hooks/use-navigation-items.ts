@@ -18,6 +18,7 @@ function isNavLink(item: MainNavItem): item is NavLink {
 function shouldShowNavItem(
 	isAuthenticated: boolean,
 	isAdmin: boolean,
+	isPlatformAdmin: boolean,
 	item: BaseNavItem
 ) {
 	if (item.visibility === "authenticated" && !isAuthenticated) {
@@ -32,13 +33,22 @@ function shouldShowNavItem(
 		return false;
 	}
 
+	if (item.visibility === "platform-admin" && !isPlatformAdmin) {
+		return false;
+	}
+
 	return true;
 }
 
 export function useNavigationItems() {
-	const { isAuthenticated, isAdmin } = useSession();
+	const { isAuthenticated, isAdmin, isPlatformAdmin } = useSession();
 
-	const shouldShow = shouldShowNavItem.bind(null, isAuthenticated, isAdmin);
+	const shouldShow = shouldShowNavItem.bind(
+		null,
+		isAuthenticated,
+		isAdmin,
+		isPlatformAdmin
+	);
 
 	const navGroups = NAV_ITEMS.filter(isNavGroup)
 		.filter(shouldShow)

@@ -81,7 +81,7 @@ export function SubjectCard({
 							<DropdownMenuItem
 								className="text-destructive"
 								onClick={onDelete}>
-								<Trash2 className="mr-2 h-4 w-4" />
+								<Trash2 className="mr-2 h-4 w-4 text-destructive" />
 								Delete
 							</DropdownMenuItem>
 						</DropdownMenuContent>

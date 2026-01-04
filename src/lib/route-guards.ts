@@ -16,6 +16,10 @@ import {
 
 export function requireGuest({ session }: RouterContext) {
 	if (session) {
+		if (isPlatformAdmin(session)) {
+			throw redirect({ to: "/schools" });
+		}
+
 		throw redirect({ to: "/schedule" });
 	}
 }

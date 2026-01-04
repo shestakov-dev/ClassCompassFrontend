@@ -135,7 +135,9 @@ export function Navbar() {
 
 				{/* Right Section */}
 				<div className="flex items-center gap-2">
-					<SchoolSelector />
+					<div className="hidden md:block">
+						<SchoolSelector />
+					</div>
 
 					{navButtons.map(item => (
 						<Link key={item.href} to={item.href}>
