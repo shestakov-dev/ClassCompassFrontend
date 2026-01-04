@@ -60,14 +60,18 @@ export function SchoolCard({ school, onEdit, onDelete }: SchoolCardProps) {
 				isCurrentSchool && "border-primary"
 			)}>
 			<CardHeader className="bg-primary/5 border-b pt-6">
-				<CardTitle
-					className="flex items-center gap-2 text-primary cursor-pointer hover:underline group"
-					onClick={handleSetCurrent}>
-					<School className="h-5 w-5" />
-					{school.name}
+				<CardTitle className="flex items-center gap-2">
+					<div
+						className="flex items-center gap-2 text-primary cursor-pointer hover:underline group"
+						onClick={handleSetCurrent}>
+						<School className="h-5 w-5" />
+						{school.name}
+					</div>
+
 					{isCurrentSchool && (
 						<span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
-							<Check className="w-3 h-3" /> Current
+							<Check className="w-3 h-3" />
+							Current
 						</span>
 					)}
 				</CardTitle>
