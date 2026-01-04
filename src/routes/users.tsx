@@ -29,26 +29,26 @@ export const Route = createFileRoute("/users")({
 			return;
 		}
 
-		// Prefetch all data in parallel
-		await Promise.all([
-			context.queryClient.ensureQueryData({
-				queryKey: getUsersControllerFindAllBySchoolQueryKey(schoolId),
-				queryFn: () => usersControllerFindAllBySchool(schoolId),
-			}),
-			context.queryClient.ensureQueryData({
-				queryKey: getSchoolsControllerGetAdminsQueryKey(schoolId),
-				queryFn: () => schoolsControllerGetAdmins(schoolId),
-			}),
-			context.queryClient.ensureQueryData({
-				queryKey: getClassesControllerFindAllBySchoolQueryKey(schoolId),
-				queryFn: () => classesControllerFindAllBySchool(schoolId),
-			}),
-			context.queryClient.ensureQueryData({
-				queryKey:
-					getSubjectsControllerFindAllBySchoolQueryKey(schoolId),
-				queryFn: () => subjectsControllerFindAllBySchool(schoolId),
-			}),
-		]);
+		// Prefetching
+		context.queryClient.ensureQueryData({
+			queryKey: getUsersControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => usersControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getSchoolsControllerGetAdminsQueryKey(schoolId),
+			queryFn: () => schoolsControllerGetAdmins(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getClassesControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => classesControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getSubjectsControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => subjectsControllerFindAllBySchool(schoolId),
+		});
 	},
 	component: UsersPage,
 });

@@ -88,6 +88,9 @@ export default function AcademicsPage() {
 		{
 			query: {
 				enabled: !!schoolId,
+				meta: {
+					operationContext: "get all classes",
+				},
 			},
 		}
 	);
@@ -97,6 +100,9 @@ export default function AcademicsPage() {
 		{
 			query: {
 				enabled: !!schoolId,
+				meta: {
+					operationContext: "get all subjects",
+				},
 			},
 		}
 	);
@@ -104,6 +110,9 @@ export default function AcademicsPage() {
 	const { data: users = [] } = useUsersControllerFindAllBySchool(schoolId!, {
 		query: {
 			enabled: !!schoolId,
+			meta: {
+				operationContext: "get all users",
+			},
 		},
 	});
 
@@ -114,6 +123,9 @@ export default function AcademicsPage() {
 	// Class mutations
 	const createClassMutation = useClassesControllerCreate({
 		mutation: {
+			meta: {
+				operationContext: "create class",
+			},
 			onSuccess: () => {
 				toast.success("Class created successfully");
 
@@ -130,6 +142,9 @@ export default function AcademicsPage() {
 
 	const updateClassMutation = useClassesControllerUpdate({
 		mutation: {
+			meta: {
+				operationContext: "update class",
+			},
 			onSuccess: () => {
 				toast.success("Class updated successfully");
 
@@ -147,6 +162,9 @@ export default function AcademicsPage() {
 
 	const deleteClassMutation = useClassesControllerRemove({
 		mutation: {
+			meta: {
+				operationContext: "delete class",
+			},
 			onSuccess: () => {
 				toast.success("Class deleted successfully");
 
@@ -165,6 +183,9 @@ export default function AcademicsPage() {
 	// Subject mutations
 	const createSubjectMutation = useSubjectsControllerCreate({
 		mutation: {
+			meta: {
+				operationContext: "create subject",
+			},
 			onSuccess: () => {
 				toast.success("Subject created successfully");
 
@@ -181,6 +202,9 @@ export default function AcademicsPage() {
 
 	const updateSubjectMutation = useSubjectsControllerUpdate({
 		mutation: {
+			meta: {
+				operationContext: "update subject",
+			},
 			onSuccess: () => {
 				toast.success("Subject updated successfully");
 
@@ -198,6 +222,9 @@ export default function AcademicsPage() {
 
 	const deleteSubjectMutation = useSubjectsControllerRemove({
 		mutation: {
+			meta: {
+				operationContext: "delete subject",
+			},
 			onSuccess: () => {
 				toast.success("Subject deleted successfully");
 
@@ -213,8 +240,33 @@ export default function AcademicsPage() {
 		},
 	});
 
+	// Student mutations
+	const createStudentMutation = useStudentsControllerCreate({
+		mutation: {
+			meta: {
+				operationContext: "create student",
+			},
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: getClassesControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
+				});
+
+				queryClient.invalidateQueries({
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
+				});
+			},
+		},
+	});
+
 	const updateStudentMutation = useStudentsControllerUpdate({
 		mutation: {
+			meta: {
+				operationContext: "update student",
+			},
 			onSuccess: () => {
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
@@ -233,24 +285,9 @@ export default function AcademicsPage() {
 
 	const removeStudentMutation = useStudentsControllerRemove({
 		mutation: {
-			onSuccess: () => {
-				queryClient.invalidateQueries({
-					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						schoolId!
-					),
-				});
-
-				queryClient.invalidateQueries({
-					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						schoolId!
-					),
-				});
+			meta: {
+				operationContext: "remove student",
 			},
-		},
-	});
-
-	const createStudentMutation = useStudentsControllerCreate({
-		mutation: {
 			onSuccess: () => {
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(

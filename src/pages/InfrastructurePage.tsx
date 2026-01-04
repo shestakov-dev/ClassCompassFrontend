@@ -64,7 +64,7 @@ export default function InfrastructurePage() {
 			query: {
 				enabled: !!schoolId,
 				meta: {
-					operationContext: "load buildings",
+					operationContext: "get all buildings",
 				},
 			},
 		}

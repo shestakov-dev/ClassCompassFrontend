@@ -110,37 +110,41 @@ export default function SchedulePage() {
 			enabled: !!schoolId,
 			staleTime: 1000 * 60 * 1,
 			placeholderData: keepPreviousData,
-			meta: { operationContext: "load lessons" },
+			meta: { operationContext: "get lessons" },
 		},
 	});
+
 	const { data: classes } = useClassesControllerFindAllBySchool(schoolId!, {
 		query: {
 			enabled: !!schoolId,
 			staleTime: 1000 * 60 * 1,
-			meta: { operationContext: "load classes" },
+			meta: { operationContext: "get all classes" },
 		},
 	});
+
 	const { data: subjects } = useSubjectsControllerFindAllBySchool(schoolId!, {
 		query: {
 			enabled: !!schoolId,
 			staleTime: 1000 * 60 * 1,
-			meta: { operationContext: "load subjects" },
+			meta: { operationContext: "get all subjects" },
 		},
 	});
+
 	const { data: teachers } = useTeachersControllerFindAllBySchool(schoolId!, {
 		query: {
 			enabled: !!schoolId,
 			staleTime: 1000 * 60 * 1,
-			meta: { operationContext: "load teachers" },
+			meta: { operationContext: "get all teachers" },
 		},
 	});
+
 	const { data: buildings } = useBuildingsControllerFindAllBySchool(
 		schoolId!,
 		{
 			query: {
 				enabled: !!schoolId,
 				staleTime: 1000 * 60 * 1,
-				meta: { operationContext: "load buildings" },
+				meta: { operationContext: "get all buildings" },
 			},
 		}
 	);
@@ -260,31 +264,38 @@ export default function SchedulePage() {
 
 	const createLessonMutation = useLessonsControllerCreate({
 		mutation: {
+			meta: {
+				operationContext: "create lesson",
+			},
 			onSuccess: () => {
 				toast.success("Lesson created successfully");
+
 				queryClient.invalidateQueries({
 					queryKey: getLessonsControllerFindFilteredQueryKey(
 						schoolId!,
 						filters
 					),
 				});
+
 				setCreateDialogOpen(false);
-			},
-			onError: () => {
-				toast.error("Failed to create lesson");
 			},
 		},
 	});
 	const updateLessonMutation = useLessonsControllerUpdate({
 		mutation: {
+			meta: {
+				operationContext: "update lesson",
+			},
 			onSuccess: () => {
 				toast.success("Lesson updated successfully");
+
 				queryClient.invalidateQueries({
 					queryKey: getLessonsControllerFindFilteredQueryKey(
 						schoolId!,
 						filters
 					),
 				});
+
 				setEditDialogOpen(false);
 				setSelectedLesson(null);
 			},
@@ -292,21 +303,32 @@ export default function SchedulePage() {
 	});
 	const deleteLessonMutation = useLessonsControllerRemove({
 		mutation: {
+			meta: {
+				operationContext: "delete lesson",
+			},
 			onSuccess: () => {
 				toast.success("Lesson deleted successfully");
+
 				queryClient.invalidateQueries({
 					queryKey: getLessonsControllerFindFilteredQueryKey(
 						schoolId!,
 						filters
 					),
 				});
+
 				setIsModalOpen(false);
 				setSelectedLesson(null);
 			},
 		},
 	});
 
-	const createDailyScheduleMutation = useDailySchedulesControllerCreate();
+	const createDailyScheduleMutation = useDailySchedulesControllerCreate({
+		mutation: {
+			meta: {
+				operationContext: "create daily schedule",
+			},
+		},
+	});
 
 	const findOrCreateDailySchedule = async (
 		classId: string,

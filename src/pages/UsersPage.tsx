@@ -67,6 +67,18 @@ export default function UsersPage() {
 
 	const { data: users = [] } = useUsersControllerFindAllBySchool(schoolId!, {
 		query: {
+			meta: {
+				operationContext: "get all users",
+			},
+			enabled: !!schoolId,
+		},
+	});
+
+	const { data: adminUsers = [] } = useSchoolsControllerGetAdmins(schoolId!, {
+		query: {
+			meta: {
+				operationContext: "get admin users",
+			},
 			enabled: !!schoolId,
 		},
 	});
@@ -75,6 +87,9 @@ export default function UsersPage() {
 		schoolId!,
 		{
 			query: {
+				meta: {
+					operationContext: "get all classes",
+				},
 				enabled: !!schoolId,
 			},
 		}
@@ -84,16 +99,13 @@ export default function UsersPage() {
 		schoolId!,
 		{
 			query: {
+				meta: {
+					operationContext: "get all subjects",
+				},
 				enabled: !!schoolId,
 			},
 		}
 	);
-
-	const { data: adminUsers = [] } = useSchoolsControllerGetAdmins(schoolId!, {
-		query: {
-			enabled: !!schoolId,
-		},
-	});
 
 	// Add isAdmin property to users based on adminUsers list
 	const usersWithAdminStatus = useMemo(() => {
@@ -135,8 +147,9 @@ export default function UsersPage() {
 				toast.success("User created successfully");
 
 				queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				setCreateDialogOpen(false);
@@ -153,8 +166,9 @@ export default function UsersPage() {
 				toast.success("User updated successfully");
 
 				queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				setEditDialogOpen(false);
@@ -171,8 +185,9 @@ export default function UsersPage() {
 				toast.success("User deleted successfully");
 
 				queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				setDeleteDialogOpen(false);
@@ -232,8 +247,9 @@ export default function UsersPage() {
 				toast.success("Student role added successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				updateSelectedUserFromCache();
@@ -241,17 +257,18 @@ export default function UsersPage() {
 		},
 	});
 
-	const removeStudentMutation = useStudentsControllerRemove({
+	const updateStudentMutation = useStudentsControllerUpdate({
 		mutation: {
 			meta: {
-				operationContext: "remove student role",
+				operationContext: "update student",
 			},
 			onSuccess: async () => {
-				toast.success("Student role removed successfully");
+				toast.success("Student updated successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				// Update the selected user with fresh data
@@ -279,17 +296,18 @@ export default function UsersPage() {
 		},
 	});
 
-	const updateStudentMutation = useStudentsControllerUpdate({
+	const removeStudentMutation = useStudentsControllerRemove({
 		mutation: {
 			meta: {
-				operationContext: "update student",
+				operationContext: "remove student role",
 			},
 			onSuccess: async () => {
-				toast.success("Student updated successfully");
+				toast.success("Student role removed successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				// Update the selected user with fresh data
@@ -326,45 +344,9 @@ export default function UsersPage() {
 				toast.success("Teacher role added successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
-				});
-
-				if (selectedUser) {
-					const updatedUsers = queryClient.getQueryData<typeof users>(
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
-					);
-
-					const updatedUser = updatedUsers?.find(
-						currentUser => currentUser.id === selectedUser.id
-					);
-
-					if (updatedUser) {
-						const adminIds = new Set(
-							adminUsers.map(admin => admin.id)
-						);
-
-						setSelectedUser({
-							...updatedUser,
-							isAdmin: adminIds.has(updatedUser.id),
-						});
-					}
-				}
-			},
-		},
-	});
-
-	const removeTeacherMutation = useTeachersControllerRemove({
-		mutation: {
-			meta: {
-				operationContext: "remove teacher role",
-			},
-			onSuccess: async () => {
-				toast.success("Teacher role removed successfully");
-
-				await queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				if (selectedUser) {
@@ -400,8 +382,47 @@ export default function UsersPage() {
 				toast.success("Teacher updated successfully");
 
 				await queryClient.invalidateQueries({
-					queryKey:
-						getUsersControllerFindAllBySchoolQueryKey(schoolId!),
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
+				});
+
+				if (selectedUser) {
+					const updatedUsers = queryClient.getQueryData<typeof users>(
+						getUsersControllerFindAllBySchoolQueryKey(schoolId!)
+					);
+
+					const updatedUser = updatedUsers?.find(
+						currentUser => currentUser.id === selectedUser.id
+					);
+
+					if (updatedUser) {
+						const adminIds = new Set(
+							adminUsers.map(admin => admin.id)
+						);
+
+						setSelectedUser({
+							...updatedUser,
+							isAdmin: adminIds.has(updatedUser.id),
+						});
+					}
+				}
+			},
+		},
+	});
+
+	const removeTeacherMutation = useTeachersControllerRemove({
+		mutation: {
+			meta: {
+				operationContext: "remove teacher role",
+			},
+			onSuccess: async () => {
+				toast.success("Teacher role removed successfully");
+
+				await queryClient.invalidateQueries({
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
 				});
 
 				if (selectedUser) {
@@ -628,7 +649,7 @@ export default function UsersPage() {
 						currentUser
 							? (usersWithAdminStatus.find(
 									user => user.id === currentUser.id
-							  ) ?? null)
+								) ?? null)
 							: null
 					}
 				/>

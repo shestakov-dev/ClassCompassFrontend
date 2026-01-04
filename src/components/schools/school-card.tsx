@@ -43,9 +43,33 @@ export function SchoolCard({ school, onEdit, onDelete }: SchoolCardProps) {
 	const { schoolId, setSchoolId } = useSchool();
 	const navigate = useNavigate();
 
-	const { data: users } = useUsersControllerFindAllBySchool(school.id);
-	const { data: classes } = useClassesControllerFindAllBySchool(school.id);
-	const { data: lessons } = useLessonsControllerFindFiltered(school.id, {});
+	const { data: users } = useUsersControllerFindAllBySchool(school.id, {
+		query: {
+			meta: {
+				operationContext: "get all users",
+			},
+		},
+	});
+
+	const { data: classes } = useClassesControllerFindAllBySchool(school.id, {
+		query: {
+			meta: {
+				operationContext: "get all classes",
+			},
+		},
+	});
+
+	const { data: lessons } = useLessonsControllerFindFiltered(
+		school.id,
+		{},
+		{
+			query: {
+				meta: {
+					operationContext: "get all lessons",
+				},
+			},
+		}
+	);
 
 	const isCurrentSchool = schoolId === school.id;
 
