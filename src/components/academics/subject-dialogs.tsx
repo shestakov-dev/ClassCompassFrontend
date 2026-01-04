@@ -1,4 +1,7 @@
-import { useEffect, useEffectEvent, useState, type FormEvent } from "react";
+import { useEffect, useEffectEvent } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+import { BookOpen } from "lucide-react";
 
 import {
 	Dialog,
@@ -10,12 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { MultiSelectCombobox } from "@/components/ui/multi-select-combobox";
 import type { SubjectEntity } from "@/api/generated/models/subjectEntity";
 import type { CreateSubjectDto } from "@/api/generated/models/createSubjectDto";
 import type { UpdateSubjectDto } from "@/api/generated/models/updateSubjectDto";
 import type { UserEntity } from "@/api/generated/models/userEntity";
+
+const subjectSchema = z.object({
+	name: z.string().min(1, "Subject name is required"),
+});
 
 interface CreateSubjectDialogProps {
 	open: boolean;
@@ -32,10 +39,17 @@ export function CreateSubjectDialog({
 	schoolId,
 	isLoading,
 }: CreateSubjectDialogProps) {
-	const [name, setName] = useState("");
+	const form = useForm({
+		defaultValues: {
+			name: "",
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit({ name: value.name, schoolId });
+		},
+	});
 
 	const resetForm = useEffectEvent(() => {
-		setName("");
+		form.reset();
 	});
 
 	useEffect(() => {
@@ -44,37 +58,64 @@ export function CreateSubjectDialog({
 		}
 	}, [open]);
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-
-		onSubmit({ name, schoolId });
-	};
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Create New Subject</DialogTitle>
+					<DialogTitle className="flex items-center gap-2">
+						<BookOpen className="w-5 h-5 text-chart-3" />
+						Create New Subject
+					</DialogTitle>
 
 					<DialogDescription>
 						Add a new subject to your school
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit}>
-					<div className="space-y-4">
-						<div className="space-y-2">
-							<Label htmlFor="name">Subject Name</Label>
-							<Input
-								id="name"
-								value={name}
-								onChange={e => setName(e.target.value)}
-								placeholder="e.g., Mathematics, History"
-								className="focus-visible:border-chart-3 focus-visible:ring-chart-3/50"
-								required
-							/>
-						</div>
-					</div>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="name"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									subjectSchema.shape.name.safeParse(value);
+
+								if (!result.success) {
+									return {
+										message: result.error.issues[0].message,
+									};
+								}
+
+								return undefined;
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Subject Name
+								</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={e =>
+										field.handleChange(e.target.value)
+									}
+									placeholder="e.g., Mathematics, History"
+									className="focus-visible:border-chart-3 focus-visible:ring-chart-3/50"
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<DialogFooter className="mt-6">
 						<Button
@@ -85,7 +126,10 @@ export function CreateSubjectDialog({
 							Cancel
 						</Button>
 
-						<Button type="submit" disabled={isLoading}>
+						<Button
+							type="submit"
+							disabled={isLoading}
+							className="bg-chart-3 hover:bg-chart-3/90">
 							{isLoading ? "Creating..." : "Create"}
 						</Button>
 					</DialogFooter>
@@ -110,11 +154,18 @@ export function EditSubjectDialog({
 	subjectData,
 	isLoading,
 }: EditSubjectDialogProps) {
-	const [name, setName] = useState("");
+	const form = useForm({
+		defaultValues: {
+			name: subjectData?.name ?? "",
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit({ name: value.name });
+		},
+	});
 
 	const syncFormData = useEffectEvent(() => {
 		if (subjectData) {
-			setName(subjectData.name);
+			form.setFieldValue("name", subjectData.name);
 		}
 	});
 
@@ -124,37 +175,64 @@ export function EditSubjectDialog({
 		}
 	}, [subjectData, open]);
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-
-		onSubmit({ name });
-	};
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit Subject</DialogTitle>
+					<DialogTitle className="flex items-center gap-2">
+						<BookOpen className="w-5 h-5 text-chart-3" />
+						Edit Subject
+					</DialogTitle>
 
 					<DialogDescription>
 						Update the subject information
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit}>
-					<div className="space-y-4">
-						<div className="space-y-2">
-							<Label htmlFor="name">Subject Name</Label>
-							<Input
-								id="name"
-								value={name}
-								onChange={e => setName(e.target.value)}
-								placeholder="e.g., Mathematics, History"
-								className="focus-visible:border-chart-3 focus-visible:ring-chart-3/50"
-								required
-							/>
-						</div>
-					</div>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="name"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									subjectSchema.shape.name.safeParse(value);
+
+								if (!result.success) {
+									return {
+										message: result.error.issues[0].message,
+									};
+								}
+
+								return undefined;
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Subject Name
+								</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={e =>
+										field.handleChange(e.target.value)
+									}
+									placeholder="e.g., Mathematics, History"
+									className="focus-visible:border-chart-3 focus-visible:ring-chart-3/50"
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<DialogFooter className="mt-6">
 						<Button
@@ -242,26 +320,31 @@ export function AssignTeachersDialog({
 	users,
 	isLoading,
 }: AssignTeachersDialogProps) {
-	const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
+	const form = useForm({
+		defaultValues: {
+			teacherIds: [] as string[],
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit(value.teacherIds);
+		},
+	});
 
 	const syncSelectedTeachers = useEffectEvent(() => {
 		if (subjectData) {
 			const currentTeachers =
 				subjectData.teachers?.map(teacher => teacher.id) ?? [];
 
-			setSelectedTeachers(currentTeachers);
+			form.setFieldValue("teacherIds", currentTeachers);
 		}
 	});
 
 	useEffect(() => {
 		if (open) {
 			syncSelectedTeachers();
+		} else {
+			form.reset();
 		}
-	}, [subjectData, open]);
-
-	const handleSubmit = () => {
-		onSubmit(selectedTeachers);
-	};
+	}, [subjectData, open, form]);
 
 	// Get users who have a teacher record
 	const teacherUsers = users.filter(user => user.teacher);
@@ -288,33 +371,49 @@ export function AssignTeachersDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="py-4">
-					<MultiSelectCombobox
-						items={teacherOptions}
-						selectedValues={selectedTeachers}
-						onChange={setSelectedTeachers}
-						placeholder="Select teachers..."
-						searchPlaceholder="Search teachers..."
-						emptyMessage="No teachers found."
-						label="Teachers"
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="teacherIds"
+						children={field => (
+							<Field>
+								<MultiSelectCombobox
+									items={teacherOptions}
+									selectedValues={field.state.value}
+									onChange={vals => field.handleChange(vals)}
+									placeholder="Select teachers..."
+									searchPlaceholder="Search teachers..."
+									emptyMessage="No teachers found."
+									label="Teachers"
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
 					/>
-				</div>
 
-				<DialogFooter>
-					<Button
-						variant="outline"
-						onClick={() => onOpenChange(false)}
-						disabled={isLoading}>
-						Cancel
-					</Button>
+					<DialogFooter>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => onOpenChange(false)}
+							disabled={isLoading}>
+							Cancel
+						</Button>
 
-					<Button
-						onClick={handleSubmit}
-						disabled={isLoading}
-						className="bg-chart-3 hover:bg-chart-3/90">
-						{isLoading ? "Assigning..." : "Assign Teachers"}
-					</Button>
-				</DialogFooter>
+						<Button
+							type="submit"
+							disabled={isLoading}
+							className="bg-chart-3 hover:bg-chart-3/90">
+							{isLoading ? "Assigning..." : "Assign Teachers"}
+						</Button>
+					</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);
