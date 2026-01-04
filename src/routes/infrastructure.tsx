@@ -23,7 +23,7 @@ export const Route = createFileRoute("/infrastructure")({
 			return;
 		}
 
-		await context.queryClient.ensureQueryData({
+		context.queryClient.ensureQueryData({
 			queryKey: getBuildingsControllerFindAllBySchoolQueryKey(schoolId),
 			queryFn: () => buildingsControllerFindAllBySchool(schoolId),
 		});

@@ -25,22 +25,20 @@ export const Route = createFileRoute("/academics")({
 			return;
 		}
 
-		// Prefetch all data in parallel
-		await Promise.all([
-			context.queryClient.ensureQueryData({
-				queryKey: getClassesControllerFindAllBySchoolQueryKey(schoolId),
-				queryFn: () => classesControllerFindAllBySchool(schoolId),
-			}),
-			context.queryClient.ensureQueryData({
-				queryKey:
-					getSubjectsControllerFindAllBySchoolQueryKey(schoolId),
-				queryFn: () => subjectsControllerFindAllBySchool(schoolId),
-			}),
-			context.queryClient.ensureQueryData({
-				queryKey: getUsersControllerFindAllBySchoolQueryKey(schoolId),
-				queryFn: () => usersControllerFindAllBySchool(schoolId),
-			}),
-		]);
+		context.queryClient.ensureQueryData({
+			queryKey: getClassesControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => classesControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getSubjectsControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => subjectsControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getUsersControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => usersControllerFindAllBySchool(schoolId),
+		});
 	},
 	component: AcademicsPage,
 });

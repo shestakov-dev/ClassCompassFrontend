@@ -65,7 +65,7 @@ export function SessionProvider({
 					isAuthenticated && !!identityId && !isPlatformAdminUser,
 				placeholderData: keepPreviousData,
 				meta: {
-					operationContext: "load user data",
+					operationContext: "get user data",
 				},
 			},
 		}

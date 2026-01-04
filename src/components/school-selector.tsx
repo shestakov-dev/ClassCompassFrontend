@@ -19,6 +19,9 @@ export function SchoolSelector({
 	const { data: schools } = useSchoolsControllerFindAll({
 		query: {
 			enabled: canChangeSchool,
+			meta: {
+				operationContext: "get all schools",
+			},
 		},
 	});
 

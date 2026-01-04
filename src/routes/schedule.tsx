@@ -9,6 +9,22 @@ import { buildScheduleFilters } from "@/lib/schedule-utils";
 import { requireAuth } from "@/lib/route-guards";
 import SchedulePage from "@/pages/SchedulePage";
 import { getSchoolId } from "@/lib/school-utils";
+import {
+	classesControllerFindAllBySchool,
+	getClassesControllerFindAllBySchoolQueryKey,
+} from "@/api/generated/endpoints/classes/classes";
+import {
+	getSubjectsControllerFindAllBySchoolQueryKey,
+	subjectsControllerFindAllBySchool,
+} from "@/api/generated/endpoints/subjects/subjects";
+import {
+	getTeachersControllerFindAllBySchoolQueryKey,
+	teachersControllerFindAllBySchool,
+} from "@/api/generated/endpoints/teachers/teachers";
+import {
+	buildingsControllerFindAllBySchool,
+	getBuildingsControllerFindAllBySchoolQueryKey,
+} from "@/api/generated/endpoints/buildings/buildings";
 
 const scheduleSearchSchema = z.object({
 	mode: z.enum(["date", "weekly"]).default("weekly").optional(),
@@ -43,12 +59,33 @@ export const Route = createFileRoute("/schedule")({
 
 		const apiFilters = buildScheduleFilters(user, search);
 
+		// Prefetching
 		context.queryClient.prefetchQuery({
 			queryKey: getLessonsControllerFindFilteredQueryKey(
 				schoolId,
 				apiFilters
 			),
 			queryFn: () => lessonsControllerFindFiltered(schoolId, apiFilters),
+		});
+
+		context.queryClient.prefetchQuery({
+			queryKey: getClassesControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => classesControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getSubjectsControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => subjectsControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getTeachersControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => teachersControllerFindAllBySchool(schoolId),
+		});
+
+		context.queryClient.ensureQueryData({
+			queryKey: getBuildingsControllerFindAllBySchoolQueryKey(schoolId),
+			queryFn: () => buildingsControllerFindAllBySchool(schoolId),
 		});
 	},
 	component: SchedulePage,

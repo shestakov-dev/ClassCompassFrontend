@@ -37,10 +37,19 @@ export default function SchoolsPage() {
 
 	const queryClient = useQueryClient();
 
-	const { data: schools = [], isLoading } = useSchoolsControllerFindAll();
+	const { data: schools = [], isLoading } = useSchoolsControllerFindAll({
+		query: {
+			meta: {
+				operationContext: "get all schools",
+			},
+		},
+	});
 
 	const createMutation = useSchoolsControllerCreate({
 		mutation: {
+			meta: {
+				operationContext: "create school",
+			},
 			onSuccess: () => {
 				toast.success("School created successfully");
 
@@ -55,6 +64,9 @@ export default function SchoolsPage() {
 
 	const updateMutation = useSchoolsControllerUpdate({
 		mutation: {
+			meta: {
+				operationContext: "update school",
+			},
 			onSuccess: () => {
 				toast.success("School updated successfully");
 
@@ -70,6 +82,9 @@ export default function SchoolsPage() {
 
 	const deleteMutation = useSchoolsControllerRemove({
 		mutation: {
+			meta: {
+				operationContext: "delete school",
+			},
 			onSuccess: () => {
 				toast.success("School deleted successfully");
 
