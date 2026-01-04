@@ -11,6 +11,11 @@ import {
 import type { AxiosError } from "axios";
 import type { Session } from "@ory/client-fetch";
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import {
+	isPlatformAdmin,
+	getIdentityId,
+	isValidSession,
+} from "@/lib/session-utils";
 
 interface SessionContextType {
 	session: Session | null;
@@ -19,6 +24,7 @@ interface SessionContextType {
 	isLoading: boolean;
 	error: AxiosError | null;
 	isAdmin: boolean;
+	isPlatformAdmin: boolean;
 	refreshSession: () => Promise<void>;
 }
 
@@ -43,18 +49,20 @@ export function SessionProvider({
 }) {
 	const queryClient = useQueryClient();
 
-	const isAuthenticated = !!initialSession;
-	const identityId = initialSession?.identity?.id;
+	const isAuthenticated = isValidSession(initialSession);
+	const identityId = getIdentityId(initialSession);
+	const isPlatformAdminUser = isPlatformAdmin(initialSession);
 
 	const {
-		data: user,
+		data: user = null,
 		isLoading: isLoadingUser,
 		error: userError,
 	} = useUsersControllerFindByIdentityId<UserEntity, AxiosError>(
 		identityId ?? "",
 		{
 			query: {
-				enabled: isAuthenticated && !!identityId,
+				enabled:
+					isAuthenticated && !!identityId && !isPlatformAdminUser,
 				placeholderData: keepPreviousData,
 				meta: {
 					operationContext: "load user data",
@@ -64,7 +72,7 @@ export function SessionProvider({
 	);
 
 	const {
-		data: isSchoolAdmin,
+		data: isSchoolAdmin = false,
 		isLoading: isLoadingAdmin,
 		error: adminError,
 	} = useSchoolsControllerIsAdmin<boolean, AxiosError>(
@@ -72,7 +80,7 @@ export function SessionProvider({
 		user?.id ?? "",
 		{
 			query: {
-				enabled: !!user?.schoolId && !!user?.id,
+				enabled: !!user,
 				placeholderData: keepPreviousData,
 				retry: false,
 				meta: {
@@ -82,7 +90,7 @@ export function SessionProvider({
 		}
 	);
 
-	const isAdmin = isSchoolAdmin ?? false;
+	const isAdmin = isPlatformAdminUser || isSchoolAdmin;
 	const isLoading = isLoadingUser || (!!user?.schoolId && isLoadingAdmin);
 	const error = userError ?? adminError;
 
@@ -115,6 +123,7 @@ export function SessionProvider({
 				isLoading,
 				error,
 				isAdmin,
+				isPlatformAdmin: isPlatformAdminUser,
 				refreshSession,
 			}}>
 			{children}

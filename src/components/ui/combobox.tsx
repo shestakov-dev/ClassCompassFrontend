@@ -37,6 +37,7 @@ interface ComboboxProps {
 	id?: string;
 	className?: string;
 	modal?: boolean;
+	size?: React.ComponentProps<typeof Button>["size"];
 }
 
 export function Combobox({
@@ -50,6 +51,7 @@ export function Combobox({
 	id: providedId,
 	className,
 	modal = false,
+	size,
 }: ComboboxProps) {
 	const generatedId = useId();
 	const id = providedId ?? generatedId;
@@ -71,6 +73,7 @@ export function Combobox({
 						id={id}
 						variant="outline"
 						role="combobox"
+						size={size}
 						aria-expanded={open}
 						className="w-full justify-between hover:bg-transparent">
 						{selectedItem ? (
@@ -105,6 +108,13 @@ export function Combobox({
 									<CommandItem
 										key={item.value}
 										value={item.value}
+										keywords={[
+											item.label,
+											item.secondaryLabel,
+										].filter(
+											(s): s is string =>
+												typeof s === "string"
+										)}
 										onSelect={handleSelect}>
 										<div className="flex flex-col">
 											<span>{item.label}</span>

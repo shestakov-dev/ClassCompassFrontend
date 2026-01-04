@@ -8,6 +8,7 @@ import { queryClient } from "@/lib/query-client";
 import { ThemeProvider } from "@/context/theme-context";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "@/context/session-context";
+import { SchoolProvider } from "@/context/school-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getSession } from "@/services/kratos";
 import { router } from "@/router";
@@ -18,12 +19,14 @@ getSession().then(session => {
 			<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
 				<QueryClientProvider client={queryClient}>
 					<SessionProvider initialSession={session}>
-						<TooltipProvider>
-							<RouterProvider
-								router={router}
-								context={{ session }}
-							/>
-						</TooltipProvider>
+						<SchoolProvider>
+							<TooltipProvider>
+								<RouterProvider
+									router={router}
+									context={{ session }}
+								/>
+							</TooltipProvider>
+						</SchoolProvider>
 					</SessionProvider>
 
 					<Toaster />

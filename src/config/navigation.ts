@@ -9,6 +9,12 @@ export const NAV_ITEMS: readonly MainNavItem[] = [
 		type: "link",
 	},
 	{
+		title: "Schools",
+		href: "/schools",
+		visibility: "platform-admin",
+		type: "link",
+	},
+	{
 		title: "Schedule",
 		href: "/schedule",
 		visibility: "authenticated",

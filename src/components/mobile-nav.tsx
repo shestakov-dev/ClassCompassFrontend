@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/accordion";
 import { Logo } from "@/components/logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
+import { SchoolSelector } from "@/components/school-selector";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
@@ -47,6 +48,13 @@ export function MobileNav() {
 				</SheetHeader>
 
 				<div className="flex flex-col px-6">
+					<div className="mb-4">
+						<p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+							Current School
+						</p>
+						<SchoolSelector className="w-full" />
+					</div>
+
 					{/* Accordion Menus */}
 					{navGroups.length > 0 && (
 						<Accordion type="single" collapsible className="w-full">

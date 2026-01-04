@@ -17,34 +17,36 @@ import {
 	getSubjectsControllerFindAllBySchoolQueryKey,
 	subjectsControllerFindAllBySchool,
 } from "@/api/generated/endpoints/subjects/subjects";
+import { getSchoolId } from "@/lib/school-utils";
 
 export const Route = createFileRoute("/users")({
 	beforeLoad: async ({ context }) => {
 		const user = await requireAdmin(context, "/users");
 
+		const schoolId = getSchoolId(context.session, user);
+
+		if (!schoolId) {
+			return;
+		}
+
 		// Prefetch all data in parallel
 		await Promise.all([
 			context.queryClient.ensureQueryData({
-				queryKey: getUsersControllerFindAllBySchoolQueryKey(
-					user.schoolId
-				),
-				queryFn: () => usersControllerFindAllBySchool(user.schoolId),
+				queryKey: getUsersControllerFindAllBySchoolQueryKey(schoolId),
+				queryFn: () => usersControllerFindAllBySchool(schoolId),
 			}),
 			context.queryClient.ensureQueryData({
-				queryKey: getSchoolsControllerGetAdminsQueryKey(user.schoolId),
-				queryFn: () => schoolsControllerGetAdmins(user.schoolId),
+				queryKey: getSchoolsControllerGetAdminsQueryKey(schoolId),
+				queryFn: () => schoolsControllerGetAdmins(schoolId),
 			}),
 			context.queryClient.ensureQueryData({
-				queryKey: getClassesControllerFindAllBySchoolQueryKey(
-					user.schoolId
-				),
-				queryFn: () => classesControllerFindAllBySchool(user.schoolId),
+				queryKey: getClassesControllerFindAllBySchoolQueryKey(schoolId),
+				queryFn: () => classesControllerFindAllBySchool(schoolId),
 			}),
 			context.queryClient.ensureQueryData({
-				queryKey: getSubjectsControllerFindAllBySchoolQueryKey(
-					user.schoolId
-				),
-				queryFn: () => subjectsControllerFindAllBySchool(user.schoolId),
+				queryKey:
+					getSubjectsControllerFindAllBySchoolQueryKey(schoolId),
+				queryFn: () => subjectsControllerFindAllBySchool(schoolId),
 			}),
 		]);
 	},

@@ -3,7 +3,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { GraduationCap, BookOpen, Plus } from "lucide-react";
 
-import { useSession } from "@/context/session-context";
+import { useSchool } from "@/context/school-context";
+import { SchoolRequired } from "@/components/school-required";
 import {
 	getClassesControllerFindAllBySchoolQueryKey,
 	useClassesControllerCreate,
@@ -59,7 +60,7 @@ import type { CreateSubjectDto } from "@/api/generated/models/createSubjectDto";
 import type { UpdateSubjectDto } from "@/api/generated/models/updateSubjectDto";
 
 export default function AcademicsPage() {
-	const { user: currentUser } = useSession();
+	const { schoolId } = useSchool();
 	const queryClient = useQueryClient();
 	const [activeTab, setActiveTab] = useState("classes");
 
@@ -83,31 +84,28 @@ export default function AcademicsPage() {
 		useState<SubjectEntity | null>(null);
 
 	const { data: classes = [] } = useClassesControllerFindAllBySchool(
-		currentUser?.schoolId ?? "",
+		schoolId!,
 		{
 			query: {
-				enabled: !!currentUser?.schoolId,
+				enabled: !!schoolId,
 			},
 		}
 	);
 
 	const { data: subjects = [] } = useSubjectsControllerFindAllBySchool(
-		currentUser?.schoolId ?? "",
+		schoolId!,
 		{
 			query: {
-				enabled: !!currentUser?.schoolId,
+				enabled: !!schoolId,
 			},
 		}
 	);
 
-	const { data: users = [] } = useUsersControllerFindAllBySchool(
-		currentUser?.schoolId ?? "",
-		{
-			query: {
-				enabled: !!currentUser?.schoolId,
-			},
-		}
-	);
+	const { data: users = [] } = useUsersControllerFindAllBySchool(schoolId!, {
+		query: {
+			enabled: !!schoolId,
+		},
+	});
 
 	const students = users
 		.filter(user => !!user.student)
@@ -121,7 +119,7 @@ export default function AcademicsPage() {
 
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
@@ -137,7 +135,7 @@ export default function AcademicsPage() {
 
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
@@ -154,7 +152,7 @@ export default function AcademicsPage() {
 
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
@@ -172,7 +170,7 @@ export default function AcademicsPage() {
 
 				queryClient.invalidateQueries({
 					queryKey: getSubjectsControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
@@ -188,7 +186,7 @@ export default function AcademicsPage() {
 
 				queryClient.invalidateQueries({
 					queryKey: getSubjectsControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
@@ -205,7 +203,7 @@ export default function AcademicsPage() {
 
 				queryClient.invalidateQueries({
 					queryKey: getSubjectsControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
@@ -220,13 +218,13 @@ export default function AcademicsPage() {
 			onSuccess: () => {
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
 				queryClient.invalidateQueries({
 					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 			},
@@ -238,13 +236,13 @@ export default function AcademicsPage() {
 			onSuccess: () => {
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
 				queryClient.invalidateQueries({
 					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 			},
@@ -256,13 +254,13 @@ export default function AcademicsPage() {
 			onSuccess: () => {
 				queryClient.invalidateQueries({
 					queryKey: getClassesControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 
 				queryClient.invalidateQueries({
 					queryKey: getUsersControllerFindAllBySchoolQueryKey(
-						currentUser?.schoolId
+						schoolId!
 					),
 				});
 			},
@@ -370,222 +368,229 @@ export default function AcademicsPage() {
 	};
 
 	return (
-		<div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Academics</h1>
-				<p className="text-muted-foreground">
-					Manage classes, subjects, and their assignments
-				</p>
-			</div>
-
-			<Tabs
-				value={activeTab}
-				onValueChange={setActiveTab}
-				className="w-full">
-				<div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
-					<TabsList className="relative grid w-full lg:w-auto lg:min-w-100 grid-cols-2 h-12">
-						<div
-							className={`absolute inset-y-1 rounded-md transition-all duration-300 ease-out ${
-								activeTab === "classes"
-									? "left-1 right-1/2 mr-1 bg-chart-4"
-									: "left-1/2 right-1 ml-1 bg-chart-3"
-							}`}
-						/>
-						<TabsTrigger
-							value="classes"
-							className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
-							<GraduationCap className="h-4 w-4" />
-							Classes
-						</TabsTrigger>
-
-						<TabsTrigger
-							value="subjects"
-							className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
-							<BookOpen className="h-4 w-4" />
-							Subjects
-						</TabsTrigger>
-					</TabsList>
-
-					<Button
-						onClick={() => {
-							if (activeTab === "classes") {
-								setCreateClassDialogOpen(true);
-							} else {
-								setCreateSubjectDialogOpen(true);
-							}
-						}}
-						className={`gap-2 ${
-							activeTab === "classes"
-								? "bg-chart-4 hover:bg-chart-4/90"
-								: "bg-chart-3 hover:bg-chart-3/90"
-						}`}>
-						<Plus className="h-4 w-4" />
-						Create {activeTab === "classes" ? "Class" : "Subject"}
-					</Button>
+		<SchoolRequired>
+			<div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+				<div>
+					<h1 className="text-3xl font-bold tracking-tight">
+						Academics
+					</h1>
+					<p className="text-muted-foreground">
+						Manage classes, subjects, and their assignments
+					</p>
 				</div>
 
-				<TabsContent value="classes" className="space-y-4">
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-						{classes.map(cls => (
-							<ClassCard
-								key={cls.id}
-								classEntity={cls}
-								students={students}
-								users={users}
-								onEdit={() => {
-									setSelectedClass(cls);
-									setEditClassDialogOpen(true);
-								}}
-								onDelete={() => {
-									setSelectedClass(cls);
-									setDeleteClassDialogOpen(true);
-								}}
-								onAssign={() => {
-									setSelectedClass(cls);
-									setAssignStudentsDialogOpen(true);
-								}}
+				<Tabs
+					value={activeTab}
+					onValueChange={setActiveTab}
+					className="w-full">
+					<div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
+						<TabsList className="relative grid w-full lg:w-auto lg:min-w-100 grid-cols-2 h-12">
+							<div
+								className={`absolute inset-y-1 rounded-md transition-all duration-300 ease-out ${
+									activeTab === "classes"
+										? "left-1 right-1/2 mr-1 bg-chart-4"
+										: "left-1/2 right-1 ml-1 bg-chart-3"
+								}`}
 							/>
-						))}
+							<TabsTrigger
+								value="classes"
+								className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
+								<GraduationCap className="h-4 w-4" />
+								Classes
+							</TabsTrigger>
 
-						{classes.length === 0 && (
-							<Empty className="col-span-full">
-								<EmptyHeader>
-									<EmptyTitle>No classes yet</EmptyTitle>
+							<TabsTrigger
+								value="subjects"
+								className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
+								<BookOpen className="h-4 w-4" />
+								Subjects
+							</TabsTrigger>
+						</TabsList>
 
-									<EmptyDescription>
-										Create your first class to get started
-									</EmptyDescription>
-								</EmptyHeader>
-
-								<EmptyContent>
-									<Button
-										onClick={() =>
-											setCreateClassDialogOpen(true)
-										}
-										className="gap-2 bg-chart-4 hover:bg-chart-4/90">
-										<Plus className="h-4 w-4" />
-										Create Class
-									</Button>
-								</EmptyContent>
-							</Empty>
-						)}
+						<Button
+							onClick={() => {
+								if (activeTab === "classes") {
+									setCreateClassDialogOpen(true);
+								} else {
+									setCreateSubjectDialogOpen(true);
+								}
+							}}
+							className={`gap-2 ${
+								activeTab === "classes"
+									? "bg-chart-4 hover:bg-chart-4/90"
+									: "bg-chart-3 hover:bg-chart-3/90"
+							}`}>
+							<Plus className="h-4 w-4" />
+							Create{" "}
+							{activeTab === "classes" ? "Class" : "Subject"}
+						</Button>
 					</div>
-				</TabsContent>
 
-				<TabsContent value="subjects" className="space-y-4">
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-						{subjects.map(subject => (
-							<SubjectCard
-								key={subject.id}
-								subject={subject}
-								users={users}
-								onEdit={() => {
-									setSelectedSubject(subject);
-									setEditSubjectDialogOpen(true);
-								}}
-								onDelete={() => {
-									setSelectedSubject(subject);
-									setDeleteSubjectDialogOpen(true);
-								}}
-								onAssign={() => {
-									setSelectedSubject(subject);
-									setAssignTeachersDialogOpen(true);
-								}}
-							/>
-						))}
+					<TabsContent value="classes" className="space-y-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+							{classes.map(cls => (
+								<ClassCard
+									key={cls.id}
+									classEntity={cls}
+									students={students}
+									users={users}
+									onEdit={() => {
+										setSelectedClass(cls);
+										setEditClassDialogOpen(true);
+									}}
+									onDelete={() => {
+										setSelectedClass(cls);
+										setDeleteClassDialogOpen(true);
+									}}
+									onAssign={() => {
+										setSelectedClass(cls);
+										setAssignStudentsDialogOpen(true);
+									}}
+								/>
+							))}
 
-						{subjects.length === 0 && (
-							<Empty className="col-span-full">
-								<EmptyHeader>
-									<EmptyTitle>No subjects yet</EmptyTitle>
+							{classes.length === 0 && (
+								<Empty className="col-span-full">
+									<EmptyHeader>
+										<EmptyTitle>No classes yet</EmptyTitle>
 
-									<EmptyDescription>
-										Create your first subject to get started
-									</EmptyDescription>
-								</EmptyHeader>
+										<EmptyDescription>
+											Create your first class to get
+											started
+										</EmptyDescription>
+									</EmptyHeader>
 
-								<EmptyContent>
-									<Button
-										onClick={() =>
-											setCreateSubjectDialogOpen(true)
-										}
-										className="gap-2 bg-chart-3 hover:bg-chart-3/90">
-										<Plus className="h-4 w-4" />
-										Create Subject
-									</Button>
-								</EmptyContent>
-							</Empty>
-						)}
-					</div>
-				</TabsContent>
-			</Tabs>
+									<EmptyContent>
+										<Button
+											onClick={() =>
+												setCreateClassDialogOpen(true)
+											}
+											className="gap-2 bg-chart-4 hover:bg-chart-4/90">
+											<Plus className="h-4 w-4" />
+											Create Class
+										</Button>
+									</EmptyContent>
+								</Empty>
+							)}
+						</div>
+					</TabsContent>
 
-			<CreateClassDialog
-				open={createClassDialogOpen}
-				onOpenChange={setCreateClassDialogOpen}
-				onSubmit={handleCreateClass}
-				schoolId={currentUser?.schoolId ?? ""}
-				isLoading={createClassMutation.isPending}
-			/>
+					<TabsContent value="subjects" className="space-y-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+							{subjects.map(subject => (
+								<SubjectCard
+									key={subject.id}
+									subject={subject}
+									users={users}
+									onEdit={() => {
+										setSelectedSubject(subject);
+										setEditSubjectDialogOpen(true);
+									}}
+									onDelete={() => {
+										setSelectedSubject(subject);
+										setDeleteSubjectDialogOpen(true);
+									}}
+									onAssign={() => {
+										setSelectedSubject(subject);
+										setAssignTeachersDialogOpen(true);
+									}}
+								/>
+							))}
 
-			<EditClassDialog
-				open={editClassDialogOpen}
-				onOpenChange={setEditClassDialogOpen}
-				onSubmit={handleEditClass}
-				classData={selectedClass}
-				isLoading={updateClassMutation.isPending}
-			/>
+							{subjects.length === 0 && (
+								<Empty className="col-span-full">
+									<EmptyHeader>
+										<EmptyTitle>No subjects yet</EmptyTitle>
 
-			<DeleteClassDialog
-				open={deleteClassDialogOpen}
-				onOpenChange={setDeleteClassDialogOpen}
-				onConfirm={handleDeleteClass}
-				classData={selectedClass}
-				isLoading={deleteClassMutation.isPending}
-			/>
+										<EmptyDescription>
+											Create your first subject to get
+											started
+										</EmptyDescription>
+									</EmptyHeader>
 
-			<AssignStudentsDialog
-				open={assignStudentsDialogOpen}
-				onOpenChange={setAssignStudentsDialogOpen}
-				onSubmit={handleAssignStudents}
-				classData={selectedClass}
-				students={students}
-				users={users}
-				isLoading={updateStudentMutation.isPending}
-			/>
+									<EmptyContent>
+										<Button
+											onClick={() =>
+												setCreateSubjectDialogOpen(true)
+											}
+											className="gap-2 bg-chart-3 hover:bg-chart-3/90">
+											<Plus className="h-4 w-4" />
+											Create Subject
+										</Button>
+									</EmptyContent>
+								</Empty>
+							)}
+						</div>
+					</TabsContent>
+				</Tabs>
 
-			<CreateSubjectDialog
-				open={createSubjectDialogOpen}
-				onOpenChange={setCreateSubjectDialogOpen}
-				onSubmit={handleCreateSubject}
-				schoolId={currentUser?.schoolId ?? ""}
-				isLoading={createSubjectMutation.isPending}
-			/>
+				<CreateClassDialog
+					open={createClassDialogOpen}
+					onOpenChange={setCreateClassDialogOpen}
+					onSubmit={handleCreateClass}
+					schoolId={schoolId!}
+					isLoading={createClassMutation.isPending}
+				/>
 
-			<EditSubjectDialog
-				open={editSubjectDialogOpen}
-				onOpenChange={setEditSubjectDialogOpen}
-				onSubmit={handleEditSubject}
-				subjectData={selectedSubject}
-				isLoading={updateSubjectMutation.isPending}
-			/>
+				<EditClassDialog
+					open={editClassDialogOpen}
+					onOpenChange={setEditClassDialogOpen}
+					onSubmit={handleEditClass}
+					classData={selectedClass}
+					isLoading={updateClassMutation.isPending}
+				/>
 
-			<DeleteSubjectDialog
-				open={deleteSubjectDialogOpen}
-				onOpenChange={setDeleteSubjectDialogOpen}
-				onConfirm={handleDeleteSubject}
-				subjectData={selectedSubject}
-				isLoading={deleteSubjectMutation.isPending}
-			/>
+				<DeleteClassDialog
+					open={deleteClassDialogOpen}
+					onOpenChange={setDeleteClassDialogOpen}
+					onConfirm={handleDeleteClass}
+					classData={selectedClass}
+					isLoading={deleteClassMutation.isPending}
+				/>
 
-			<AssignTeachersDialog
-				open={assignTeachersDialogOpen}
-				onOpenChange={setAssignTeachersDialogOpen}
-				onSubmit={handleAssignTeachers}
-				subjectData={selectedSubject}
-				users={users}
-				isLoading={updateSubjectMutation.isPending}
-			/>
-		</div>
+				<AssignStudentsDialog
+					open={assignStudentsDialogOpen}
+					onOpenChange={setAssignStudentsDialogOpen}
+					onSubmit={handleAssignStudents}
+					classData={selectedClass}
+					students={students}
+					users={users}
+					isLoading={updateStudentMutation.isPending}
+				/>
+
+				<CreateSubjectDialog
+					open={createSubjectDialogOpen}
+					onOpenChange={setCreateSubjectDialogOpen}
+					onSubmit={handleCreateSubject}
+					schoolId={schoolId!}
+					isLoading={createSubjectMutation.isPending}
+				/>
+
+				<EditSubjectDialog
+					open={editSubjectDialogOpen}
+					onOpenChange={setEditSubjectDialogOpen}
+					onSubmit={handleEditSubject}
+					subjectData={selectedSubject}
+					isLoading={updateSubjectMutation.isPending}
+				/>
+
+				<DeleteSubjectDialog
+					open={deleteSubjectDialogOpen}
+					onOpenChange={setDeleteSubjectDialogOpen}
+					onConfirm={handleDeleteSubject}
+					subjectData={selectedSubject}
+					isLoading={deleteSubjectMutation.isPending}
+				/>
+
+				<AssignTeachersDialog
+					open={assignTeachersDialogOpen}
+					onOpenChange={setAssignTeachersDialogOpen}
+					onSubmit={handleAssignTeachers}
+					subjectData={selectedSubject}
+					users={users}
+					isLoading={updateSubjectMutation.isPending}
+				/>
+			</div>
+		</SchoolRequired>
 	);
 }
