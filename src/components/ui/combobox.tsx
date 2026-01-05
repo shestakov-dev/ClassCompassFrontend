@@ -58,7 +58,11 @@ export function Combobox({
 	const [open, setOpen] = useState(false);
 
 	const handleSelect = (currentValue: string) => {
-		onChange(currentValue === value ? "" : currentValue);
+		const matchedItem = items.find(
+			item => item.value.toLowerCase() === currentValue.toLowerCase()
+		);
+		const originalValue = matchedItem ? matchedItem.value : currentValue;
+		onChange(originalValue === value ? "" : originalValue);
 		setOpen(false);
 	};
 

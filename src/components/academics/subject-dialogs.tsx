@@ -87,13 +87,12 @@ export function CreateSubjectDialog({
 								const result =
 									subjectSchema.shape.name.safeParse(value);
 
-								if (!result.success) {
-									return {
-										message: result.error.issues[0].message,
-									};
-								}
-
-								return undefined;
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
 							},
 						}}
 						children={field => (
@@ -126,12 +125,24 @@ export function CreateSubjectDialog({
 							Cancel
 						</Button>
 
-						<Button
-							type="submit"
-							disabled={isLoading}
-							className="bg-chart-3 hover:bg-chart-3/90">
-							{isLoading ? "Creating..." : "Create"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}
+									className="bg-chart-3 hover:bg-chart-3/90">
+									{isLoading || isSubmitting
+										? "Creating..."
+										: "Create"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -204,13 +215,12 @@ export function EditSubjectDialog({
 								const result =
 									subjectSchema.shape.name.safeParse(value);
 
-								if (!result.success) {
-									return {
-										message: result.error.issues[0].message,
-									};
-								}
-
-								return undefined;
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
 							},
 						}}
 						children={field => (
@@ -243,12 +253,24 @@ export function EditSubjectDialog({
 							Cancel
 						</Button>
 
-						<Button
-							type="submit"
-							disabled={isLoading}
-							className="bg-chart-3 hover:bg-chart-3/90">
-							{isLoading ? "Saving..." : "Save"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}
+									className="bg-chart-3 hover:bg-chart-3/90">
+									{isLoading || isSubmitting
+										? "Saving..."
+										: "Save"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -353,7 +375,7 @@ export function AssignTeachersDialog({
 	const teacherOptions = teacherUsers
 		.filter(user => user.teacher)
 		.map(user => ({
-			value: user.teacher!.id,
+			value: user.teacher?.id ?? "",
 			label: `${user.firstName} ${user.lastName}`,
 			secondaryLabel: user.email,
 		}));
@@ -406,12 +428,24 @@ export function AssignTeachersDialog({
 							Cancel
 						</Button>
 
-						<Button
-							type="submit"
-							disabled={isLoading}
-							className="bg-chart-3 hover:bg-chart-3/90">
-							{isLoading ? "Assigning..." : "Assign Teachers"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}
+									className="bg-chart-3 hover:bg-chart-3/90">
+									{isLoading || isSubmitting
+										? "Assigning..."
+										: "Assign Teachers"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
