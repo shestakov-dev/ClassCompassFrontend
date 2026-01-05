@@ -70,7 +70,7 @@ export function CreateLessonDialog({
 }: CreateLessonDialogProps) {
 	const form = useForm({
 		defaultValues: {
-			day: defaultValues?.day ?? "",
+			day: defaultValues?.day as Day,
 			classId: defaultValues?.classId ?? "",
 			subjectId: defaultValues?.subjectId ?? "",
 			teacherId: defaultValues?.teacherId ?? "",
@@ -95,14 +95,14 @@ export function CreateLessonDialog({
 			}).toISOString();
 
 			onSubmit({
-				day: value.day as Day,
+				day: value.day,
 				classId: value.classId,
 				subjectId: value.subjectId,
 				teacherId: value.teacherId,
 				roomId: value.roomId,
 				startTime: dateTimeStart,
 				endTime: dateTimeEnd,
-				lessonWeek: value.lessonWeek as LessonWeek,
+				lessonWeek: value.lessonWeek,
 			});
 		},
 	});
@@ -193,8 +193,8 @@ export function CreateLessonDialog({
 											day.slice(1),
 									}))}
 									value={field.state.value}
-									onChange={val =>
-										field.handleChange(val as Day)
+									onChange={value =>
+										field.handleChange(value as Day)
 									}
 									placeholder="Select day"
 									searchPlaceholder="Search days..."
@@ -234,7 +234,9 @@ export function CreateLessonDialog({
 										})
 									)}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select class"
 									searchPlaceholder="Search classes..."
 								/>
@@ -275,7 +277,9 @@ export function CreateLessonDialog({
 										})
 									)}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select subject"
 									searchPlaceholder="Search subjects..."
 								/>
@@ -300,7 +304,9 @@ export function CreateLessonDialog({
 										})
 									)}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select teacher"
 									searchPlaceholder="Search teachers..."
 								/>
@@ -338,7 +344,9 @@ export function CreateLessonDialog({
 											room.floor?.building?.name,
 									}))}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select room"
 									searchPlaceholder="Search rooms..."
 								/>
@@ -470,8 +478,8 @@ export function CreateLessonDialog({
 										},
 									]}
 									value={field.state.value}
-									onChange={val =>
-										field.handleChange(val as LessonWeek)
+									onChange={value =>
+										field.handleChange(value as LessonWeek)
 									}
 									placeholder="Select lesson week"
 									searchPlaceholder="Search lesson week..."
@@ -540,7 +548,7 @@ export function EditLessonDialog({
 }: EditLessonDialogProps) {
 	const form = useForm({
 		defaultValues: {
-			day: "",
+			day: Day.monday as Day,
 			classId: "",
 			subjectId: "",
 			teacherId: "",
@@ -566,21 +574,21 @@ export function EditLessonDialog({
 			}).toISOString();
 
 			onSubmit({
-				day: value.day as Day,
+				day: value.day,
 				classId: value.classId,
 				subjectId: value.subjectId,
 				teacherId: value.teacherId,
 				roomId: value.roomId,
 				startTime: updatedStartTime,
 				endTime: updatedEndTime,
-				lessonWeek: value.lessonWeek as LessonWeek,
+				lessonWeek: value.lessonWeek,
 			});
 		},
 	});
 
 	const syncFormData = useEffectEvent(() => {
 		if (lesson) {
-			form.setFieldValue("day", lesson.dailySchedule?.day ?? "");
+			form.setFieldValue("day", lesson.dailySchedule?.day ?? Day.monday);
 			form.setFieldValue("classId", lesson.dailySchedule?.classId ?? "");
 			form.setFieldValue("subjectId", lesson.subjectId ?? "");
 			form.setFieldValue("teacherId", lesson.teacherId ?? "");
@@ -668,8 +676,8 @@ export function EditLessonDialog({
 											day.slice(1),
 									}))}
 									value={field.state.value}
-									onChange={val =>
-										field.handleChange(val as Day)
+									onChange={value =>
+										field.handleChange(value as Day)
 									}
 									placeholder="Select day"
 									searchPlaceholder="Search days..."
@@ -709,7 +717,9 @@ export function EditLessonDialog({
 										})
 									)}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select class"
 									searchPlaceholder="Search classes..."
 								/>
@@ -750,7 +760,9 @@ export function EditLessonDialog({
 										})
 									)}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select subject"
 									searchPlaceholder="Search subjects..."
 								/>
@@ -775,7 +787,9 @@ export function EditLessonDialog({
 										})
 									)}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select teacher"
 									searchPlaceholder="Search teachers..."
 								/>
@@ -813,7 +827,9 @@ export function EditLessonDialog({
 											room.floor?.building?.name,
 									}))}
 									value={field.state.value}
-									onChange={val => field.handleChange(val)}
+									onChange={value =>
+										field.handleChange(value)
+									}
 									placeholder="Select room"
 									searchPlaceholder="Search rooms..."
 								/>
@@ -945,8 +961,8 @@ export function EditLessonDialog({
 										},
 									]}
 									value={field.state.value}
-									onChange={val =>
-										field.handleChange(val as LessonWeek)
+									onChange={value =>
+										field.handleChange(value as LessonWeek)
 									}
 									placeholder="Select lesson week"
 									searchPlaceholder="Search lesson week..."

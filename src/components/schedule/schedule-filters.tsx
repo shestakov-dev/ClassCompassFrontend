@@ -253,11 +253,14 @@ export function ScheduleFilters({
 	};
 
 	const toggleIgnoreWeek = (checked: boolean) => {
-		setFilters(prev => ({ ...prev, ignoreWeek: checked }));
+		setFilters(previousFilters => ({
+			...previousFilters,
+			ignoreWeek: checked,
+		}));
 	};
 
-	const clearFilters = (event: MouseEvent<HTMLButtonElement>) => {
-		event.stopPropagation();
+	const clearFilters = (e: MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
 
 		form.reset();
 
@@ -448,9 +451,9 @@ export function ScheduleFilters({
 											children={field => (
 												<Select
 													value={field.state.value}
-													onValueChange={val =>
+													onValueChange={value =>
 														field.handleChange(
-															val as TimeSubMode
+															value as TimeSubMode
 														)
 													}>
 													<SelectTrigger className="h-9">
@@ -647,9 +650,9 @@ export function ScheduleFilters({
 										children={field => (
 											<Select
 												value={field.state.value}
-												onValueChange={val =>
+												onValueChange={value =>
 													field.handleChange(
-														val as LessonWeek
+														value as LessonWeek
 													)
 												}>
 												<SelectTrigger className="h-9 capitalize">

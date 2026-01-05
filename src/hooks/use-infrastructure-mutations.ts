@@ -192,7 +192,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 						old.map(building => ({
 							...building,
 							floors: building.floors?.filter(
-								f => f.id !== variables.id
+								floor => floor.id !== variables.id
 							),
 						}))
 					);
@@ -273,7 +273,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 							floors: building.floors?.map(floor => ({
 								...floor,
 								rooms: floor.rooms?.filter(
-									r => r.id !== variables.id
+									room => room.id !== variables.id
 								),
 							})),
 						}))

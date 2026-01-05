@@ -144,8 +144,9 @@ export function FloorItem({
 						variant="ghost"
 						size="icon-sm"
 						className="text-muted-foreground hover:text-foreground hover:bg-accent"
-						onClick={event => {
-							event.stopPropagation();
+						onClick={e => {
+							e.stopPropagation();
+
 							onEditFloor();
 						}}>
 						<Edit2 className="h-4 w-4" />
@@ -154,8 +155,9 @@ export function FloorItem({
 						variant="ghost"
 						size="icon-sm"
 						className="text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
-						onClick={event => {
-							event.stopPropagation();
+						onClick={e => {
+							e.stopPropagation();
+
 							onDeleteFloor();
 						}}>
 						<Trash2 className="h-4 w-4" />

@@ -657,13 +657,21 @@ export function ManageRolesDialog({
 												</SelectTrigger>
 
 												<SelectContent>
-													{classes.map(cls => (
-														<SelectItem
-															key={cls.id}
-															value={cls.id}>
-															{cls.name}
-														</SelectItem>
-													))}
+													{classes.map(
+														currentClass => (
+															<SelectItem
+																key={
+																	currentClass.id
+																}
+																value={
+																	currentClass.id
+																}>
+																{
+																	currentClass.name
+																}
+															</SelectItem>
+														)
+													)}
 												</SelectContent>
 											</Select>
 										)}
@@ -716,13 +724,21 @@ export function ManageRolesDialog({
 												</SelectTrigger>
 
 												<SelectContent>
-													{classes.map(cls => (
-														<SelectItem
-															key={cls.id}
-															value={cls.id}>
-															{cls.name}
-														</SelectItem>
-													))}
+													{classes.map(
+														currentClass => (
+															<SelectItem
+																key={
+																	currentClass.id
+																}
+																value={
+																	currentClass.id
+																}>
+																{
+																	currentClass.name
+																}
+															</SelectItem>
+														)
+													)}
 												</SelectContent>
 											</Select>
 										)}

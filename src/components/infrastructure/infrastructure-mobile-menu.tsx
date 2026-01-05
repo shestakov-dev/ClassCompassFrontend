@@ -36,14 +36,15 @@ export function InfrastructureMobileMenu({
 		onClose();
 	};
 
-	const handleEdit = (event: MouseEvent, building: BuildingEntity) => {
-		event.stopPropagation();
+	const handleEdit = (e: MouseEvent, building: BuildingEntity) => {
+		e.stopPropagation();
+
 		onClose();
 		onOpenDialog("building", "edit", building);
 	};
 
-	const handleDelete = (event: MouseEvent, id: string, name: string) => {
-		event.stopPropagation();
+	const handleDelete = (e: MouseEvent, id: string, name: string) => {
+		e.stopPropagation();
 		onClose();
 		onDelete(id, name);
 	};
@@ -78,9 +79,7 @@ export function InfrastructureMobileMenu({
 									variant="ghost"
 									size="icon-sm"
 									className="h-6 w-6 hover:bg-accent hover:text-foreground"
-									onClick={event =>
-										handleEdit(event, building)
-									}>
+									onClick={e => handleEdit(e, building)}>
 									<Edit2 className="h-3 w-3" />
 								</Button>
 
@@ -88,9 +87,9 @@ export function InfrastructureMobileMenu({
 									variant="ghost"
 									size="icon-sm"
 									className="h-6 w-6 text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
-									onClick={event =>
+									onClick={e =>
 										handleDelete(
-											event,
+											e,
 											building.id,
 											building.name
 										)

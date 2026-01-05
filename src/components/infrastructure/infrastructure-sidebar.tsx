@@ -58,8 +58,8 @@ export function InfrastructureSidebar({
 									variant="ghost"
 									size="icon-sm"
 									className="h-6 w-6"
-									onClick={event => {
-										event.stopPropagation();
+									onClick={e => {
+										e.stopPropagation();
 										onOpenDialog(
 											"building",
 											"edit",
@@ -73,8 +73,8 @@ export function InfrastructureSidebar({
 									variant="ghost"
 									size="icon-sm"
 									className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
-									onClick={event => {
-										event.stopPropagation();
+									onClick={e => {
+										e.stopPropagation();
 										onDelete(building.id, building.name);
 									}}>
 									<Trash2 className="h-3 w-3" />

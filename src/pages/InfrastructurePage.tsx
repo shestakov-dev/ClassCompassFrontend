@@ -158,7 +158,7 @@ export default function InfrastructurePage() {
 			}
 		}
 
-		setDialogState(prev => ({ ...prev, open: false }));
+		setDialogState(previousState => ({ ...previousState, open: false }));
 	};
 
 	const confirmDelete = () => {
@@ -342,7 +342,10 @@ export default function InfrastructurePage() {
 				<InfrastructureDialogs
 					open={dialogState.open}
 					onOpenChange={open =>
-						setDialogState(prev => ({ ...prev, open }))
+						setDialogState(previousState => ({
+							...previousState,
+							open,
+						}))
 					}
 					type={dialogState.type}
 					mode={dialogState.mode}
@@ -353,7 +356,10 @@ export default function InfrastructurePage() {
 				<DeleteConfirmation
 					open={deleteConfirm.open}
 					onOpenChange={open =>
-						setDeleteConfirm(prev => ({ ...prev, open }))
+						setDeleteConfirm(previousState => ({
+							...previousState,
+							open,
+						}))
 					}
 					name={deleteConfirm.name}
 					onConfirm={confirmDelete}
