@@ -86,14 +86,14 @@ export function MultiSelectCombobox({
 							className={`flex flex-wrap items-center gap-1 pr-2.5 ${expanded ? "max-h-32 overflow-y-auto" : "max-h-none"}`}>
 							{selectedValues.length > 0 ? (
 								<>
-									{visibleItems.map(val => {
+									{visibleItems.map(value => {
 										const item = items.find(
-											c => c.value === val
+											item => item.value === value
 										);
 
 										return item ? (
 											<Badge
-												key={val}
+												key={value}
 												variant="outline"
 												className="rounded-sm">
 												{item.label}
@@ -103,7 +103,7 @@ export function MultiSelectCombobox({
 													className="size-4"
 													onClick={e => {
 														e.stopPropagation();
-														removeSelection(val);
+														removeSelection(value);
 													}}
 													asChild>
 													<span>
@@ -118,7 +118,11 @@ export function MultiSelectCombobox({
 											variant="outline"
 											onClick={e => {
 												e.stopPropagation();
-												setExpanded(prev => !prev);
+
+												setExpanded(
+													previousValue =>
+														!previousValue
+												);
 											}}
 											className="rounded-sm cursor-pointer">
 											{expanded

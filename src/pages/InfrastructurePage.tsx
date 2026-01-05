@@ -1,4 +1,4 @@
-import { useState, useEffect, useEffectEvent, type FormEvent } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { Building, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -105,34 +105,31 @@ export default function InfrastructurePage() {
 		setDeleteConfirm({ open: true, type, id, name });
 	};
 
-	const handleSave = (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-
+	const handleSave = (values: {
+		name?: string;
+		number?: number;
+		description?: string;
+	}) => {
 		const { type, mode, data, parentId } = dialogState;
-
-		const formData = new FormData(event.currentTarget);
-		const formValues = Object.fromEntries(formData.entries());
 
 		if (type === "building") {
 			if (mode === "create") {
 				mutations.createBuilding.mutate({
 					data: {
-						name: formValues.name as string,
+						name: values.name!,
 						schoolId: schoolId!,
 					},
 				});
 			} else {
 				mutations.updateBuilding.mutate({
-					id: data.id as string,
-					data: { name: formValues.name as string },
+					id: data.id!,
+					data: { name: values.name! },
 				});
 			}
 		} else if (type === "floor") {
 			const floorData = {
-				number: parseInt(formValues.number as string),
-				...(formValues.description
-					? { description: formValues.description as string }
-					: {}),
+				number: values.number!,
+				description: values.description ?? undefined,
 			};
 
 			if (mode === "create" && selectedBuildingId) {
@@ -141,7 +138,7 @@ export default function InfrastructurePage() {
 				});
 			} else {
 				mutations.updateFloor.mutate({
-					id: data.id as string,
+					id: data.id!,
 					data: floorData,
 				});
 			}
@@ -149,19 +146,19 @@ export default function InfrastructurePage() {
 			if (mode === "create" && parentId) {
 				mutations.createRoom.mutate({
 					data: {
-						name: formValues.name as string,
+						name: values.name!,
 						floorId: parentId,
 					},
 				});
 			} else {
 				mutations.updateRoom.mutate({
-					id: data.id as string,
-					data: { name: formValues.name as string },
+					id: data.id!,
+					data: { name: values.name! },
 				});
 			}
 		}
 
-		setDialogState(prev => ({ ...prev, open: false }));
+		setDialogState(previousState => ({ ...previousState, open: false }));
 	};
 
 	const confirmDelete = () => {
@@ -345,7 +342,10 @@ export default function InfrastructurePage() {
 				<InfrastructureDialogs
 					open={dialogState.open}
 					onOpenChange={open =>
-						setDialogState(prev => ({ ...prev, open }))
+						setDialogState(previousState => ({
+							...previousState,
+							open,
+						}))
 					}
 					type={dialogState.type}
 					mode={dialogState.mode}
@@ -356,7 +356,10 @@ export default function InfrastructurePage() {
 				<DeleteConfirmation
 					open={deleteConfirm.open}
 					onOpenChange={open =>
-						setDeleteConfirm(prev => ({ ...prev, open }))
+						setDeleteConfirm(previousState => ({
+							...previousState,
+							open,
+						}))
 					}
 					name={deleteConfirm.name}
 					onConfirm={confirmDelete}

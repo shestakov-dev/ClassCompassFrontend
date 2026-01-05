@@ -465,22 +465,22 @@ export default function AcademicsPage() {
 
 					<TabsContent value="classes" className="space-y-4">
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-							{classes.map(cls => (
+							{classes.map(currentClass => (
 								<ClassCard
-									key={cls.id}
-									classEntity={cls}
+									key={currentClass.id}
+									classEntity={currentClass}
 									students={students}
 									users={users}
 									onEdit={() => {
-										setSelectedClass(cls);
+										setSelectedClass(currentClass);
 										setEditClassDialogOpen(true);
 									}}
 									onDelete={() => {
-										setSelectedClass(cls);
+										setSelectedClass(currentClass);
 										setDeleteClassDialogOpen(true);
 									}}
 									onAssign={() => {
-										setSelectedClass(cls);
+										setSelectedClass(currentClass);
 										setAssignStudentsDialogOpen(true);
 									}}
 								/>

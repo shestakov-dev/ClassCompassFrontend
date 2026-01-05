@@ -1,3 +1,7 @@
+import { useEffect, useEffectEvent } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -8,18 +12,33 @@ import {
 	DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import type {
-	BuildingEntity,
-	FloorEntity,
-	RoomEntity,
-} from "@/api/generated/models";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import type {
 	DialogType,
 	DialogMode,
 	DialogData,
 } from "@/types/infrastructure";
-import type { FormEvent } from "react";
+
+const buildingSchema = z.object({
+	name: z.string().min(1, "Building name is required"),
+});
+
+const floorSchema = z.object({
+	// We accept string input to handle the form state,
+	// then validate it parses to a number
+	number: z
+		.string()
+		.min(1, "Floor number is required")
+		.refine(value => !isNaN(Number(value)), {
+			message: "Must be a valid number",
+		})
+		.transform(value => Number(value)),
+	description: z.string().optional(),
+});
+
+const roomSchema = z.object({
+	name: z.string().min(1, "Room name/number is required"),
+});
 
 interface InfrastructureDialogsProps {
 	open: boolean;
@@ -27,7 +46,11 @@ interface InfrastructureDialogsProps {
 	type: DialogType;
 	mode: DialogMode;
 	data: DialogData;
-	onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+	onSubmit: (data: {
+		name?: string;
+		number?: number;
+		description?: string;
+	}) => void;
 }
 
 export function InfrastructureDialogs({
@@ -38,6 +61,48 @@ export function InfrastructureDialogs({
 	data,
 	onSubmit,
 }: InfrastructureDialogsProps) {
+	const form = useForm({
+		defaultValues: {
+			name: "",
+			number: "",
+			description: "",
+		},
+		onSubmit: async ({ value }) => {
+			if (type === "building") {
+				onSubmit({ name: value.name });
+			} else if (type === "floor") {
+				onSubmit({
+					number: Number(value.number),
+					description: value.description,
+				});
+			} else if (type === "room") {
+				onSubmit({ name: value.name });
+			}
+		},
+	});
+
+	const resetAndFill = useEffectEvent(() => {
+		form.reset();
+
+		if (data) {
+			if (type === "building" && "name" in data) {
+				form.setFieldValue("name", data.name ?? "");
+			} else if (type === "floor" && "number" in data) {
+				form.setFieldValue("number", data.number?.toString() ?? "");
+				const desc = "description" in data ? data.description : "";
+				form.setFieldValue("description", desc ?? "");
+			} else if (type === "room" && "name" in data) {
+				form.setFieldValue("name", data.name ?? "");
+			}
+		}
+	});
+
+	useEffect(() => {
+		if (open) {
+			resetAndFill();
+		}
+	}, [open, data, type]);
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
@@ -48,60 +113,172 @@ export function InfrastructureDialogs({
 					</DialogTitle>
 				</DialogHeader>
 
-				<form onSubmit={onSubmit} className="grid gap-4 py-4">
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="grid gap-4 py-4">
 					{type === "building" && (
-						<div className="grid gap-2">
-							<Label htmlFor="name">Building Name</Label>
-							<Input
-								id="name"
-								name="name"
-								defaultValue={(data as BuildingEntity)?.name}
-								required
-								autoFocus
-							/>
-						</div>
+						<form.Field
+							name="name"
+							validators={{
+								onChange: ({ value }) => {
+									const result =
+										buildingSchema.shape.name.safeParse(
+											value
+										);
+
+									return result.success
+										? undefined
+										: {
+												message:
+													result.error.issues[0]
+														.message,
+											};
+								},
+							}}
+							children={field => (
+								<Field>
+									<FieldLabel htmlFor={field.name}>
+										Building Name
+									</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={e =>
+											field.handleChange(e.target.value)
+										}
+										autoFocus
+									/>
+									{field.state.meta.isTouched && (
+										<FieldError
+											errors={field.state.meta.errors}
+										/>
+									)}
+								</Field>
+							)}
+						/>
 					)}
 
 					{type === "floor" && (
 						<>
-							<div className="grid gap-2">
-								<Label htmlFor="number">Floor Number</Label>
-								<Input
-									id="number"
-									name="number"
-									type="number"
-									defaultValue={(data as FloorEntity)?.number}
-									required
-									autoFocus
-								/>
-							</div>
+							<form.Field
+								name="number"
+								validators={{
+									onChange: ({ value }) => {
+										const result =
+											floorSchema.shape.number.safeParse(
+												value
+											);
 
-							<div className="grid gap-2">
-								<Label htmlFor="description">Description</Label>
-								<Input
-									id="description"
-									name="description"
-									defaultValue={
-										(data as FloorEntity)?.description ?? ""
-									}
-									placeholder="e.g. Administration"
-								/>
-							</div>
+										return result.success
+											? undefined
+											: {
+													message:
+														result.error.issues[0]
+															.message,
+												};
+									},
+								}}
+								children={field => (
+									<Field>
+										<FieldLabel htmlFor={field.name}>
+											Floor Number
+										</FieldLabel>
+										<Input
+											id={field.name}
+											name={field.name}
+											type="text"
+											inputMode="decimal"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={e =>
+												field.handleChange(
+													e.target.value
+												)
+											}
+											autoFocus
+										/>
+										{field.state.meta.isTouched && (
+											<FieldError
+												errors={field.state.meta.errors}
+											/>
+										)}
+									</Field>
+								)}
+							/>
+
+							<form.Field
+								name="description"
+								children={field => (
+									<Field>
+										<FieldLabel htmlFor={field.name}>
+											Description
+										</FieldLabel>
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={e =>
+												field.handleChange(
+													e.target.value
+												)
+											}
+											placeholder="e.g. Administration"
+										/>
+									</Field>
+								)}
+							/>
 						</>
 					)}
 
 					{type === "room" && (
-						<div className="grid gap-2">
-							<Label htmlFor="name">Room Name / Number</Label>
-							<Input
-								id="name"
-								name="name"
-								defaultValue={(data as RoomEntity)?.name}
-								required
-								autoFocus
-								placeholder="e.g. 101"
-							/>
-						</div>
+						<form.Field
+							name="name"
+							validators={{
+								onChange: ({ value }) => {
+									const result =
+										roomSchema.shape.name.safeParse(value);
+
+									return result.success
+										? undefined
+										: {
+												message:
+													result.error.issues[0]
+														.message,
+											};
+								},
+							}}
+							children={field => (
+								<Field>
+									<FieldLabel htmlFor={field.name}>
+										Room Name / Number
+									</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={e =>
+											field.handleChange(e.target.value)
+										}
+										autoFocus
+										placeholder="e.g. 101"
+									/>
+									{field.state.meta.isTouched && (
+										<FieldError
+											errors={field.state.meta.errors}
+										/>
+									)}
+								</Field>
+							)}
+						/>
 					)}
 
 					<DialogFooter>
@@ -111,7 +288,20 @@ export function InfrastructureDialogs({
 							onClick={() => onOpenChange(false)}>
 							Cancel
 						</Button>
-						<Button type="submit">Save</Button>
+
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={!canSubmit || isSubmitting}>
+									{isSubmitting ? "Saving..." : "Save"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -135,6 +325,7 @@ export function DeleteConfirmation({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Delete Confirmation</DialogTitle>
+
 					<DialogDescription>
 						Are you sure you want to delete{" "}
 						<span className="font-medium text-foreground">
@@ -143,6 +334,7 @@ export function DeleteConfirmation({
 						? This action cannot be undone.
 					</DialogDescription>
 				</DialogHeader>
+
 				<DialogFooter className="flex flex-row justify-end gap-2">
 					<Button
 						type="button"
@@ -150,6 +342,7 @@ export function DeleteConfirmation({
 						onClick={() => onOpenChange(false)}>
 						Cancel
 					</Button>
+
 					<Button
 						type="button"
 						variant="destructive"

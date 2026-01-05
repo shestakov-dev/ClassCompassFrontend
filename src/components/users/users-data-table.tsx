@@ -87,9 +87,9 @@ interface CombinedDataTableFilterProps<TData> {
 	classes: ClassEntity[];
 	subjects: SubjectEntity[];
 	classFilter: string[];
-	setClassFilter: (val: string[]) => void;
+	setClassFilter: (value: string[]) => void;
 	subjectFilter: string[];
-	setSubjectFilter: (val: string[]) => void;
+	setSubjectFilter: (value: string[]) => void;
 }
 
 function CombinedDataTableFilter<TData>({
@@ -213,7 +213,8 @@ function CombinedDataTableFilter<TData>({
 									toggleFilter(
 										selectedRoles,
 										"student",
-										val => rolesColumn?.setFilterValue(val)
+										value =>
+											rolesColumn?.setFilterValue(value)
 									)
 								}>
 								<div
@@ -235,7 +236,8 @@ function CombinedDataTableFilter<TData>({
 									toggleFilter(
 										selectedRoles,
 										"teacher",
-										val => rolesColumn?.setFilterValue(val)
+										value =>
+											rolesColumn?.setFilterValue(value)
 									)
 								}>
 								<div
@@ -258,8 +260,8 @@ function CombinedDataTableFilter<TData>({
 						<CommandGroup heading="Admin Status">
 							<CommandItem
 								onSelect={() =>
-									toggleFilter(selectedAdmin, "true", val =>
-										adminColumn?.setFilterValue(val)
+									toggleFilter(selectedAdmin, "true", value =>
+										adminColumn?.setFilterValue(value)
 									)
 								}>
 								<div
@@ -284,17 +286,17 @@ function CombinedDataTableFilter<TData>({
 							classes.length > 0 && (
 								<>
 									<CommandGroup heading="Classes">
-										{classes.map(cls => (
+										{classes.map(currentClass => (
 											<CommandItem
-												key={cls.id}
-												value={`class-${cls.name}`}
+												key={currentClass.id}
+												value={`class-${currentClass.name}`}
 												onSelect={() =>
 													toggleFilter(
 														selectedClasses,
-														cls.id,
-														val =>
+														currentClass.id,
+														value =>
 															setClassFilter(
-																val ?? []
+																value ?? []
 															)
 													)
 												}>
@@ -302,7 +304,7 @@ function CombinedDataTableFilter<TData>({
 													className={cn(
 														"mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
 														selectedClasses.has(
-															cls.id
+															currentClass.id
 														)
 															? "bg-primary text-primary-foreground"
 															: "opacity-50 [&_svg]:invisible"
@@ -310,7 +312,7 @@ function CombinedDataTableFilter<TData>({
 													<Check className="h-4 w-4" />
 												</div>
 
-												<span>{cls.name}</span>
+												<span>{currentClass.name}</span>
 											</CommandItem>
 										))}
 									</CommandGroup>
@@ -331,9 +333,9 @@ function CombinedDataTableFilter<TData>({
 												toggleFilter(
 													selectedSubjects,
 													sub.id,
-													val =>
+													value =>
 														setSubjectFilter(
-															val ?? []
+															value ?? []
 														)
 												)
 											}>
@@ -476,8 +478,8 @@ export function UsersDataTable<TData extends UserWithRoles, TValue>({
 			const isMedium = window.matchMedia("(max-width: 1024px)").matches;
 			const isBelowXL = window.matchMedia("(max-width: 1280px)").matches;
 
-			setColumnVisibility(prev => {
-				const newVisibility = { ...prev };
+			setColumnVisibility(previousVisibility => {
+				const newVisibility = { ...previousVisibility };
 
 				if (isSmall) {
 					newVisibility.email = false;
@@ -584,7 +586,7 @@ export function UsersDataTable<TData extends UserWithRoles, TValue>({
 					<Input
 						placeholder="Search users..."
 						value={globalFilter}
-						onChange={event => setGlobalFilter(event.target.value)}
+						onChange={e => setGlobalFilter(e.target.value)}
 						className="h-8 w-full pl-8 pr-8"
 					/>
 					{globalFilter && (

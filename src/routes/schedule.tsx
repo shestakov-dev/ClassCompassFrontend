@@ -40,7 +40,7 @@ const scheduleSearchSchema = z.object({
 	week: z.enum(LessonWeek).optional(),
 	ignoreWeek: z
 		.union([z.boolean(), z.literal("true"), z.literal("false")])
-		.transform(val => val === true || val === "true")
+		.transform(value => value === true || value === "true")
 		.optional(),
 	showAll: z.boolean().optional(),
 });

@@ -5,7 +5,6 @@ import {
 	ChevronsUpDown,
 	CalendarDays,
 	CalendarRange,
-	Clock,
 } from "lucide-react";
 import { set } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -17,9 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import {
 	Select,
 	SelectContent,
-	SelectGroup,
 	SelectItem,
-	SelectLabel,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
@@ -38,7 +35,8 @@ import {
 	type SetStateAction,
 	type MouseEvent,
 	useEffect,
-	type ChangeEvent,
+	useCallback,
+	useMemo,
 } from "react";
 import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-utils";
 import {
@@ -48,7 +46,8 @@ import {
 	type TimeSubMode,
 	type FilterOptions,
 } from "@/types/schedule";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useForm, useStore } from "@tanstack/react-form";
+import { Combobox } from "@/components/ui/combobox";
 
 interface ScheduleFiltersProps {
 	date: Date;
@@ -82,17 +81,19 @@ export function ScheduleFilters({
 	onClearResource,
 }: ScheduleFiltersProps) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [timeSubMode, setTimeSubMode] = useState<TimeSubMode>("full-day");
-	const [atTime, setAtTime] = useState("08:00");
-	const [rangeStart, setRangeStart] = useState("08:00");
-	const [rangeEnd, setRangeEnd] = useState("17:00");
-	const [genericWeek, setGenericWeek] = useState<LessonWeek>(
-		LessonWeek.every
-	);
 
-	const debouncedAtTime = useDebounce(atTime, 500);
-	const debouncedRangeStart = useDebounce(rangeStart, 500);
-	const debouncedRangeEnd = useDebounce(rangeEnd, 500);
+	const form = useForm({
+		defaultValues: {
+			timeSubMode: "full-day" as TimeSubMode,
+			atTime: "08:00",
+			rangeStart: "08:00",
+			rangeEnd: "17:00",
+			genericWeek: LessonWeek.every as LessonWeek,
+		},
+	});
+
+	const timeSubMode = useStore(form.store, state => state.values.timeSubMode);
+	const genericWeek = useStore(form.store, state => state.values.genericWeek);
 
 	const computeParams = (
 		targetMode: ScheduleMode,
@@ -121,6 +122,7 @@ export function ScheduleFilters({
 				nextParams.to = undefined;
 			} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
 				const [hours, minutes] = targetAtTime.split(":").map(Number);
+
 				const dateWithTime = set(targetDate, {
 					hours,
 					minutes,
@@ -182,55 +184,31 @@ export function ScheduleFilters({
 		return nextParams;
 	};
 
+	const handleFilterUpdate = useCallback(
+		(values: typeof form.state.values) => {
+			const newParameters = computeParams(
+				mode,
+				values.timeSubMode,
+				values.atTime,
+				values.rangeStart,
+				values.rangeEnd,
+				genericDay,
+				values.genericWeek,
+				date,
+				filters.ignoreWeek
+			);
+
+			setFilters(previousFilters => ({
+				...previousFilters,
+				...newParameters,
+			}));
+		},
+		[form, mode, genericDay, date, filters.ignoreWeek, setFilters]
+	);
+
 	useEffect(() => {
-		const newParameters = computeParams(
-			mode,
-			timeSubMode,
-			debouncedAtTime,
-			debouncedRangeStart,
-			debouncedRangeEnd,
-			genericDay,
-			genericWeek,
-			date,
-			filters.ignoreWeek
-		);
-
-		setFilters(previousFilters => ({
-			...previousFilters,
-			...newParameters,
-		}));
-	}, [
-		mode,
-		timeSubMode,
-		debouncedAtTime,
-		debouncedRangeStart,
-		debouncedRangeEnd,
-		genericDay,
-		genericWeek,
-		date,
-		filters.ignoreWeek,
-		setFilters,
-	]);
-
-	const handleTimeSubModeChange = (value: string) => {
-		setTimeSubMode(value as TimeSubMode);
-	};
-
-	const handleAtTimeChange = (event: ChangeEvent<HTMLInputElement>) => {
-		setAtTime(event.target.value);
-	};
-
-	const handleRangeStartChange = (event: ChangeEvent<HTMLInputElement>) => {
-		setRangeStart(event.target.value);
-	};
-
-	const handleRangeEndChange = (event: ChangeEvent<HTMLInputElement>) => {
-		setRangeEnd(event.target.value);
-	};
-
-	const handleGenericWeekChange = (value: string) => {
-		setGenericWeek(value as LessonWeek);
-	};
+		handleFilterUpdate(form.state.values);
+	}, [handleFilterUpdate, form.state.values]);
 
 	const handleGenericDayChange = (value: string) => {
 		setGenericDay(value as Day);
@@ -251,7 +229,7 @@ export function ScheduleFilters({
 		key: keyof LessonsControllerFindFilteredParams,
 		value: string
 	) => {
-		if (value === "all") {
+		if (value === "all" || value === "") {
 			// If the filter is a primary resource, use the clear handler
 			if (
 				(key === "classId" ||
@@ -275,21 +253,72 @@ export function ScheduleFilters({
 	};
 
 	const toggleIgnoreWeek = (checked: boolean) => {
-		setFilters(prev => ({ ...prev, ignoreWeek: checked }));
+		setFilters(previousFilters => ({
+			...previousFilters,
+			ignoreWeek: checked,
+		}));
 	};
 
-	const clearFilters = (event: MouseEvent<HTMLButtonElement>) => {
-		event.stopPropagation();
-		setTimeSubMode("full-day");
-		setAtTime("08:00");
-		setGenericWeek(LessonWeek.every);
-		if (onReset) onReset();
+	const clearFilters = (e: MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+
+		form.reset();
+
+		if (onReset) {
+			onReset();
+		}
 	};
 
 	const activeCount = Object.entries(filters).filter(
 		([key, value]) =>
 			key !== "ignoreWeek" && value !== undefined && value !== null
 	).length;
+
+	const classItems = useMemo(
+		() =>
+			options.classes?.map(currentClass => ({
+				value: currentClass.id,
+				label: currentClass.name,
+			})) ?? [],
+		[options.classes]
+	);
+
+	const subjectItems = useMemo(
+		() =>
+			options.subjects?.map(subject => ({
+				value: subject.id,
+				label: subject.name,
+			})) ?? [],
+		[options.subjects]
+	);
+
+	const teacherItems = useMemo(
+		() =>
+			options.teachers?.map(teacher => ({
+				value: teacher.id,
+				label: `${teacher.user?.firstName} ${teacher.user?.lastName}`,
+				secondaryLabel: teacher.subjects
+					?.map(subject => subject.name)
+					.join(", "),
+			})) ?? [],
+		[options.teachers]
+	);
+
+	const roomItems = useMemo(
+		() =>
+			options.buildings?.flatMap(
+				building =>
+					building.floors?.flatMap(
+						floor =>
+							floor.rooms?.map(room => ({
+								value: room.id,
+								label: room.name,
+								secondaryLabel: `${building.name}, Floor ${floor.number}`,
+							})) ?? []
+					) ?? []
+			) ?? [],
+		[options.buildings]
+	);
 
 	return (
 		<Collapsible
@@ -309,20 +338,24 @@ export function ScheduleFilters({
 							<span className="flex items-center gap-2">
 								<Filter className="h-4 w-4 text-muted-foreground" />
 								<span>Filters</span>
+
 								{activeCount > 0 && (
 									<Badge
 										variant="secondary"
-										className="h-5 px-1.5 text-[10px]">
-										{activeCount} active
+										className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+										{activeCount}
 									</Badge>
 								)}
+
 								<ChevronsUpDown className="h-3 w-3 text-muted-foreground opacity-50" />
 							</span>
 						</Button>
 					</CollapsibleTrigger>
+
 					{!isOpen && (
 						<div className="hidden sm:flex items-center text-xs text-muted-foreground gap-2">
 							<Separator orientation="vertical" className="h-4" />
+
 							{mode === "date" ? (
 								<span className="flex items-center gap-1">
 									<CalendarIcon className="h-3 w-3" />
@@ -341,6 +374,7 @@ export function ScheduleFilters({
 						</div>
 					)}
 				</div>
+
 				{showReset && onReset && (
 					<Button
 						variant="ghost"
@@ -355,6 +389,7 @@ export function ScheduleFilters({
 			<CollapsibleContent>
 				<div className="px-4 pb-4 space-y-6">
 					<Separator />
+
 					<div className="space-y-4">
 						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
 							View Mode
@@ -380,8 +415,8 @@ export function ScheduleFilters({
 						</Tabs>
 					</div>
 
-					<div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-						{mode === "date" ? (
+					{mode === "date" ? (
+						<div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
 							<div className="space-y-3">
 								<Label className="text-xs font-medium">
 									Date & Time
@@ -401,94 +436,157 @@ export function ScheduleFilters({
 										<Label className="text-xs text-muted-foreground">
 											Detail Level
 										</Label>
-										<Select
-											value={timeSubMode}
-											onValueChange={
-												handleTimeSubModeChange
-											}>
-											<SelectTrigger className="h-9">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="full-day">
-													Full Day
-												</SelectItem>
-												<SelectItem value="timestamp">
-													Specific Time
-												</SelectItem>
-												<SelectItem value="range">
-													Time Range
-												</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-							</div>
-						) : (
-							<div className="space-y-3">
-								<Label className="text-xs font-medium">
-									Recurring Settings
-								</Label>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div className="space-y-1">
-										<Label className="text-xs text-muted-foreground">
-											Day of Week
-										</Label>
-										<Select
-											value={genericDay}
-											onValueChange={
-												handleGenericDayChange
-											}>
-											<SelectTrigger className="h-9 capitalize">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												{Object.values(Day).map(
-													dayValue => (
-														<SelectItem
-															key={dayValue}
-															value={dayValue}
-															className="capitalize">
-															{dayValue}
+										<form.Field
+											name="timeSubMode"
+											validators={{
+												onChangeAsync: async ({
+													fieldApi,
+												}) => {
+													handleFilterUpdate(
+														fieldApi.form.state
+															.values
+													);
+												},
+											}}
+											children={field => (
+												<Select
+													value={field.state.value}
+													onValueChange={value =>
+														field.handleChange(
+															value as TimeSubMode
+														)
+													}>
+													<SelectTrigger className="h-9">
+														<SelectValue />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value="full-day">
+															Full Day
 														</SelectItem>
-													)
+														<SelectItem value="timestamp">
+															Specific Time
+														</SelectItem>
+														<SelectItem value="range">
+															Time Range
+														</SelectItem>
+													</SelectContent>
+												</Select>
+											)}
+										/>
+									</div>
+									{timeSubMode === "timestamp" && (
+										<div className="space-y-1">
+											<Label className="text-xs text-muted-foreground">
+												At Time
+											</Label>
+											<form.Field
+												name="atTime"
+												validators={{
+													onChangeAsyncDebounceMs: 500,
+													onChangeAsync: async ({
+														fieldApi,
+													}) => {
+														handleFilterUpdate(
+															fieldApi.form.state
+																.values
+														);
+													},
+												}}
+												children={field => (
+													<Input
+														type="time"
+														value={
+															field.state.value
+														}
+														onChange={e =>
+															field.handleChange(
+																e.target.value
+															)
+														}
+														className="h-9"
+													/>
 												)}
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="space-y-1">
-										<Label className="text-xs text-muted-foreground">
-											Week Type
-										</Label>
-										<Select
-											value={genericWeek}
-											onValueChange={
-												handleGenericWeekChange
-											}>
-											<SelectTrigger className="h-9 capitalize">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem
-													value={LessonWeek.every}>
-													All Weeks
-												</SelectItem>
-												<SelectItem
-													value={LessonWeek.odd}>
-													Odd Weeks
-												</SelectItem>
-												<SelectItem
-													value={LessonWeek.even}>
-													Even Weeks
-												</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
+											/>
+										</div>
+									)}
+									{timeSubMode === "range" && (
+										<>
+											<div className="space-y-1">
+												<Label className="text-xs text-muted-foreground">
+													From
+												</Label>
+												<form.Field
+													name="rangeStart"
+													validators={{
+														onChangeAsyncDebounceMs: 500,
+														onChangeAsync: async ({
+															fieldApi,
+														}) => {
+															handleFilterUpdate(
+																fieldApi.form
+																	.state
+																	.values
+															);
+														},
+													}}
+													children={field => (
+														<Input
+															type="time"
+															value={
+																field.state
+																	.value
+															}
+															onChange={e =>
+																field.handleChange(
+																	e.target
+																		.value
+																)
+															}
+															className="h-9"
+														/>
+													)}
+												/>
+											</div>
+											<div className="space-y-1">
+												<Label className="text-xs text-muted-foreground">
+													To
+												</Label>
+												<form.Field
+													name="rangeEnd"
+													validators={{
+														onChangeAsyncDebounceMs: 500,
+														onChangeAsync: async ({
+															fieldApi,
+														}) => {
+															handleFilterUpdate(
+																fieldApi.form
+																	.state
+																	.values
+															);
+														},
+													}}
+													children={field => (
+														<Input
+															type="time"
+															value={
+																field.state
+																	.value
+															}
+															onChange={e =>
+																field.handleChange(
+																	e.target
+																		.value
+																)
+															}
+															className="h-9"
+														/>
+													)}
+												/>
+											</div>
+										</>
+									)}
 								</div>
 							</div>
-						)}
-
-						{mode === "date" && (
 							<div className="flex items-center justify-start sm:justify-end pt-8">
 								<div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-md border border-dashed">
 									<Switch
@@ -498,59 +596,88 @@ export function ScheduleFilters({
 									/>
 									<Label
 										htmlFor="ignore-week"
-										className="text-xs font-normal cursor-pointer">
-										Show all weeks (ignore odd/even)
+										className="text-xs cursor-pointer">
+										Ignore Week Parity
 									</Label>
 								</div>
 							</div>
-						)}
-					</div>
-
-					{mode === "date" && timeSubMode !== "full-day" && (
-						<div className="bg-muted/30 p-3 rounded-md border border-dashed">
-							<div className="flex flex-wrap items-end gap-4">
-								<Clock className="h-4 w-4 text-muted-foreground mb-2.5" />
-								{timeSubMode === "timestamp" && (
-									<div className="space-y-1">
-										<Label className="text-xs">
-											At Time
-										</Label>
-										<Input
-											type="time"
-											value={atTime}
-											onChange={handleAtTimeChange}
-											className="h-8 w-32"
-										/>
-									</div>
-								)}
-								{timeSubMode === "range" && (
-									<>
-										<div className="space-y-1">
-											<Label className="text-xs">
-												From
-											</Label>
-											<Input
-												type="time"
-												value={rangeStart}
-												onChange={
-													handleRangeStartChange
-												}
-												className="h-8 w-32"
-											/>
-										</div>
-										<div className="space-y-1">
-											<Label className="text-xs">
-												To
-											</Label>
-											<Input
-												type="time"
-												value={rangeEnd}
-												onChange={handleRangeEndChange}
-												className="h-8 w-32"
-											/>
-										</div>
-									</>
-								)}
+						</div>
+					) : (
+						<div className="space-y-3">
+							<Label className="text-xs font-medium">
+								Recurring Settings
+							</Label>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div className="space-y-1">
+									<Label className="text-xs text-muted-foreground">
+										Day of Week
+									</Label>
+									<Select
+										value={genericDay}
+										onValueChange={handleGenericDayChange}>
+										<SelectTrigger className="h-9 capitalize">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{Object.values(Day).map(
+												dayValue => (
+													<SelectItem
+														key={dayValue}
+														value={dayValue}
+														className="capitalize">
+														{dayValue}
+													</SelectItem>
+												)
+											)}
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="space-y-1">
+									<Label className="text-xs text-muted-foreground">
+										Week Type
+									</Label>
+									<form.Field
+										name="genericWeek"
+										validators={{
+											onChangeAsync: async ({
+												fieldApi,
+											}) => {
+												handleFilterUpdate(
+													fieldApi.form.state.values
+												);
+											},
+										}}
+										children={field => (
+											<Select
+												value={field.state.value}
+												onValueChange={value =>
+													field.handleChange(
+														value as LessonWeek
+													)
+												}>
+												<SelectTrigger className="h-9 capitalize">
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem
+														value={
+															LessonWeek.every
+														}>
+														All Weeks
+													</SelectItem>
+													<SelectItem
+														value={LessonWeek.odd}>
+														Odd Weeks
+													</SelectItem>
+													<SelectItem
+														value={LessonWeek.even}>
+														Even Weeks
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										)}
+									/>
+								</div>
 							</div>
 						</div>
 					)}
@@ -563,112 +690,50 @@ export function ScheduleFilters({
 						</Label>
 
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-							<div className="space-y-1">
-								<Label className="text-xs">Class</Label>
-								<Select
-									value={filters.classId ?? "all"}
-									onValueChange={value =>
-										handleEntityChange("classId", value)
-									}>
-									<SelectTrigger className="h-9">
-										<SelectValue placeholder="All Classes" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">
-											All Classes
-										</SelectItem>
-										{options.classes?.map(item => (
-											<SelectItem
-												key={item.id}
-												value={item.id}>
-												{item.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-1">
-								<Label className="text-xs">Subject</Label>
-								<Select
-									value={filters.subjectId ?? "all"}
-									onValueChange={value =>
-										handleEntityChange("subjectId", value)
-									}>
-									<SelectTrigger className="h-9">
-										<SelectValue placeholder="All Subjects" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">
-											All Subjects
-										</SelectItem>
-										{options.subjects?.map(item => (
-											<SelectItem
-												key={item.id}
-												value={item.id}>
-												{item.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-1">
-								<Label className="text-xs">Teacher</Label>
-								<Select
-									value={filters.teacherId ?? "all"}
-									onValueChange={value =>
-										handleEntityChange("teacherId", value)
-									}>
-									<SelectTrigger className="h-9">
-										<SelectValue placeholder="All Teachers" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">
-											All Teachers
-										</SelectItem>
-										{options.teachers?.map(item => (
-											<SelectItem
-												key={item.id}
-												value={item.id}>
-												{`${item.user?.firstName} ${item.user?.lastName}`}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-1">
-								<Label className="text-xs">Room</Label>
-								<Select
-									value={filters.roomId ?? "all"}
-									onValueChange={value =>
-										handleEntityChange("roomId", value)
-									}>
-									<SelectTrigger className="h-9">
-										<SelectValue placeholder="All Rooms" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">
-											All Rooms
-										</SelectItem>
-										{options.buildings?.map(building => (
-											<SelectGroup key={building.id}>
-												<SelectLabel>
-													{building.name}
-												</SelectLabel>
-												{building.floors?.map(floor =>
-													floor.rooms?.map(room => (
-														<SelectItem
-															key={room.id}
-															value={room.id}>
-															{room.name} (Floor{" "}
-															{floor.number})
-														</SelectItem>
-													))
-												)}
-											</SelectGroup>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
+							<Combobox
+								label="Class"
+								items={classItems}
+								value={filters.classId}
+								onChange={value =>
+									handleEntityChange("classId", value)
+								}
+								placeholder="All Classes"
+								searchPlaceholder="Search classes..."
+								emptyMessage="No class found."
+							/>
+							<Combobox
+								label="Subject"
+								items={subjectItems}
+								value={filters.subjectId}
+								onChange={value =>
+									handleEntityChange("subjectId", value)
+								}
+								placeholder="All Subjects"
+								searchPlaceholder="Search subjects..."
+								emptyMessage="No subject found."
+							/>
+							<Combobox
+								label="Teacher"
+								items={teacherItems}
+								value={filters.teacherId}
+								onChange={value =>
+									handleEntityChange("teacherId", value)
+								}
+								placeholder="All Teachers"
+								searchPlaceholder="Search teachers..."
+								emptyMessage="No teacher found."
+							/>
+							<Combobox
+								label="Room"
+								items={roomItems}
+								value={filters.roomId}
+								onChange={value =>
+									handleEntityChange("roomId", value)
+								}
+								placeholder="All Rooms"
+								searchPlaceholder="Search rooms..."
+								emptyMessage="No room found."
+							/>
 						</div>
 					</div>
 				</div>

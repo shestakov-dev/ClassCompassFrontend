@@ -155,7 +155,7 @@ export default function SchedulePage() {
 	const updateSearch = useCallback(
 		(newParams: Partial<typeof search>) => {
 			navigate({
-				search: prev => ({ ...prev, ...newParams }),
+				search: previousSearch => ({ ...previousSearch, ...newParams }),
 				replace: true,
 			});
 		},
@@ -243,7 +243,7 @@ export default function SchedulePage() {
 			updater:
 				| LessonsControllerFindFilteredParams
 				| ((
-						prev: LessonsControllerFindFilteredParams
+						previousFilters: LessonsControllerFindFilteredParams
 				  ) => LessonsControllerFindFilteredParams)
 		) => {
 			const nextFilters =
@@ -343,11 +343,14 @@ export default function SchedulePage() {
 				dailySchedulesControllerFindAllByClass(classId, signal),
 		});
 
-		const found = schedules.find(ds => ds.day === day);
-		if (found) return found.id;
+		const found = schedules.find(schedule => schedule.day === day);
+
+		if (found) {
+			return found.id;
+		}
 
 		const created = await createDailyScheduleMutation.mutateAsync({
-			data: { classId, day: day as Day },
+			data: { classId, day },
 		});
 
 		queryClient.invalidateQueries({ queryKey });

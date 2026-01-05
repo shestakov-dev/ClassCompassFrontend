@@ -28,12 +28,12 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
 	const [loadingCount, setLoadingCount] = useState(0);
 
 	const setIsLoading = useCallback((isLoading: boolean) => {
-		setLoadingCount(prev => {
+		setLoadingCount(previousCount => {
 			if (isLoading) {
-				return prev + 1;
+				return previousCount + 1;
 			}
 
-			return Math.max(0, prev - 1);
+			return Math.max(0, previousCount - 1);
 		});
 	}, []);
 

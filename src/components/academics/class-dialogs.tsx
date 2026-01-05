@@ -1,4 +1,7 @@
-import { useEffect, useEffectEvent, useState, type FormEvent } from "react";
+import { useEffect, useEffectEvent } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+import { GraduationCap } from "lucide-react";
 
 import {
 	Dialog,
@@ -10,13 +13,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { MultiSelectCombobox } from "@/components/ui/multi-select-combobox";
 import type { ClassEntity } from "@/api/generated/models/classEntity";
 import type { CreateClassDto } from "@/api/generated/models/createClassDto";
 import type { UpdateClassDto } from "@/api/generated/models/updateClassDto";
 import type { StudentEntity } from "@/api/generated/models/studentEntity";
 import type { UserEntity } from "@/api/generated/models/userEntity";
+
+const classSchema = z.object({
+	name: z.string().min(1, "Class name is required"),
+});
 
 interface CreateClassDialogProps {
 	open: boolean;
@@ -33,10 +40,17 @@ export function CreateClassDialog({
 	schoolId,
 	isLoading,
 }: CreateClassDialogProps) {
-	const [name, setName] = useState("");
+	const form = useForm({
+		defaultValues: {
+			name: "",
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit({ name: value.name, schoolId });
+		},
+	});
 
 	const resetForm = useEffectEvent(() => {
-		setName("");
+		form.reset();
 	});
 
 	useEffect(() => {
@@ -45,36 +59,63 @@ export function CreateClassDialog({
 		}
 	}, [open]);
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-		onSubmit({ name, schoolId });
-	};
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Create New Class</DialogTitle>
+					<DialogTitle className="flex items-center gap-2">
+						<GraduationCap className="w-5 h-5 text-chart-4" />
+						Create New Class
+					</DialogTitle>
 
 					<DialogDescription>
 						Add a new class to your school
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit}>
-					<div className="space-y-4">
-						<div className="space-y-2">
-							<Label htmlFor="name">Class Name</Label>
-							<Input
-								id="name"
-								value={name}
-								onChange={e => setName(e.target.value)}
-								placeholder="e.g., 10A, Grade 5B"
-								className="focus-visible:border-chart-4 focus-visible:ring-chart-4/50"
-								required
-							/>
-						</div>
-					</div>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="name"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									classSchema.shape.name.safeParse(value);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Class Name
+								</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={e =>
+										field.handleChange(e.target.value)
+									}
+									placeholder="e.g., 10A, Grade 5B"
+									className="focus-visible:border-chart-4 focus-visible:ring-chart-4/50"
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<DialogFooter className="mt-6">
 						<Button
@@ -85,9 +126,24 @@ export function CreateClassDialog({
 							Cancel
 						</Button>
 
-						<Button type="submit" disabled={isLoading}>
-							{isLoading ? "Creating..." : "Create"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}
+									className="bg-chart-4 hover:bg-chart-4/90">
+									{isLoading || isSubmitting
+										? "Creating..."
+										: "Create"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -110,11 +166,18 @@ export function EditClassDialog({
 	classData,
 	isLoading,
 }: EditClassDialogProps) {
-	const [name, setName] = useState("");
+	const form = useForm({
+		defaultValues: {
+			name: classData?.name ?? "",
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit({ name: value.name });
+		},
+	});
 
 	const syncFormData = useEffectEvent(() => {
 		if (classData) {
-			setName(classData.name);
+			form.setFieldValue("name", classData.name);
 		}
 	});
 
@@ -124,37 +187,63 @@ export function EditClassDialog({
 		}
 	}, [classData, open]);
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-
-		onSubmit({ name });
-	};
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit Class</DialogTitle>
+					<DialogTitle className="flex items-center gap-2">
+						<GraduationCap className="w-5 h-5 text-chart-4" />
+						Edit Class
+					</DialogTitle>
 
 					<DialogDescription>
 						Update the class information
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit}>
-					<div className="space-y-4">
-						<div className="space-y-2">
-							<Label htmlFor="name">Class Name</Label>
-							<Input
-								id="name"
-								value={name}
-								onChange={e => setName(e.target.value)}
-								placeholder="e.g., 10A, Grade 5B"
-								className="focus-visible:border-chart-4 focus-visible:ring-chart-4/50"
-								required
-							/>
-						</div>
-					</div>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="name"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									classSchema.shape.name.safeParse(value);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Class Name
+								</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={e =>
+										field.handleChange(e.target.value)
+									}
+									placeholder="e.g., 10A, Grade 5B"
+									className="focus-visible:border-chart-4 focus-visible:ring-chart-4/50"
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<DialogFooter className="mt-6">
 						<Button
@@ -165,12 +254,24 @@ export function EditClassDialog({
 							Cancel
 						</Button>
 
-						<Button
-							type="submit"
-							disabled={isLoading}
-							className="bg-chart-4 hover:bg-chart-4/90">
-							{isLoading ? "Saving..." : "Save"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}
+									className="bg-chart-4 hover:bg-chart-4/90">
+									{isLoading || isSubmitting
+										? "Saving..."
+										: "Save"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -244,7 +345,14 @@ export function AssignStudentsDialog({
 	users,
 	isLoading,
 }: AssignStudentsDialogProps) {
-	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+	const form = useForm({
+		defaultValues: {
+			userIds: [] as string[],
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit(value.userIds);
+		},
+	});
 
 	const syncSelectedUsers = useEffectEvent(() => {
 		if (classData) {
@@ -252,19 +360,17 @@ export function AssignStudentsDialog({
 				.filter(student => student.classId === classData.id)
 				.map(student => student.userId);
 
-			setSelectedUsers(currentUserIds);
+			form.setFieldValue("userIds", currentUserIds);
 		}
 	});
 
 	useEffect(() => {
 		if (open) {
 			syncSelectedUsers();
+		} else {
+			form.reset();
 		}
-	}, [classData, open]);
-
-	const handleSubmit = () => {
-		onSubmit(selectedUsers);
-	};
+	}, [classData, open, form]);
 
 	// Show users who are not teachers and are not students in other classes
 	const eligibleUsers = users
@@ -273,10 +379,8 @@ export function AssignStudentsDialog({
 			const studentEntry = students.find(
 				student => student.id === user.student?.id
 			);
-
 			const isInCurrentClass =
 				classData && studentEntry?.classId === classData.id;
-
 			return !studentEntry || isInCurrentClass;
 		});
 
@@ -299,33 +403,61 @@ export function AssignStudentsDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="py-4">
-					<MultiSelectCombobox
-						items={userOptions}
-						selectedValues={selectedUsers}
-						onChange={setSelectedUsers}
-						placeholder="Select students..."
-						searchPlaceholder="Search students..."
-						emptyMessage="No students found."
-						label="Students"
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="userIds"
+						children={field => (
+							<Field>
+								<MultiSelectCombobox
+									items={userOptions}
+									selectedValues={field.state.value}
+									onChange={vals => field.handleChange(vals)}
+									placeholder="Select students..."
+									searchPlaceholder="Search students..."
+									emptyMessage="No students found."
+									label="Students"
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
 					/>
-				</div>
 
-				<DialogFooter>
-					<Button
-						variant="outline"
-						onClick={() => onOpenChange(false)}
-						disabled={isLoading}>
-						Cancel
-					</Button>
+					<DialogFooter>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => onOpenChange(false)}
+							disabled={isLoading}>
+							Cancel
+						</Button>
 
-					<Button
-						onClick={handleSubmit}
-						disabled={isLoading}
-						className="bg-chart-4 hover:bg-chart-4/90">
-						{isLoading ? "Assigning..." : "Assign Students"}
-					</Button>
-				</DialogFooter>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}
+									className="bg-chart-4 hover:bg-chart-4/90">
+									{isLoading || isSubmitting
+										? "Assigning..."
+										: "Assign Students"}
+								</Button>
+							)}
+						/>
+					</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

@@ -1,6 +1,8 @@
-import { useEffect, useEffectEvent, useState, type FormEvent } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { format, parseISO, set } from "date-fns";
-import { toast } from "sonner";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+
 import {
 	Dialog,
 	DialogContent,
@@ -11,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Combobox } from "@/components/ui/combobox";
 import { Edit, Trash2 } from "lucide-react";
 import type {
@@ -31,6 +33,17 @@ import {
 	LessonWeek,
 } from "@/types/schedule";
 import { WeekBadge } from "@/components/schedule/week-badge";
+
+const lessonSchema = z.object({
+	day: z.string().min(1, "Day is required"),
+	classId: z.string().min(1, "Class is required"),
+	subjectId: z.string().min(1, "Subject is required"),
+	teacherId: z.string().optional(),
+	roomId: z.string().min(1, "Room is required"),
+	startTime: z.string().min(1, "Start time is required"),
+	endTime: z.string().min(1, "End time is required"),
+	lessonWeek: z.string().min(1, "Lesson week is required"),
+});
 
 interface CreateLessonDialogProps {
 	open: boolean;
@@ -55,32 +68,68 @@ export function CreateLessonDialog({
 	defaultValues,
 	options,
 }: CreateLessonDialogProps) {
-	const [selectedDay, setSelectedDay] = useState<Day | "">(
-		defaultValues?.day ?? ""
-	);
-	const [selectedClassId, setSelectedClassId] = useState<string>(
-		defaultValues?.classId ?? ""
-	);
-	const [subjectId, setSubjectId] = useState<string>(
-		defaultValues?.subjectId ?? ""
-	);
-	const [teacherId, setTeacherId] = useState<string>(
-		defaultValues?.teacherId ?? ""
-	);
-	const [roomId, setRoomId] = useState<string>(defaultValues?.roomId ?? "");
-	const [startTime, setStartTime] = useState<string>("");
-	const [endTime, setEndTime] = useState<string>("");
-	const [lessonWeek, setLessonWeek] = useState<LessonWeek>(LessonWeek.every);
+	const form = useForm({
+		defaultValues: {
+			day: defaultValues?.day as Day,
+			classId: defaultValues?.classId ?? "",
+			subjectId: defaultValues?.subjectId ?? "",
+			teacherId: defaultValues?.teacherId ?? "",
+			roomId: defaultValues?.roomId ?? "",
+			startTime: "",
+			endTime: "",
+			lessonWeek: LessonWeek.every as LessonWeek,
+		},
+		onSubmit: async ({ value }) => {
+			const [startHours, startMinutes] = value.startTime
+				.split(":")
+				.map(Number);
+			const [endHours, endMinutes] = value.endTime.split(":").map(Number);
+
+			const dateTimeStart = set(new Date(0), {
+				hours: startHours,
+				minutes: startMinutes,
+			}).toISOString();
+			const dateTimeEnd = set(new Date(0), {
+				hours: endHours,
+				minutes: endMinutes,
+			}).toISOString();
+
+			onSubmit({
+				day: value.day,
+				classId: value.classId,
+				subjectId: value.subjectId,
+				teacherId: value.teacherId,
+				roomId: value.roomId,
+				startTime: dateTimeStart,
+				endTime: dateTimeEnd,
+				lessonWeek: value.lessonWeek,
+			});
+		},
+	});
 
 	const syncFormData = useEffectEvent(() => {
-		setSelectedDay(defaultValues?.day ?? "");
-		setSelectedClassId(defaultValues?.classId ?? "");
-		setSubjectId(defaultValues?.subjectId ?? "");
-		setTeacherId(defaultValues?.teacherId ?? "");
-		setRoomId(defaultValues?.roomId ?? "");
-		setStartTime("");
-		setEndTime("");
-		setLessonWeek(LessonWeek.every);
+		form.reset();
+		if (defaultValues) {
+			if (defaultValues.day) {
+				form.setFieldValue("day", defaultValues.day);
+			}
+
+			if (defaultValues.classId) {
+				form.setFieldValue("classId", defaultValues.classId);
+			}
+
+			if (defaultValues.subjectId) {
+				form.setFieldValue("subjectId", defaultValues.subjectId);
+			}
+
+			if (defaultValues.teacherId) {
+				form.setFieldValue("teacherId", defaultValues.teacherId);
+			}
+
+			if (defaultValues.roomId) {
+				form.setFieldValue("roomId", defaultValues.roomId);
+			}
+		}
 	});
 
 	useEffect(() => {
@@ -95,57 +144,6 @@ export function CreateLessonDialog({
 				building.floors?.flatMap(floor => floor.rooms ?? []) ?? []
 		) ?? [];
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-
-		if (
-			!selectedDay ||
-			!selectedClassId ||
-			!subjectId ||
-			!teacherId ||
-			!roomId ||
-			!startTime ||
-			!endTime ||
-			!lessonWeek
-		) {
-			toast.error("Please fill in all required fields");
-			return;
-		}
-
-		const [startHours, startMinutes] = startTime.split(":").map(Number);
-		const [endHours, endMinutes] = endTime.split(":").map(Number);
-
-		const dateTimeStart = set(new Date(0), {
-			hours: startHours,
-			minutes: startMinutes,
-		}).toISOString();
-		const dateTimeEnd = set(new Date(0), {
-			hours: endHours,
-			minutes: endMinutes,
-		}).toISOString();
-
-		onSubmit({
-			day: selectedDay,
-			classId: selectedClassId,
-			subjectId,
-			teacherId,
-			roomId,
-			startTime: dateTimeStart,
-			endTime: dateTimeEnd,
-			lessonWeek,
-		});
-	};
-
-	const isFormValid =
-		selectedDay &&
-		selectedClassId &&
-		subjectId &&
-		teacherId &&
-		roomId &&
-		startTime &&
-		endTime &&
-		lessonWeek;
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -153,162 +151,343 @@ export function CreateLessonDialog({
 					<DialogTitle>Create New Lesson</DialogTitle>
 
 					<DialogDescription>
-						Add a new lesson to the schedule. Fields are pre-filled
-						based on current filters but can be changed.
+						Add a new lesson to the schedule.
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-4">
-					<div className="space-y-2">
-						<Label
-							htmlFor="day"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Day of Week
-						</Label>
-						<Combobox
-							items={ALL_DAYS.map(day => ({
-								value: day,
-								label:
-									day.charAt(0).toUpperCase() + day.slice(1),
-							}))}
-							value={selectedDay}
-							onChange={value => setSelectedDay(value as Day)}
-							placeholder="Select day"
-							searchPlaceholder="Search days..."
-						/>
-					</div>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="class"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Class
-						</Label>
-						<Combobox
-							items={(options.classes ?? []).map(classItem => ({
-								value: classItem.id,
-								label: classItem.name,
-							}))}
-							value={selectedClassId}
-							onChange={setSelectedClassId}
-							placeholder="Select class"
-							searchPlaceholder="Search classes..."
-						/>
-					</div>
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="day"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.day.safeParse(value);
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="subject"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Subject
-						</Label>
-						<Combobox
-							items={(options.subjects ?? []).map(subject => ({
-								value: subject.id,
-								label: subject.name,
-							}))}
-							value={subjectId}
-							onChange={setSubjectId}
-							placeholder="Select subject"
-							searchPlaceholder="Search subjects..."
-						/>
-					</div>
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Day of Week
+								</FieldLabel>
+								<Combobox
+									items={ALL_DAYS.map(day => ({
+										value: day,
+										label:
+											day.charAt(0).toUpperCase() +
+											day.slice(1),
+									}))}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value as Day)
+									}
+									placeholder="Select day"
+									searchPlaceholder="Search days..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
-					<div className="space-y-2">
-						<Label htmlFor="teacher">Teacher</Label>
-						<Combobox
-							items={(options.teachers ?? []).map(teacher => ({
-								value: teacher.id,
-								label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
-								secondaryLabel: teacher.user?.email,
-							}))}
-							value={teacherId}
-							onChange={setTeacherId}
-							placeholder="Select teacher"
-							searchPlaceholder="Search teachers..."
-						/>
-					</div>
+					<form.Field
+						name="classId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.classId.safeParse(value);
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="room"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Room
-						</Label>
-						<Combobox
-							items={rooms.map(room => ({
-								value: room.id,
-								label: room.name,
-								secondaryLabel: room.floor?.building?.name,
-							}))}
-							value={roomId}
-							onChange={setRoomId}
-							placeholder="Select room"
-							searchPlaceholder="Search rooms..."
-						/>
-					</div>
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Class
+								</FieldLabel>
+								<Combobox
+									items={(options.classes ?? []).map(
+										classItem => ({
+											value: classItem.id,
+											label: classItem.name,
+										})
+									)}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select class"
+									searchPlaceholder="Search classes..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
+
+					<form.Field
+						name="subjectId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.subjectId.safeParse(
+										value
+									);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Subject
+								</FieldLabel>
+								<Combobox
+									items={(options.subjects ?? []).map(
+										subject => ({
+											value: subject.id,
+											label: subject.name,
+										})
+									)}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select subject"
+									searchPlaceholder="Search subjects..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
+
+					<form.Field
+						name="teacherId"
+						children={field => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Teacher
+								</FieldLabel>
+								<Combobox
+									items={(options.teachers ?? []).map(
+										teacher => ({
+											value: teacher.id,
+											label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
+											secondaryLabel: teacher.user?.email,
+										})
+									)}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select teacher"
+									searchPlaceholder="Search teachers..."
+								/>
+							</Field>
+						)}
+					/>
+
+					<form.Field
+						name="roomId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.roomId.safeParse(value);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Room
+								</FieldLabel>
+								<Combobox
+									items={rooms.map(room => ({
+										value: room.id,
+										label: room.name,
+										secondaryLabel:
+											room.floor?.building?.name,
+									}))}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select room"
+									searchPlaceholder="Search rooms..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<div className="grid grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<Label
-								htmlFor="startTime"
-								className="after:content-['*'] after:ml-0.5 after:text-destructive">
-								Start Time
-							</Label>
-							<Input
-								id="startTime"
-								type="time"
-								value={startTime}
-								onChange={e => setStartTime(e.target.value)}
-								required
-							/>
-						</div>
+						<form.Field
+							name="startTime"
+							validators={{
+								onChange: ({ value }) => {
+									const result =
+										lessonSchema.shape.startTime.safeParse(
+											value
+										);
 
-						<div className="space-y-2">
-							<Label
-								htmlFor="endTime"
-								className="after:content-['*'] after:ml-0.5 after:text-destructive">
-								End Time
-							</Label>
-							<Input
-								id="endTime"
-								type="time"
-								value={endTime}
-								onChange={e => setEndTime(e.target.value)}
-								required
-							/>
-						</div>
-					</div>
+									return result.success
+										? undefined
+										: {
+												message:
+													result.error.issues[0]
+														.message,
+											};
+								},
+							}}
+							children={field => (
+								<Field>
+									<FieldLabel
+										htmlFor={field.name}
+										className="after:content-['*'] after:ml-0.5 after:text-destructive">
+										Start Time
+									</FieldLabel>
+									<Input
+										id={field.name}
+										type="time"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={e =>
+											field.handleChange(e.target.value)
+										}
+									/>
+									<FieldError
+										errors={field.state.meta.errors}
+									/>
+								</Field>
+							)}
+						/>
+						<form.Field
+							name="endTime"
+							validators={{
+								onChange: ({ value }) => {
+									const result =
+										lessonSchema.shape.endTime.safeParse(
+											value
+										);
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="lessonWeek"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Lesson Week
-						</Label>
-						<Combobox
-							items={[
-								{
-									value: LessonWeek.every,
-									label: "All Weeks",
+									return result.success
+										? undefined
+										: {
+												message:
+													result.error.issues[0]
+														.message,
+											};
 								},
-								{
-									value: LessonWeek.odd,
-									label: "Odd Weeks",
-								},
-								{
-									value: LessonWeek.even,
-									label: "Even Weeks",
-								},
-							]}
-							value={lessonWeek}
-							onChange={value =>
-								setLessonWeek(value as LessonWeek)
-							}
-							placeholder="Select lesson week"
-							searchPlaceholder="Search lesson week..."
+							}}
+							children={field => (
+								<Field>
+									<FieldLabel
+										htmlFor={field.name}
+										className="after:content-['*'] after:ml-0.5 after:text-destructive">
+										End Time
+									</FieldLabel>
+									<Input
+										id={field.name}
+										type="time"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={e =>
+											field.handleChange(e.target.value)
+										}
+									/>
+									<FieldError
+										errors={field.state.meta.errors}
+									/>
+								</Field>
+							)}
 						/>
 					</div>
+
+					<form.Field
+						name="lessonWeek"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.lessonWeek.safeParse(
+										value
+									);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Lesson Week
+								</FieldLabel>
+								<Combobox
+									items={[
+										{
+											value: LessonWeek.every,
+											label: "All Weeks",
+										},
+										{
+											value: LessonWeek.odd,
+											label: "Odd Weeks",
+										},
+										{
+											value: LessonWeek.even,
+											label: "Even Weeks",
+										},
+									]}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value as LessonWeek)
+									}
+									placeholder="Select lesson week"
+									searchPlaceholder="Search lesson week..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<DialogFooter>
 						<Button
@@ -319,11 +498,23 @@ export function CreateLessonDialog({
 							Cancel
 						</Button>
 
-						<Button
-							type="submit"
-							disabled={!isFormValid || isLoading}>
-							{isLoading ? "Creating..." : "Create Lesson"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}>
+									{isLoading || isSubmitting
+										? "Creating..."
+										: "Create Lesson"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -355,31 +546,70 @@ export function EditLessonDialog({
 	lesson,
 	options,
 }: EditLessonDialogProps) {
-	const [day, setDay] = useState<Day | "">("");
-	const [classId, setClassId] = useState<string>("");
-	const [subjectId, setSubjectId] = useState<string>("");
-	const [teacherId, setTeacherId] = useState<string>("");
-	const [roomId, setRoomId] = useState<string>("");
-	const [startTime, setStartTime] = useState<string>("");
-	const [endTime, setEndTime] = useState<string>("");
-	const [lessonWeek, setLessonWeek] = useState<LessonWeek>(LessonWeek.every);
+	const form = useForm({
+		defaultValues: {
+			day: Day.monday as Day,
+			classId: "",
+			subjectId: "",
+			teacherId: "",
+			roomId: "",
+			startTime: "",
+			endTime: "",
+			lessonWeek: LessonWeek.every as LessonWeek,
+		},
+		onSubmit: async ({ value }) => {
+			const [startHours, startMinutes] = value.startTime
+				.split(":")
+				.map(Number);
+			const [endHours, endMinutes] = value.endTime.split(":").map(Number);
+
+			const updatedStartTime = set(new Date(0), {
+				hours: startHours,
+				minutes: startMinutes,
+			}).toISOString();
+
+			const updatedEndTime = set(new Date(0), {
+				hours: endHours,
+				minutes: endMinutes,
+			}).toISOString();
+
+			onSubmit({
+				day: value.day,
+				classId: value.classId,
+				subjectId: value.subjectId,
+				teacherId: value.teacherId,
+				roomId: value.roomId,
+				startTime: updatedStartTime,
+				endTime: updatedEndTime,
+				lessonWeek: value.lessonWeek,
+			});
+		},
+	});
 
 	const syncFormData = useEffectEvent(() => {
 		if (lesson) {
-			setDay(lesson.dailySchedule?.day ?? "");
-			setClassId(lesson.dailySchedule?.classId ?? "");
-			setSubjectId(lesson.subjectId ?? "");
-			setTeacherId(lesson.teacherId ?? "");
-			setRoomId(lesson.roomId ?? "");
-			setStartTime(
+			form.setFieldValue("day", lesson.dailySchedule?.day ?? Day.monday);
+			form.setFieldValue("classId", lesson.dailySchedule?.classId ?? "");
+			form.setFieldValue("subjectId", lesson.subjectId ?? "");
+			form.setFieldValue("teacherId", lesson.teacherId ?? "");
+			form.setFieldValue("roomId", lesson.roomId ?? "");
+
+			form.setFieldValue(
+				"startTime",
 				lesson.startTime
 					? format(parseISO(lesson.startTime), "HH:mm")
 					: ""
 			);
-			setEndTime(
+
+			form.setFieldValue(
+				"endTime",
 				lesson.endTime ? format(parseISO(lesson.endTime), "HH:mm") : ""
 			);
-			setLessonWeek(lesson.lessonWeek);
+
+			form.setFieldValue(
+				"lessonWeek",
+				lesson.lessonWeek ?? LessonWeek.every
+			);
 		}
 	});
 
@@ -395,59 +625,6 @@ export function EditLessonDialog({
 				building.floors?.flatMap(floor => floor.rooms ?? []) ?? []
 		) ?? [];
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-
-		if (
-			!lesson ||
-			!day ||
-			!classId ||
-			!subjectId ||
-			!teacherId ||
-			!roomId ||
-			!startTime ||
-			!endTime ||
-			!lessonWeek
-		) {
-			toast.error("Please fill in all required fields");
-			return;
-		}
-
-		const [startHours, startMinutes] = startTime.split(":").map(Number);
-		const [endHours, endMinutes] = endTime.split(":").map(Number);
-
-		const updatedStartTime = set(new Date(0), {
-			hours: startHours,
-			minutes: startMinutes,
-		}).toISOString();
-
-		const updatedEndTime = set(new Date(0), {
-			hours: endHours,
-			minutes: endMinutes,
-		}).toISOString();
-
-		onSubmit({
-			day,
-			classId,
-			subjectId,
-			teacherId,
-			roomId,
-			startTime: updatedStartTime,
-			endTime: updatedEndTime,
-			lessonWeek,
-		});
-	};
-
-	const isFormValid =
-		day &&
-		classId &&
-		subjectId &&
-		teacherId &&
-		roomId &&
-		startTime &&
-		endTime &&
-		lessonWeek;
-
 	if (!lesson) return null;
 
 	return (
@@ -455,166 +632,345 @@ export function EditLessonDialog({
 			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Edit Lesson</DialogTitle>
+
 					<DialogDescription>
 						Update the details for the lesson.
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-4">
-					<div className="space-y-2">
-						<Label
-							htmlFor="day"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Day of Week
-						</Label>
-						<Combobox
-							items={ALL_DAYS.map(dayOption => ({
-								value: dayOption,
-								label:
-									dayOption.charAt(0).toUpperCase() +
-									dayOption.slice(1),
-							}))}
-							value={day}
-							onChange={value => setDay(value as Day)}
-							placeholder="Select day"
-							searchPlaceholder="Search days..."
-						/>
-					</div>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						e.stopPropagation();
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="class"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Class
-						</Label>
-						<Combobox
-							items={(options.classes ?? []).map(classItem => ({
-								value: classItem.id,
-								label: classItem.name,
-							}))}
-							value={classId}
-							onChange={setClassId}
-							placeholder="Select class"
-							searchPlaceholder="Search classes..."
-						/>
-					</div>
+						form.handleSubmit();
+					}}
+					className="space-y-4">
+					<form.Field
+						name="day"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.day.safeParse(value);
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="subject"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Subject
-						</Label>
-						<Combobox
-							items={(options.subjects ?? []).map(subject => ({
-								value: subject.id,
-								label: subject.name,
-							}))}
-							value={subjectId}
-							onChange={setSubjectId}
-							placeholder="Select subject"
-							searchPlaceholder="Search subjects..."
-						/>
-					</div>
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Day of Week
+								</FieldLabel>
+								<Combobox
+									items={ALL_DAYS.map(day => ({
+										value: day,
+										label:
+											day.charAt(0).toUpperCase() +
+											day.slice(1),
+									}))}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value as Day)
+									}
+									placeholder="Select day"
+									searchPlaceholder="Search days..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="teacher"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Teacher
-						</Label>
-						<Combobox
-							items={(options.teachers ?? []).map(teacher => ({
-								value: teacher.id,
-								label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
-								secondaryLabel: teacher.user?.email,
-							}))}
-							value={teacherId}
-							onChange={setTeacherId}
-							placeholder="Select teacher"
-							searchPlaceholder="Search teachers..."
-						/>
-					</div>
+					<form.Field
+						name="classId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.classId.safeParse(value);
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="room"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Room
-						</Label>
-						<Combobox
-							items={rooms.map(room => ({
-								value: room.id,
-								label: room.name,
-								secondaryLabel: room.floor?.building?.name,
-							}))}
-							value={roomId}
-							onChange={setRoomId}
-							placeholder="Select room"
-							searchPlaceholder="Search rooms..."
-						/>
-					</div>
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Class
+								</FieldLabel>
+								<Combobox
+									items={(options.classes ?? []).map(
+										classItem => ({
+											value: classItem.id,
+											label: classItem.name,
+										})
+									)}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select class"
+									searchPlaceholder="Search classes..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
+
+					<form.Field
+						name="subjectId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.subjectId.safeParse(
+										value
+									);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Subject
+								</FieldLabel>
+								<Combobox
+									items={(options.subjects ?? []).map(
+										subject => ({
+											value: subject.id,
+											label: subject.name,
+										})
+									)}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select subject"
+									searchPlaceholder="Search subjects..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
+
+					<form.Field
+						name="teacherId"
+						children={field => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Teacher
+								</FieldLabel>
+								<Combobox
+									items={(options.teachers ?? []).map(
+										teacher => ({
+											value: teacher.id,
+											label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
+											secondaryLabel: teacher.user?.email,
+										})
+									)}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select teacher"
+									searchPlaceholder="Search teachers..."
+								/>
+							</Field>
+						)}
+					/>
+
+					<form.Field
+						name="roomId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.roomId.safeParse(value);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Room
+								</FieldLabel>
+								<Combobox
+									items={rooms.map(room => ({
+										value: room.id,
+										label: room.name,
+										secondaryLabel:
+											room.floor?.building?.name,
+									}))}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value)
+									}
+									placeholder="Select room"
+									searchPlaceholder="Search rooms..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<div className="grid grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<Label
-								htmlFor="startTime"
-								className="after:content-['*'] after:ml-0.5 after:text-destructive">
-								Start Time
-							</Label>
-							<Input
-								id="startTime"
-								type="time"
-								value={startTime}
-								onChange={e => setStartTime(e.target.value)}
-								required
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label
-								htmlFor="endTime"
-								className="after:content-['*'] after:ml-0.5 after:text-destructive">
-								End Time
-							</Label>
-							<Input
-								id="endTime"
-								type="time"
-								value={endTime}
-								onChange={e => setEndTime(e.target.value)}
-								required
-							/>
-						</div>
-					</div>
+						<form.Field
+							name="startTime"
+							validators={{
+								onChange: ({ value }) => {
+									const result =
+										lessonSchema.shape.startTime.safeParse(
+											value
+										);
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="lessonWeek"
-							className="after:content-['*'] after:ml-0.5 after:text-destructive">
-							Lesson Week
-						</Label>
-						<Combobox
-							items={[
-								{
-									value: LessonWeek.every,
-									label: "All Weeks",
+									return result.success
+										? undefined
+										: {
+												message:
+													result.error.issues[0]
+														.message,
+											};
 								},
-								{
-									value: LessonWeek.odd,
-									label: "Odd Weeks",
+							}}
+							children={field => (
+								<Field>
+									<FieldLabel
+										htmlFor={field.name}
+										className="after:content-['*'] after:ml-0.5 after:text-destructive">
+										Start Time
+									</FieldLabel>
+									<Input
+										id={field.name}
+										type="time"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={e =>
+											field.handleChange(e.target.value)
+										}
+									/>
+									<FieldError
+										errors={field.state.meta.errors}
+									/>
+								</Field>
+							)}
+						/>
+						<form.Field
+							name="endTime"
+							validators={{
+								onChange: ({ value }) => {
+									const result =
+										lessonSchema.shape.endTime.safeParse(
+											value
+										);
+
+									return result.success
+										? undefined
+										: {
+												message:
+													result.error.issues[0]
+														.message,
+											};
 								},
-								{
-									value: LessonWeek.even,
-									label: "Even Weeks",
-								},
-							]}
-							value={lessonWeek}
-							onChange={value =>
-								setLessonWeek(value as LessonWeek)
-							}
-							placeholder="Select lesson week"
-							searchPlaceholder="Search lesson week..."
+							}}
+							children={field => (
+								<Field>
+									<FieldLabel
+										htmlFor={field.name}
+										className="after:content-['*'] after:ml-0.5 after:text-destructive">
+										End Time
+									</FieldLabel>
+									<Input
+										id={field.name}
+										type="time"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={e =>
+											field.handleChange(e.target.value)
+										}
+									/>
+									<FieldError
+										errors={field.state.meta.errors}
+									/>
+								</Field>
+							)}
 						/>
 					</div>
+
+					<form.Field
+						name="lessonWeek"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.lessonWeek.safeParse(
+										value
+									);
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
+						children={field => (
+							<Field>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									Lesson Week
+								</FieldLabel>
+								<Combobox
+									items={[
+										{
+											value: LessonWeek.every,
+											label: "All Weeks",
+										},
+										{
+											value: LessonWeek.odd,
+											label: "Odd Weeks",
+										},
+										{
+											value: LessonWeek.even,
+											label: "Even Weeks",
+										},
+									]}
+									value={field.state.value}
+									onChange={value =>
+										field.handleChange(value as LessonWeek)
+									}
+									placeholder="Select lesson week"
+									searchPlaceholder="Search lesson week..."
+								/>
+								<FieldError errors={field.state.meta.errors} />
+							</Field>
+						)}
+					/>
 
 					<DialogFooter>
 						<Button
@@ -624,11 +980,24 @@ export function EditLessonDialog({
 							disabled={isLoading}>
 							Cancel
 						</Button>
-						<Button
-							type="submit"
-							disabled={!isFormValid || isLoading}>
-							{isLoading ? "Saving..." : "Save Changes"}
-						</Button>
+
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}>
+									{isLoading || isSubmitting
+										? "Saving..."
+										: "Save Changes"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>

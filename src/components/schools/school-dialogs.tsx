@@ -87,13 +87,12 @@ export function CreateSchoolDialog({
 								const result =
 									schoolSchema.shape.name.safeParse(value);
 
-								if (!result.success) {
-									return {
-										message: result.error.issues[0].message,
-									};
-								}
-
-								return undefined;
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
 							},
 						}}
 						children={field => (
@@ -129,9 +128,23 @@ export function CreateSchoolDialog({
 							Cancel
 						</Button>
 
-						<Button type="submit" disabled={isLoading}>
-							{isLoading ? "Creating..." : "Create School"}
-						</Button>
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}>
+									{isLoading || isSubmitting
+										? "Creating..."
+										: "Create School"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>
@@ -199,13 +212,12 @@ export function EditSchoolDialog({
 								const result =
 									schoolSchema.shape.name.safeParse(value);
 
-								if (!result.success) {
-									return {
-										message: result.error.issues[0].message,
-									};
-								}
-
-								return undefined;
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
 							},
 						}}
 						children={field => (
@@ -240,9 +252,24 @@ export function EditSchoolDialog({
 							disabled={isLoading}>
 							Cancel
 						</Button>
-						<Button type="submit" disabled={isLoading}>
-							{isLoading ? "Saving..." : "Save Changes"}
-						</Button>
+
+						<form.Subscribe
+							selector={state => [
+								state.canSubmit,
+								state.isSubmitting,
+							]}
+							children={([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={
+										!canSubmit || isSubmitting || isLoading
+									}>
+									{isLoading || isSubmitting
+										? "Saving..."
+										: "Save Changes"}
+								</Button>
+							)}
+						/>
 					</DialogFooter>
 				</form>
 			</DialogContent>

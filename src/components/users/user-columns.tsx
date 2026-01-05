@@ -307,7 +307,7 @@ export const createUserColumns = ({
 						<DropdownMenuItem
 							onClick={() => onDelete(user)}
 							className="text-destructive">
-							<Trash2 className="mr-2 h-4 w-4" />
+							<Trash2 className="mr-2 h-4 w-4 text-destructive" />
 							Delete user
 						</DropdownMenuItem>
 					</DropdownMenuContent>
