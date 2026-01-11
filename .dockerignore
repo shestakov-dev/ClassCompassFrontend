@@ -1,0 +1,26 @@
+# Node modules and build output
+node_modules/
+dist/
+
+# Environment and secrets
+.env
+*.env
+*.log
+
+# Git and docs
+.git
+*.md
+
+# Test files and folders
+__tests__/
+tests/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# Misc
+Dockerfile*
+docker-compose.yml
+*.swp
+*.bak
