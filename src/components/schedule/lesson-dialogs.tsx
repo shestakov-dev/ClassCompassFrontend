@@ -33,6 +33,7 @@ import {
 	LessonWeek,
 } from "@/types/schedule";
 import { WeekBadge } from "@/components/schedule/week-badge";
+import { useSession } from "@/context/session-context";
 
 const lessonSchema = z.object({
 	day: z.string().min(1, "Day is required"),
@@ -1130,6 +1131,8 @@ export function LessonDetailsDialog({
 	onEdit,
 	onDelete,
 }: LessonDetailsDialogProps) {
+	const { isAdmin } = useSession();
+
 	if (!lesson) {
 		return null;
 	}
@@ -1187,7 +1190,7 @@ export function LessonDetailsDialog({
 					</div>
 				</dl>
 
-				{(onEdit || onDelete) && (
+				{isAdmin && (onEdit || onDelete) && (
 					<div className="flex gap-2 pt-2">
 						{onEdit && (
 							<Button

@@ -15,6 +15,7 @@ import {
 	WeekBadge,
 	getLessonWeekVariant,
 } from "@/components/schedule/week-badge";
+import { useSession } from "@/context/session-context";
 
 export const lessonCardVariants = cva("", {
 	variants: {
@@ -71,6 +72,8 @@ export function LessonCard({
 	const endTime = parseISO(lesson.endTime);
 	const timeRange = `${format(startTime, "HH:mm")} - ${format(endTime, "HH:mm")}`;
 
+	const { isAdmin } = useSession();
+
 	return (
 		<Card
 			onClick={clickEvent => {
@@ -107,23 +110,27 @@ export function LessonCard({
 								<Info className="h-4 w-4 mr-2" />
 								Info
 							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={e => {
-									e.stopPropagation();
-									onEdit?.(lesson);
-								}}>
-								<Edit className="h-4 w-4 mr-2" />
-								Edit
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={e => {
-									e.stopPropagation();
-									onDelete?.(lesson);
-								}}
-								className="text-destructive focus:text-destructive">
-								<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
-								Delete
-							</DropdownMenuItem>
+							{isAdmin && (
+								<>
+									<DropdownMenuItem
+										onClick={e => {
+											e.stopPropagation();
+											onEdit?.(lesson);
+										}}>
+										<Edit className="h-4 w-4 mr-2" />
+										Edit
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={e => {
+											e.stopPropagation();
+											onDelete?.(lesson);
+										}}
+										className="text-destructive focus:text-destructive">
+										<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
+										Delete
+									</DropdownMenuItem>
+								</>
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
