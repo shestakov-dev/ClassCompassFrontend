@@ -9,7 +9,7 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ModeToggle } from "@/components/common/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
 import {
@@ -17,10 +17,10 @@ import {
 	type ComponentPropsWithoutRef,
 	type ComponentRef,
 } from "react";
-import { MobileNav } from "@/components/mobile-nav";
-import { Logo } from "@/components/logo";
+import { MobileNav } from "@/components/common/mobile-nav";
+import { Logo } from "@/components/common/logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
-import { SchoolSelector } from "@/components/school-selector";
+import { SchoolSelector } from "@/components/common/school-selector";
 
 export function Navbar() {
 	const { navGroups, navLinks, navButtons } = useNavigationItems();

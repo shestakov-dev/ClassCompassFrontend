@@ -10,16 +10,16 @@ import {
 	SheetTrigger,
 	SheetFooter,
 } from "@/components/ui/sheet";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ModeToggle } from "@/components/common/mode-toggle";
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Logo } from "@/components/logo";
+import { Logo } from "@/components/common/logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
-import { SchoolSelector } from "@/components/school-selector";
+import { SchoolSelector } from "@/components/common/school-selector";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);

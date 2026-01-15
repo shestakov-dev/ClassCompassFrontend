@@ -1,6 +1,6 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/common/navbar";
 import type { RouterContext } from "@/router";
 import ErrorPage from "@/pages/ErrorPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";

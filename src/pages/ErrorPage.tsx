@@ -5,8 +5,8 @@ import {
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, TriangleAlert } from "lucide-react";
-import { GeneralError } from "@/components/general-error";
-import { AuthError } from "@/components/auth-error";
+import { GeneralError } from "@/components/common/general-error";
+import { AuthError } from "@/components/common/auth-error";
 import { isAxiosError } from "axios";
 
 export default function ErrorPage({ error }: ErrorComponentProps) {

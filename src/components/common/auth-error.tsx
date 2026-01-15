@@ -1,4 +1,4 @@
-import { GeneralError } from "@/components/general-error";
+import { GeneralError } from "@/components/common/general-error";
 import { Button } from "@/components/ui/button";
 import { Home, RotateCcw, ShieldAlert } from "lucide-react";
 import { getErrorMessage } from "@/lib/error-parsing";

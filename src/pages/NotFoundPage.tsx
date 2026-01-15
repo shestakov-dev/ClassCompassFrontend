@@ -1,4 +1,4 @@
-import { GeneralError } from "@/components/general-error";
+import { GeneralError } from "@/components/common/general-error";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Home, SearchX } from "lucide-react";

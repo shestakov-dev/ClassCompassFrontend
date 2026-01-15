@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { DatePicker } from "@/components/date-picker";
+import { DatePicker } from "@/components/common/date-picker";
 import { type LessonsControllerFindFilteredParams } from "@/api/generated/models";
 import {
 	useState,

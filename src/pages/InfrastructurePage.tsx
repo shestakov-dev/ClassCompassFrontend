@@ -9,7 +9,7 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet";
 import { useSchool } from "@/context/school-context";
-import { SchoolRequired } from "@/components/school-required";
+import { SchoolRequired } from "@/components/common/school-required";
 import { Route } from "@/routes/infrastructure";
 import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
 import type {
@@ -23,7 +23,7 @@ import {
 	FloorItem,
 	EmptyFloorState,
 } from "@/components/infrastructure/floor-list";
-import { DashedButton } from "@/components/dashed-button";
+import { DashedButton } from "@/components/common/dashed-button";
 import {
 	InfrastructureDialogs,
 	DeleteConfirmation,

@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { GraduationCap, BookOpen, Plus } from "lucide-react";
 
 import { useSchool } from "@/context/school-context";
-import { SchoolRequired } from "@/components/school-required";
+import { SchoolRequired } from "@/components/common/school-required";
 import {
 	getClassesControllerFindAllBySchoolQueryKey,
 	useClassesControllerCreate,

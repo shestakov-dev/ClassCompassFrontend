@@ -20,7 +20,7 @@ import {
 import { addDays, subDays, setDay, parseISO, set } from "date-fns";
 import { useSession } from "@/context/session-context";
 import { useSchool } from "@/context/school-context";
-import { SchoolRequired } from "@/components/school-required";
+import { SchoolRequired } from "@/components/common/school-required";
 import {
 	useLessonsControllerFindFiltered,
 	useLessonsControllerCreate,

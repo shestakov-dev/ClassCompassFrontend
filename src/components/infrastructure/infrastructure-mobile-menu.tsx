@@ -1,6 +1,6 @@
 import { Edit2, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DashedButton } from "@/components/dashed-button";
+import { DashedButton } from "@/components/common/dashed-button";
 import { cn } from "@/lib/utils";
 import type { BuildingEntity } from "@/api/generated/models";
 import type {

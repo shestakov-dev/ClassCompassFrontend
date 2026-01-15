@@ -1,7 +1,7 @@
 import { Building2 } from "lucide-react";
 import { useSession } from "@/context/session-context";
 import { useSchool } from "@/context/school-context";
-import { SchoolSelector } from "@/components/school-selector";
+import { SchoolSelector } from "@/components/common/school-selector";
 
 interface SchoolRequiredProps {
 	children: React.ReactNode;

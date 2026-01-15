@@ -27,7 +27,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DashedButton } from "@/components/dashed-button";
+import { DashedButton } from "@/components/common/dashed-button";
 import { cn } from "@/lib/utils";
 import type { FloorEntity, RoomEntity } from "@/api/generated/models";
 
