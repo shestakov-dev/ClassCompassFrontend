@@ -22,7 +22,7 @@ export function GeneralError({
 	return (
 		<div
 			className={cn(
-				"h-dvh flex flex-col items-center justify-center p-4 text-center bg-background text-foreground font-sans antialiased",
+				"flex-1 flex flex-col items-center justify-center p-4 text-center bg-background text-foreground font-sans antialiased",
 				minimal && "h-auto py-10",
 				className
 			)}

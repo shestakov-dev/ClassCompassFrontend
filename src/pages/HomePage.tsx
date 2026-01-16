@@ -31,7 +31,8 @@ export default function HomePage() {
 					{/* Title & Description */}
 					<div className="space-y-4 max-w-3xl">
 						<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-							Welcome to <span className="text-primary">ClassCompass</span>
+							Welcome to{" "}
+							<span className="text-primary">ClassCompass</span>
 						</h1>
 						<p className="mx-auto max-w-175 text-muted-foreground md:text-xl">
 							Navigate your academic journey with precision.
@@ -41,9 +42,7 @@ export default function HomePage() {
 					{/* CTA Buttons */}
 					<div className="flex flex-col gap-4 sm:flex-row">
 						<Link to="/login">
-							<Button
-								size="lg"
-								className="px-8 text-lg h-12">
+							<Button size="lg" className="px-8 text-lg h-12">
 								Get Started
 							</Button>
 						</Link>
@@ -61,19 +60,25 @@ export default function HomePage() {
 			<section className="container mx-auto px-4 py-12 md:py-24 lg:py-32">
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
 					<FeatureCard
-						icon={<ShieldCheck className="h-10 w-10 text-primary" />}
+						icon={
+							<ShieldCheck className="h-10 w-10 text-primary" />
+						}
 						title="Zero-Trust Architecture"
 						description="Built on the Ory ecosystem (Kratos, Keto, Oathkeeper) for modern, secure identity management and granular access control."
 					/>
 
 					<FeatureCard
-						icon={<CalendarRange className="h-10 w-10 text-primary" />}
+						icon={
+							<CalendarRange className="h-10 w-10 text-primary" />
+						}
 						title="Digital Timetables"
 						description="Access organized schedules for students and faculty. Clearly view planned classes, assigned rooms, and time slots at a glance."
 					/>
 
 					<FeatureCard
-						icon={<SlidersHorizontal className="h-10 w-10 text-primary" />}
+						icon={
+							<SlidersHorizontal className="h-10 w-10 text-primary" />
+						}
 						title="Advanced Filtering"
 						description="Find exactly what you need by filtering schedules by time ranges, specific rooms, subjects, or various other criteria."
 					/>
