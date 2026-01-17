@@ -1,10 +1,19 @@
-import { Configuration, FrontendApi, isResponseError } from "@ory/client-fetch";
+import {
+	Configuration,
+	FrontendApi,
+	isResponseError,
+	type CreateBrowserLoginFlowRequest,
+	type LoginFlow,
+} from "@ory/client-fetch";
 import { KRATOS_URL } from "@/config/urls";
 import { throwCleanOryError } from "@/lib/error-parsing";
 
 const kratosConfig = new Configuration({
 	basePath: KRATOS_URL,
 	credentials: "include",
+	headers: {
+		Accept: "application/json",
+	},
 });
 
 const frontendApi = new FrontendApi(kratosConfig);
@@ -37,4 +46,14 @@ export async function createLogoutFlow() {
 
 		throw error;
 	}
+}
+
+export async function createBrowserLoginFlow(
+	params: CreateBrowserLoginFlowRequest
+): Promise<LoginFlow> {
+	return await frontendApi.createBrowserLoginFlow(params);
+}
+
+export async function getLoginFlow(flowId: string): Promise<LoginFlow> {
+	return await frontendApi.getLoginFlow({ id: flowId });
 }
