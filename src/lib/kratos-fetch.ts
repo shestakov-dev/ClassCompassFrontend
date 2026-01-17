@@ -3,7 +3,7 @@ import { KRATOS_URL } from "@/config/urls";
 // Regex to find the internal URLs
 // Matches: https://kratos:4433, http://localhost:4433, http://127.0.0.1:4433
 const internalUrlRegex =
-	/http(s)?:\/\/(kratos|localhost|127\.0\.0\.1)(:[0-9]+)?/g;
+	/http(s)?:\/\/(kratos|localhost|127\.0\.0\.1)(:[0-9]+)/g;
 
 /**
  * A custom fetch wrapper that intercepts Ory Kratos responses and

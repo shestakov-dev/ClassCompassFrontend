@@ -1,25 +1,30 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { LOGIN_URL } from "@/config/urls";
+import { LoginPage } from "@/pages/LoginPage";
 import { z } from "zod";
+import { getSession } from "@/services/kratos";
 
-const loginSearchSchema = z.object({
+export const loginSearchSchema = z.object({
+	flow: z.string().optional(),
 	return_to: z.string().optional(),
+	refresh: z.union([z.literal("true"), z.literal("false")]).optional(),
+	aal: z.string().optional(),
+	login_challenge: z.string().optional(),
+	organization: z.string().optional(),
+	via: z.string().optional(),
 });
+
+export type LoginSearchParams = z.infer<typeof loginSearchSchema>;
 
 export const Route = createFileRoute("/login")({
 	validateSearch: search => loginSearchSchema.parse(search),
-	beforeLoad: ({ search }) => {
-		const returnToPath = search.return_to ?? "/";
+	beforeLoad: async ({ search }) => {
+		if (search.refresh === "true") {
+			const session = await getSession();
 
-		const returnToUrl = returnToPath.startsWith("http")
-			? returnToPath
-			: new URL(returnToPath, window.location.origin).toString();
-
-		const target = new URL(LOGIN_URL);
-		target.searchParams.set("return_to", returnToUrl);
-
-		throw redirect({
-			href: target.toString(),
-		});
+			if (session) {
+				throw redirect({ to: search.return_to ?? "/" });
+			}
+		}
 	},
+	component: LoginPage,
 });
