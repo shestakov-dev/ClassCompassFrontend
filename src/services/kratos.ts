@@ -4,8 +4,10 @@ import {
 	isResponseError,
 	type CreateBrowserLoginFlowRequest,
 	type CreateBrowserSettingsFlowRequest,
+	type CreateBrowserRecoveryFlowRequest,
 	type LoginFlow,
 	type SettingsFlow,
+	type RecoveryFlow,
 } from "@ory/client-fetch";
 import { KRATOS_URL } from "@/config/urls";
 import { throwCleanOryError } from "@/lib/error-parsing";
@@ -25,8 +27,11 @@ export async function getSession() {
 		return await frontendApi.toSession();
 	} catch (error) {
 		if (isResponseError(error)) {
-			// 401 is expected if the user isn't logged in
-			if (error.response.status === 401) {
+			// 401 and 403 are expected if the user isn't logged in
+			if (
+				error.response.status === 401 ||
+				error.response.status === 403
+			) {
 				return null;
 			}
 
@@ -41,8 +46,11 @@ export async function createLogoutFlow() {
 	try {
 		return await frontendApi.createBrowserLogoutFlow();
 	} catch (error) {
-		// 401 is expected if the user isn't logged in
-		if (isResponseError(error) && error.response.status === 401) {
+		// 401 and 403 are expected if the user isn't logged in
+		if (
+			isResponseError(error) &&
+			(error.response.status === 401 || error.response.status === 403)
+		) {
 			return null;
 		}
 
@@ -68,4 +76,14 @@ export async function createBrowserSettingsFlow(
 
 export async function getSettingsFlow(flowId: string): Promise<SettingsFlow> {
 	return await frontendApi.getSettingsFlow({ id: flowId });
+}
+
+export async function createBrowserRecoveryFlow(
+	params: CreateBrowserRecoveryFlowRequest = {}
+): Promise<RecoveryFlow> {
+	return await frontendApi.createBrowserRecoveryFlow(params);
+}
+
+export async function getRecoveryFlow(flowId: string): Promise<RecoveryFlow> {
+	return await frontendApi.getRecoveryFlow({ id: flowId });
 }

@@ -3,7 +3,7 @@ import { SettingsPage } from "@/pages/SettingsPage";
 import { z } from "zod";
 import { requireAuth } from "@/lib/route-guards";
 
-export const settingsSearchSchema = z.object({
+const settingsSearchSchema = z.object({
 	flow: z.string().optional(),
 	return_to: z.string().optional(),
 	flow_hint: z.string().optional(),

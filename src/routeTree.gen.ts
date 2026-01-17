@@ -13,6 +13,7 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ScheduleRouteImport } from './routes/schedule'
+import { Route as RecoveryRouteImport } from './routes/recovery'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InfrastructureRouteImport } from './routes/infrastructure'
@@ -37,6 +38,11 @@ const SchoolsRoute = SchoolsRouteImport.update({
 const ScheduleRoute = ScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecoveryRoute = RecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogoutRoute = LogoutRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/recovery': typeof RecoveryRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/recovery': typeof RecoveryRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/recovery': typeof RecoveryRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/infrastructure'
     | '/login'
     | '/logout'
+    | '/recovery'
     | '/schedule'
     | '/schools'
     | '/settings'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/infrastructure'
     | '/login'
     | '/logout'
+    | '/recovery'
     | '/schedule'
     | '/schools'
     | '/settings'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/infrastructure'
     | '/login'
     | '/logout'
+    | '/recovery'
     | '/schedule'
     | '/schools'
     | '/settings'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   InfrastructureRoute: typeof InfrastructureRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
+  RecoveryRoute: typeof RecoveryRoute
   ScheduleRoute: typeof ScheduleRoute
   SchoolsRoute: typeof SchoolsRoute
   SettingsRoute: typeof SettingsRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/schedule'
       fullPath: '/schedule'
       preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recovery': {
+      id: '/recovery'
+      path: '/recovery'
+      fullPath: '/recovery'
+      preLoaderRoute: typeof RecoveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logout': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   InfrastructureRoute: InfrastructureRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
+  RecoveryRoute: RecoveryRoute,
   ScheduleRoute: ScheduleRoute,
   SchoolsRoute: SchoolsRoute,
   SettingsRoute: SettingsRoute,

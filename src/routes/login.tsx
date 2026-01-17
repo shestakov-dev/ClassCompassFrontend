@@ -1,9 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { LoginPage } from "@/pages/LoginPage";
 import { z } from "zod";
-import { getSession } from "@/services/kratos";
+import { requireGuest } from "@/lib/route-guards";
 
-export const loginSearchSchema = z.object({
+const loginSearchSchema = z.object({
 	flow: z.string().optional(),
 	return_to: z.string().optional(),
 	refresh: z.union([z.literal("true"), z.literal("false")]).optional(),
@@ -13,18 +13,8 @@ export const loginSearchSchema = z.object({
 	via: z.string().optional(),
 });
 
-export type LoginSearchParams = z.infer<typeof loginSearchSchema>;
-
 export const Route = createFileRoute("/login")({
 	validateSearch: search => loginSearchSchema.parse(search),
-	beforeLoad: async ({ search }) => {
-		if (search.refresh === "true") {
-			const session = await getSession();
-
-			if (session) {
-				throw redirect({ to: search.return_to ?? "/" });
-			}
-		}
-	},
+	beforeLoad: ({ context }) => requireGuest(context),
 	component: LoginPage,
 });
