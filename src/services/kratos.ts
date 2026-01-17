@@ -3,7 +3,9 @@ import {
 	FrontendApi,
 	isResponseError,
 	type CreateBrowserLoginFlowRequest,
+	type CreateBrowserSettingsFlowRequest,
 	type LoginFlow,
+	type SettingsFlow,
 } from "@ory/client-fetch";
 import { KRATOS_URL } from "@/config/urls";
 import { throwCleanOryError } from "@/lib/error-parsing";
@@ -56,4 +58,14 @@ export async function createBrowserLoginFlow(
 
 export async function getLoginFlow(flowId: string): Promise<LoginFlow> {
 	return await frontendApi.getLoginFlow({ id: flowId });
+}
+
+export async function createBrowserSettingsFlow(
+	params: CreateBrowserSettingsFlowRequest = {}
+): Promise<SettingsFlow> {
+	return await frontendApi.createBrowserSettingsFlow(params);
+}
+
+export async function getSettingsFlow(flowId: string): Promise<SettingsFlow> {
+	return await frontendApi.getSettingsFlow({ id: flowId });
 }

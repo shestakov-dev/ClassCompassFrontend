@@ -1,26 +1,25 @@
 import { useCallback, useEffect } from "react";
 import {
-	type LoginFlow,
+	type SettingsFlow,
 	handleFlowError,
 	FlowType,
-	type CreateBrowserLoginFlowRequest,
 	isResponseError,
 } from "@ory/client-fetch";
 import { redirect, useNavigate, useSearch } from "@tanstack/react-router";
 import { KRATOS_URL } from "@/config/urls";
-import { createBrowserLoginFlow, getLoginFlow } from "@/services/kratos";
+import { createBrowserSettingsFlow, getSettingsFlow } from "@/services/kratos";
 import { useQuery } from "@tanstack/react-query";
 
-export function useLoginFlow(): LoginFlow | null | undefined {
+export function useSettingsFlow(): SettingsFlow | null | undefined {
 	const navigate = useNavigate();
-	const searchParams = useSearch({ strict: true, from: "/login" });
+	const searchParams = useSearch({ strict: true, from: "/settings" });
 
 	const restartFlow = useCallback(() => {
 		const params = new URLSearchParams(searchParams);
 
-		// Redirect to Kratos to create a new login flow
+		// Redirect to Kratos to create a new settings flow
 		throw redirect({
-			href: `${KRATOS_URL}/self-service/${FlowType.Login}/browser?${params.toString()}`,
+			href: `${KRATOS_URL}/self-service/${FlowType.Settings}/browser?${params.toString()}`,
 		});
 	}, [searchParams]);
 
@@ -29,23 +28,16 @@ export function useLoginFlow(): LoginFlow | null | undefined {
 		error,
 		isError,
 	} = useQuery({
-		queryKey: [
-			"login-flow",
-			searchParams.flow,
-			searchParams.refresh,
-			searchParams.aal,
-		],
+		queryKey: ["settings-flow", searchParams.flow, searchParams.return_to],
 		queryFn: async () => {
 			if (searchParams.flow) {
 				try {
-					return await getLoginFlow(searchParams.flow);
+					return await getSettingsFlow(String(searchParams.flow));
 				} catch (error) {
-					// If the flow is Not Found (404), Gone (410), or Forbidden (403),
+					// If flow is expired (410), not found (404), or forbidden (403),
 					// create a new flow instead.
 					if (isResponseError(error)) {
 						const status = error.response.status;
-
-						// Rethrow actual server errors (500s, etc)
 						if (
 							status !== 404 &&
 							status !== 410 &&
@@ -59,16 +51,9 @@ export function useLoginFlow(): LoginFlow | null | undefined {
 				}
 			}
 
-			const initRequest: CreateBrowserLoginFlowRequest = {
-				refresh: searchParams.refresh === "true",
-				aal: searchParams.aal,
+			return createBrowserSettingsFlow({
 				returnTo: searchParams.return_to,
-				loginChallenge: searchParams.login_challenge,
-				organization: searchParams.organization,
-				via: searchParams.via,
-			};
-
-			return createBrowserLoginFlow(initRequest);
+			});
 		},
 		refetchOnWindowFocus: false,
 		retry: false,
@@ -77,7 +62,7 @@ export function useLoginFlow(): LoginFlow | null | undefined {
 	useEffect(() => {
 		if (flow && searchParams.flow !== flow.id) {
 			navigate({
-				to: "/login",
+				to: "/settings",
 				search: prev => ({ ...prev, flow: flow.id }),
 				replace: true,
 			});
@@ -87,8 +72,6 @@ export function useLoginFlow(): LoginFlow | null | undefined {
 	useEffect(() => {
 		if (isError && error) {
 			const errorHandler = handleFlowError({
-				// Validation errors usually shouldn't happen on flow fetch,
-				// only on submission. But if they do, we shouldn't crash.
 				onValidationError: () => {},
 				onRestartFlow: restartFlow,
 				onRedirect: url => {

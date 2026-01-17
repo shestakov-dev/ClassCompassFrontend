@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as LogoutRouteImport } from './routes/logout'
@@ -21,6 +22,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SchoolsRoute = SchoolsRouteImport.update({
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/logout': typeof LogoutRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/logout': typeof LogoutRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/logout': typeof LogoutRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/schedule'
     | '/schools'
+    | '/settings'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/schedule'
     | '/schools'
+    | '/settings'
     | '/users'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/schedule'
     | '/schools'
+    | '/settings'
     | '/users'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   LogoutRoute: typeof LogoutRoute
   ScheduleRoute: typeof ScheduleRoute
   SchoolsRoute: typeof SchoolsRoute
+  SettingsRoute: typeof SettingsRoute
   UsersRoute: typeof UsersRoute
 }
 
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/schools': {
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   LogoutRoute: LogoutRoute,
   ScheduleRoute: ScheduleRoute,
   SchoolsRoute: SchoolsRoute,
+  SettingsRoute: SettingsRoute,
   UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport
