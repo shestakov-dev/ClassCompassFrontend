@@ -69,6 +69,8 @@ body,
 	--interface-foreground-brand-on-primary: oklch(0.2 0 0);
 
 	--interface-foreground-default-secondary: oklch(0.7 0 0);
+
+	--button-social-background-active: var(--ui-100);
 }
 
 .ory-elements input,

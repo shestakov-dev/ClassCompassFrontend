@@ -1,5 +1,5 @@
 import "@ory/elements-react/theme/styles.css";
-import "@/styles/theme.css";
+import "@/styles/ory.css";
 
 import { Login } from "@ory/elements-react/theme";
 import { useLoginFlow } from "@/hooks/use-login-flow";
