@@ -8,6 +8,7 @@ import {
 	type LoginFlow,
 	type SettingsFlow,
 	type RecoveryFlow,
+	type FlowError,
 } from "@ory/client-fetch";
 import { KRATOS_URL } from "@/config/urls";
 import { throwCleanOryError } from "@/lib/error-parsing";
@@ -86,4 +87,8 @@ export async function createBrowserRecoveryFlow(
 
 export async function getRecoveryFlow(flowId: string): Promise<RecoveryFlow> {
 	return await frontendApi.getRecoveryFlow({ id: flowId });
+}
+
+export async function getFlowError(id: string): Promise<FlowError> {
+	return await frontendApi.getFlowError({ id });
 }
