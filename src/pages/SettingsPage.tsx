@@ -32,7 +32,7 @@ export function SettingsPage() {
 	}
 
 	return (
-		<main className="flex-1 flex items-center justify-center bg-background p-4">
+		<div className="flex-1 flex items-center justify-center bg-background p-4">
 			<div className="w-full max-w-2xl">
 				<div className="ory-elements">
 					<SessionProvider>
@@ -44,6 +44,6 @@ export function SettingsPage() {
 					</SessionProvider>
 				</div>
 			</div>
-		</main>
+		</div>
 	);
 }

@@ -17,7 +17,7 @@ export function RecoveryPage() {
 	}
 
 	return (
-		<main className="flex-1 flex items-center justify-center bg-background p-4">
+		<div className="flex-1 flex items-center justify-center bg-background p-4">
 			<div className="w-full max-w-md">
 				<div className="ory-elements">
 					<Recovery
@@ -29,6 +29,6 @@ export function RecoveryPage() {
 					/>
 				</div>
 			</div>
-		</main>
+		</div>
 	);
 }
