@@ -10,17 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ScheduleRouteImport } from './routes/schedule'
+import { Route as RecoveryRouteImport } from './routes/recovery'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InfrastructureRouteImport } from './routes/infrastructure'
+import { Route as ErrorRouteImport } from './routes/error'
 import { Route as AcademicsRouteImport } from './routes/academics'
 import { Route as IndexRouteImport } from './routes/index'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SchoolsRoute = SchoolsRouteImport.update({
@@ -31,6 +39,11 @@ const SchoolsRoute = SchoolsRouteImport.update({
 const ScheduleRoute = ScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecoveryRoute = RecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogoutRoute = LogoutRouteImport.update({
@@ -48,6 +61,11 @@ const InfrastructureRoute = InfrastructureRouteImport.update({
   path: '/infrastructure',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ErrorRoute = ErrorRouteImport.update({
+  id: '/error',
+  path: '/error',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcademicsRoute = AcademicsRouteImport.update({
   id: '/academics',
   path: '/academics',
@@ -62,32 +80,41 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/academics': typeof AcademicsRoute
+  '/error': typeof ErrorRoute
   '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/recovery': typeof RecoveryRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/academics': typeof AcademicsRoute
+  '/error': typeof ErrorRoute
   '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/recovery': typeof RecoveryRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/academics': typeof AcademicsRoute
+  '/error': typeof ErrorRoute
   '/infrastructure': typeof InfrastructureRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/recovery': typeof RecoveryRoute
   '/schedule': typeof ScheduleRoute
   '/schools': typeof SchoolsRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
@@ -95,42 +122,54 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/academics'
+    | '/error'
     | '/infrastructure'
     | '/login'
     | '/logout'
+    | '/recovery'
     | '/schedule'
     | '/schools'
+    | '/settings'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/academics'
+    | '/error'
     | '/infrastructure'
     | '/login'
     | '/logout'
+    | '/recovery'
     | '/schedule'
     | '/schools'
+    | '/settings'
     | '/users'
   id:
     | '__root__'
     | '/'
     | '/academics'
+    | '/error'
     | '/infrastructure'
     | '/login'
     | '/logout'
+    | '/recovery'
     | '/schedule'
     | '/schools'
+    | '/settings'
     | '/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcademicsRoute: typeof AcademicsRoute
+  ErrorRoute: typeof ErrorRoute
   InfrastructureRoute: typeof InfrastructureRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
+  RecoveryRoute: typeof RecoveryRoute
   ScheduleRoute: typeof ScheduleRoute
   SchoolsRoute: typeof SchoolsRoute
+  SettingsRoute: typeof SettingsRoute
   UsersRoute: typeof UsersRoute
 }
 
@@ -141,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/schools': {
@@ -155,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/schedule'
       fullPath: '/schedule'
       preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recovery': {
+      id: '/recovery'
+      path: '/recovery'
+      fullPath: '/recovery'
+      preLoaderRoute: typeof RecoveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logout': {
@@ -178,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfrastructureRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/error': {
+      id: '/error'
+      path: '/error'
+      fullPath: '/error'
+      preLoaderRoute: typeof ErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/academics': {
       id: '/academics'
       path: '/academics'
@@ -198,11 +258,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcademicsRoute: AcademicsRoute,
+  ErrorRoute: ErrorRoute,
   InfrastructureRoute: InfrastructureRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
+  RecoveryRoute: RecoveryRoute,
   ScheduleRoute: ScheduleRoute,
   SchoolsRoute: SchoolsRoute,
+  SettingsRoute: SettingsRoute,
   UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport

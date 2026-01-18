@@ -1,0 +1,88 @@
+:root,
+body,
+.ory-elements {
+	--brand-500: oklch(0.735 0.157 168.6);
+	--brand-400: oklch(0.65 0.157 168.6);
+	--brand-300: oklch(0.735 0.157 168.6);
+
+	--brand-50: oklch(0.2 0 0);
+	--interface-foreground-brand-on-primary: oklch(0.2 0 0);
+
+	--ui-50: oklch(0.938 0 0);
+	--ui-white: oklch(1 0 0);
+	--ui-900: oklch(0.327 0 0);
+	--ui-300: oklch(0.82 0 0);
+	--ui-500: oklch(0.55 0 0);
+	--ui-100: oklch(0.96 0 0);
+
+	--button-social-background-default: transparent;
+	--button-social-border-default: var(--ui-300);
+	--button-social-foreground-default: var(--ui-900);
+	--button-social-background-hover: var(--ui-50);
+
+	--button-primary-background-default: var(--brand-500);
+	--button-primary-background-hover: var(--brand-400);
+	--button-primary-foreground-default: var(--brand-50);
+	--button-primary-border-default: transparent;
+
+	--button-identifier-background-default: var(--ui-white);
+	--button-identifier-border-border-default: var(--ui-300);
+	--button-identifier-foreground-default: var(--ui-900);
+
+	--button-identifier-background-hover: var(--ui-100);
+	--button-identifier-border-border-hover: var(--brand-500);
+	--button-identifier-foreground-hover: var(--brand-500);
+
+	--input-background-default: var(--ui-white);
+	--input-border-default: var(--ui-300);
+	--input-border-focus: var(--brand-500);
+	--input-foreground-primary: var(--ui-900);
+
+	--interface-foreground-default-secondary: oklch(0.45 0 0);
+}
+
+.dark,
+.dark body,
+.dark .ory-elements {
+	--ui-50: oklch(0.327 0 0);
+	--ui-white: oklch(0.36 0 0);
+	--ui-900: oklch(0.938 0 0);
+	--ui-300: oklch(0.4 0 0);
+	--ui-500: oklch(0.7 0 0);
+	--ui-100: oklch(0.32 0 0);
+
+	--button-social-background-default: transparent;
+	--button-social-border-default: var(--ui-300);
+	--button-social-foreground-default: var(--ui-900);
+	--button-social-background-hover: oklch(0.4 0 0);
+
+	--input-background-default: var(--ui-white);
+
+	--button-identifier-background-default: transparent;
+	--button-identifier-border-border-default: var(--ui-300);
+	--button-identifier-foreground-default: var(--ui-900);
+
+	--button-identifier-background-hover: var(--ui-300);
+	--button-identifier-border-border-hover: var(--brand-500);
+	--button-identifier-foreground-hover: var(--brand-500);
+
+	--interface-foreground-brand-on-primary: oklch(0.2 0 0);
+
+	--interface-foreground-default-secondary: oklch(0.7 0 0);
+
+	--button-social-background-active: var(--ui-100);
+}
+
+.ory-elements input,
+.ory-elements button,
+.ory-elements .card,
+.ory-elements div[data-testid="ui/card"] {
+	border-radius: 0.625rem !important;
+	box-shadow: none !important;
+}
+
+.ory-elements div[data-testid="ui/card"] {
+	background-color: var(--ui-white) !important;
+	border: 1px solid var(--ui-300) !important;
+	color: var(--ui-900) !important;
+}

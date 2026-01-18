@@ -1,25 +1,20 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { LOGIN_URL } from "@/config/urls";
+import { createFileRoute } from "@tanstack/react-router";
+import { LoginPage } from "@/pages/LoginPage";
 import { z } from "zod";
+import { requireGuest } from "@/lib/route-guards";
 
 const loginSearchSchema = z.object({
+	flow: z.string().optional(),
 	return_to: z.string().optional(),
+	refresh: z.union([z.literal("true"), z.literal("false")]).optional(),
+	aal: z.string().optional(),
+	login_challenge: z.string().optional(),
+	organization: z.string().optional(),
+	via: z.string().optional(),
 });
 
 export const Route = createFileRoute("/login")({
 	validateSearch: search => loginSearchSchema.parse(search),
-	beforeLoad: ({ search }) => {
-		const returnToPath = search.return_to ?? "/";
-
-		const returnToUrl = returnToPath.startsWith("http")
-			? returnToPath
-			: new URL(returnToPath, window.location.origin).toString();
-
-		const target = new URL(LOGIN_URL);
-		target.searchParams.set("return_to", returnToUrl);
-
-		throw redirect({
-			href: target.toString(),
-		});
-	},
+	beforeLoad: ({ context }) => requireGuest(context),
+	component: LoginPage,
 });

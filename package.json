@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"@ory/client-fetch": "^1.22.15",
+		"@ory/elements-react": "^1.1.0",
 		"@radix-ui/react-accordion": "^1.2.12",
 		"@radix-ui/react-checkbox": "^1.3.3",
 		"@radix-ui/react-collapsible": "^1.1.12",
@@ -40,6 +41,7 @@
 		"react": "^19.2.0",
 		"react-day-picker": "^9.13.0",
 		"react-dom": "^19.2.0",
+		"react-intl": "^8.1.0",
 		"sonner": "^2.0.7",
 		"tailwind-merge": "^3.4.0",
 		"tailwindcss": "^4.1.18",
@@ -64,6 +66,11 @@
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.46.4",
 		"vite": "^7.2.4"
+	},
+	"pnpm": {
+		"overrides": {
+			"@ory/client-fetch": "^1.22.15"
+		}
 	},
 	"packageManager": "pnpm@10.26.2+sha512.0e308ff2005fc7410366f154f625f6631ab2b16b1d2e70238444dd6ae9d630a8482d92a451144debc492416896ed16f7b114a86ec68b8404b2443869e68ffda6"
 }
