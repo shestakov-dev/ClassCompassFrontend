@@ -23,11 +23,11 @@ export default defineConfig({
 		host: "0.0.0.0",
 		port: 5173,
 		hmr: {
-			host: "ui.classcompass.shestakov.app",
+			host: "classcompass.shestakov.app",
 			path: "/ws",
 			protocol: "wss",
 			clientPort: 443,
 		},
-		allowedHosts: ["ui.classcompass.shestakov.app"],
+		allowedHosts: ["classcompass.shestakov.app"],
 	},
 });
