@@ -28,6 +28,7 @@ import {
 	useStudentsControllerRemove,
 	useStudentsControllerCreate,
 } from "@/api/generated/endpoints/students/students";
+import { useTeachersControllerCreate } from "@/api/generated/endpoints/teachers/teachers";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -220,6 +221,21 @@ export default function AcademicsPage() {
 		},
 	});
 
+	const createTeacherMutation = useTeachersControllerCreate({
+		mutation: {
+			meta: {
+				operationContext: "create teacher",
+			},
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: getUsersControllerFindAllBySchoolQueryKey(
+						schoolId!
+					),
+				});
+			},
+		},
+	});
+
 	const deleteSubjectMutation = useSubjectsControllerRemove({
 		mutation: {
 			meta: {
@@ -386,22 +402,52 @@ export default function AcademicsPage() {
 		}
 	};
 
-	const handleAssignTeachers = (teacherIds: string[]) => {
+	const handleAssignTeachers = async (userIds: string[]) => {
 		if (!selectedSubject) {
 			return;
 		}
 
-		updateSubjectMutation.mutate({
-			id: selectedSubject.id,
-			data: {
-				name: selectedSubject.name,
-				schoolId: selectedSubject.schoolId,
-				teacherIds,
-			},
-		});
+		try {
+			const resolvedTeacherIds = await Promise.all(
+				userIds.map(async userId => {
+					const user = users.find(user => user.id === userId);
 
-		setAssignTeachersDialogOpen(false);
-		setSelectedSubject(null);
+					if (!user) {
+						return null;
+					}
+
+					if (user.teacher) {
+						return user.teacher.id;
+					}
+
+					const newTeacher = await createTeacherMutation.mutateAsync({
+						data: { userId },
+					});
+
+					return newTeacher.id;
+				})
+			);
+
+			const validTeacherIds = resolvedTeacherIds.filter(
+				(id): id is string => id !== null
+			);
+
+			updateSubjectMutation.mutate({
+				id: selectedSubject.id,
+				data: {
+					name: selectedSubject.name,
+					schoolId: selectedSubject.schoolId,
+					teacherIds: validTeacherIds,
+				},
+			});
+
+			setAssignTeachersDialogOpen(false);
+			setSelectedSubject(null);
+		} catch (error) {
+			console.error(error);
+
+			toast.error("Failed to assign teachers");
+		}
 	};
 
 	return (
@@ -625,7 +671,10 @@ export default function AcademicsPage() {
 					onSubmit={handleAssignTeachers}
 					subjectData={selectedSubject}
 					users={users}
-					isLoading={updateSubjectMutation.isPending}
+					isLoading={
+						updateSubjectMutation.isPending ||
+						createTeacherMutation.isPending
+					}
 				/>
 			</div>
 		</SchoolRequired>

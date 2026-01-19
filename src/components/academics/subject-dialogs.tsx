@@ -328,7 +328,7 @@ export function DeleteSubjectDialog({
 interface AssignTeachersDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onSubmit: (teacherIds: string[]) => void;
+	onSubmit: (userIds: string[]) => void;
 	subjectData: SubjectEntity | null;
 	users: UserEntity[];
 	isLoading: boolean;
@@ -344,19 +344,19 @@ export function AssignTeachersDialog({
 }: AssignTeachersDialogProps) {
 	const form = useForm({
 		defaultValues: {
-			teacherIds: [] as string[],
+			userIds: [] as string[],
 		},
 		onSubmit: async ({ value }) => {
-			onSubmit(value.teacherIds);
+			onSubmit(value.userIds);
 		},
 	});
 
 	const syncSelectedTeachers = useEffectEvent(() => {
 		if (subjectData) {
 			const currentTeachers =
-				subjectData.teachers?.map(teacher => teacher.id) ?? [];
+				subjectData.teachers?.map(teacher => teacher.userId) ?? [];
 
-			form.setFieldValue("teacherIds", currentTeachers);
+			form.setFieldValue("userIds", currentTeachers);
 		}
 	});
 
@@ -368,17 +368,15 @@ export function AssignTeachersDialog({
 		}
 	}, [subjectData, open, form]);
 
-	// Get users who have a teacher record
-	const teacherUsers = users.filter(user => user.teacher);
+	// Get users who are not students (can be existing teachers or users with no role)
+	const eligibleUsers = users.filter(user => !user.student);
 
 	// Create options for combobox
-	const teacherOptions = teacherUsers
-		.filter(user => user.teacher)
-		.map(user => ({
-			value: user.teacher?.id ?? "",
-			label: `${user.firstName} ${user.lastName}`,
-			secondaryLabel: user.email,
-		}));
+	const teacherOptions = eligibleUsers.map(user => ({
+		value: user.id,
+		label: `${user.firstName} ${user.lastName}`,
+		secondaryLabel: user.email,
+	}));
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -402,7 +400,7 @@ export function AssignTeachersDialog({
 					}}
 					className="space-y-4">
 					<form.Field
-						name="teacherIds"
+						name="userIds"
 						children={field => (
 							<Field>
 								<MultiSelectCombobox

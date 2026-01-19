@@ -379,8 +379,10 @@ export function AssignStudentsDialog({
 			const studentEntry = students.find(
 				student => student.id === user.student?.id
 			);
+
 			const isInCurrentClass =
 				classData && studentEntry?.classId === classData.id;
+
 			return !studentEntry || isInCurrentClass;
 		});
 
