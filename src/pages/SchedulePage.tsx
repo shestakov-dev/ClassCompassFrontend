@@ -340,7 +340,7 @@ export default function SchedulePage() {
 		const schedules = await queryClient.fetchQuery({
 			queryKey,
 			queryFn: ({ signal }) =>
-				dailySchedulesControllerFindAllByClass(classId, signal),
+				dailySchedulesControllerFindAllByClass(classId, { signal }),
 		});
 
 		const found = schedules.find(schedule => schedule.day === day);

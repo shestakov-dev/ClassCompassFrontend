@@ -138,6 +138,7 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 						id: `temp-${Date.now()}`,
 						number: variables.data.number,
 						description: variables.data.description ?? "",
+						floorPlanETag: null,
 						buildingId: variables.data.buildingId,
 						rooms: [],
 						createdAt: new Date().toISOString(),
