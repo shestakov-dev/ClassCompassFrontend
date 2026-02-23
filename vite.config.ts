@@ -8,9 +8,9 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd());
 
-	const urlBase = env.VITE_BASE_URL ?? "classcompass.shestakov.app";
+	const urlBase = env.VITE_BASE_URL;
 
-	if (!env.VITE_BASE_URL) {
+	if (mode === "development" && !urlBase) {
 		throw new Error(
 			"VITE_BASE_URL is not defined in the environment variables."
 		);
