@@ -7,11 +7,9 @@
  */
 
 /**
- * The data required to create a new room
+ * A presigned URL to download a floor plan SVG
  */
-export interface CreateRoomDto {
-	/** The room's name */
-	name: string;
-	/** The room's floor identifier */
-	floorId: string;
+export interface FloorPlanUrlEntity {
+	/** The presigned URL to download the floor plan SVG */
+	url: string;
 }

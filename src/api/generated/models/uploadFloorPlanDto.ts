@@ -7,11 +7,9 @@
  */
 
 /**
- * The data required to create a new room
+ * The data required to upload a floor plan for a floor
  */
-export interface CreateRoomDto {
-	/** The room's name */
-	name: string;
-	/** The room's floor identifier */
-	floorId: string;
+export interface UploadFloorPlanDto {
+	/** The floor plan SVG file to upload (Max 2MB) */
+	file: string;
 }
