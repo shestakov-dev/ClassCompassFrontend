@@ -14,6 +14,9 @@ import { IntlProvider } from "react-intl";
 import en from "@/locales/en.json";
 import { getSession } from "@/services/kratos";
 import { router } from "@/router";
+import { AXIOS_INSTANCE } from "./api/mutators/custom-instance";
+
+AXIOS_INSTANCE.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 getSession().then(session => {
 	createRoot(document.getElementById("root")!).render(

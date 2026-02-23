@@ -1,5 +1,5 @@
 import type { OryClientConfiguration } from "@ory/elements-react";
-import { KRATOS_URL } from "./urls";
+import { API_URL, KRATOS_URL } from "./urls";
 import { kratosFetch } from "@/lib/kratos-fetch";
 
 export const oryConfig: OryClientConfiguration = {
@@ -25,13 +25,9 @@ export const oryConfig: OryClientConfiguration = {
 		registration_ui_url: "/register",
 		verification_ui_url: "/verification",
 		recovery_ui_url: "/recovery",
-		favicon_dark_url:
-			"https://api.classcompass.shestakov.app/assets/favicon/favicon-32x32.png",
-		favicon_light_url:
-			"https://api.classcompass.shestakov.app/assets/favicon/favicon-32x32.png",
-		logo_dark_url:
-			"https://api.classcompass.shestakov.app/assets/images/ClassCompassLogo.png",
-		logo_light_url:
-			"https://api.classcompass.shestakov.app/assets/images/ClassCompassLogo.png",
+		favicon_dark_url: `${API_URL}/assets/favicon/favicon-32x32.png`,
+		favicon_light_url: `${API_URL}/assets/favicon/favicon-32x32.png`,
+		logo_dark_url: `${API_URL}/assets/images/ClassCompassLogo.png`,
+		logo_light_url: `${API_URL}/assets/images/ClassCompassLogo.png`,
 	},
 };

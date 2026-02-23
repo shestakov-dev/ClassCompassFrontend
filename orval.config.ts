@@ -1,9 +1,20 @@
 import { defineConfig } from "orval";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const apiUrl = process.env.VITE_API_URL;
+
+if (!apiUrl) {
+	throw new Error(
+		"VITE_API_URL is not defined in the environment variables."
+	);
+}
 
 export default defineConfig({
 	classCompassBackend: {
 		input: {
-			target: "https://api.classcompass.shestakov.app/api-json",
+			target: `${apiUrl}/api-json`,
 		},
 		output: {
 			mode: "tags-split",
@@ -11,10 +22,6 @@ export default defineConfig({
 			schemas: "./src/api/generated/models",
 			client: "react-query",
 			prettier: true,
-			baseUrl: {
-				getBaseUrlFromSpecification: true,
-				index: 1,
-			},
 			override: {
 				mutator: {
 					path: "./src/api/mutators/custom-instance.ts",
