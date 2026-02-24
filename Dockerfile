@@ -18,6 +18,14 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 
 FROM base AS build
 
+ARG VITE_BASE_URL
+ARG VITE_KRATOS_URL
+ARG VITE_API_URL
+
+ENV VITE_BASE_URL=$VITE_BASE_URL
+ENV VITE_KRATOS_URL=$VITE_KRATOS_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY pnpm-lock.yaml package.json ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile

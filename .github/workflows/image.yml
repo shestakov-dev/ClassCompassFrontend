@@ -8,6 +8,7 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        environment: production
 
         permissions:
             contents: read
@@ -33,6 +34,10 @@ jobs:
               with:
                   context: .
                   push: true
+                  build-args: |
+                      VITE_BASE_URL=${{ vars.VITE_BASE_URL }}
+                      VITE_KRATOS_URL=${{ vars.VITE_KRATOS_URL }}
+                      VITE_API_URL=${{ vars.VITE_API_URL }}
                   tags: |
                       ghcr.io/${{ github.repository_owner }}/class-compass-frontend:latest
                       ghcr.io/${{ github.repository_owner }}/class-compass-frontend:${{ steps.vars.outputs.sha_short }}
