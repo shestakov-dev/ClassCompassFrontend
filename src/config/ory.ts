@@ -27,7 +27,7 @@ export const oryConfig: OryClientConfiguration = {
 		recovery_ui_url: "/recovery",
 		favicon_dark_url: `${API_URL}/assets/favicon/favicon-32x32.png`,
 		favicon_light_url: `${API_URL}/assets/favicon/favicon-32x32.png`,
-		logo_dark_url: `${API_URL}/assets/images/ClassCompassLogo.png`,
-		logo_light_url: `${API_URL}/assets/images/ClassCompassLogo.png`,
+		logo_dark_url: `${API_URL}/assets/images/ClassCompassLogo.svg`,
+		logo_light_url: `${API_URL}/assets/images/ClassCompassLogo.svg`,
 	},
 };
