@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ReactNode } from "react";
-import { LOGO_URL } from "@/config/urls";
+import { ANIMATED_LOGO_URL } from "@/config/urls";
 
 export default function HomePage() {
 	return (
@@ -22,7 +22,7 @@ export default function HomePage() {
 						<div className="absolute inset-0 rounded-full bg-primary/20 blur-xl animate-pulse" />
 
 						<img
-							src={LOGO_URL}
+							src={ANIMATED_LOGO_URL}
 							alt="ClassCompass Logo"
 							className="relative h-32 w-32 rounded-full object-cover border-4 border-background ring-2 ring-primary shadow-2xl"
 						/>
