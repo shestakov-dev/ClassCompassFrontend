@@ -17,7 +17,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Logo } from "@/components/common/logo";
+import { Logo } from "@/components/common/nav-logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 import { SchoolSelector } from "@/components/common/school-selector";
 

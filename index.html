@@ -2,19 +2,21 @@
 <html lang="en">
 	<head>
 		<link
+			rel="icon"
+			type="image/png"
+			href="%VITE_API_URL%/assets/favicon/favicon-96x96.png"
+			sizes="96x96" />
+		<link
+			rel="icon"
+			type="image/svg+xml"
+			href="%VITE_API_URL%/assets/favicon/favicon.svg" />
+		<link
+			rel="shortcut icon"
+			href="%VITE_API_URL%/assets/favicon/favicon.ico" />
+		<link
 			rel="apple-touch-icon"
 			sizes="180x180"
 			href="%VITE_API_URL%/assets/favicon/apple-touch-icon.png" />
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="32x32"
-			href="%VITE_API_URL%/assets/favicon/favicon-32x32.png" />
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="16x16"
-			href="%VITE_API_URL%/assets/favicon/favicon-16x16.png" />
 		<link
 			rel="manifest"
 			href="%VITE_API_URL%/assets/favicon/site.webmanifest" />
@@ -22,13 +24,15 @@
 		<link
 			rel="preload"
 			as="image"
-			href="%VITE_API_URL%/assets/images/ClassCompassLogo.svg" />
+			href="%VITE_API_URL%/assets/images/ClassCompassLogoOutlined.svg" />
 
 		<meta charset="UTF-8" />
-
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="apple-mobile-web-app-title" content="Compass" />
+
 		<title>ClassCompass</title>
 	</head>
+
 	<body>
 		<div id="root"></div>
 		<script type="module" src="/src/main.tsx"></script>

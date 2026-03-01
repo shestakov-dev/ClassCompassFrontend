@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ReactNode } from "react";
-import { ANIMATED_LOGO_URL } from "@/config/urls";
+import { AnimatableLogo } from "@/components/common/animatable-logo";
 
 export default function HomePage() {
 	return (
@@ -16,16 +16,8 @@ export default function HomePage() {
 			{/* Hero Section */}
 			<section className="relative flex min-h-full flex-col items-center justify-center space-y-10 py-24 text-center md:py-32">
 				<div className="container flex flex-col items-center gap-6 px-4">
-					{/* Circular Image Logo Wrapper */}
 					<div className="relative flex h-48 w-48 items-center justify-center">
-						{/* Glowing ring effect behind the image */}
-						<div className="absolute inset-0 rounded-full bg-primary/20 blur-xl animate-pulse" />
-
-						<img
-							src={ANIMATED_LOGO_URL}
-							alt="ClassCompass Logo"
-							className="relative h-32 w-32 rounded-full object-cover border-4 border-background ring-2 ring-primary shadow-2xl"
-						/>
+						<AnimatableLogo animate={true} className="h-32 w-32" />
 					</div>
 
 					{/* Title & Description */}

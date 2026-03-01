@@ -18,7 +18,7 @@ import {
 	type ComponentRef,
 } from "react";
 import { MobileNav } from "@/components/common/mobile-nav";
-import { Logo } from "@/components/common/logo";
+import { Logo } from "@/components/common/nav-logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 import { SchoolSelector } from "@/components/common/school-selector";
 
