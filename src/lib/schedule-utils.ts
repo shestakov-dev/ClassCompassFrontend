@@ -116,26 +116,16 @@ export const buildScheduleFilters = (
 	if (search.ignoreWeek !== undefined) base.ignoreWeek = search.ignoreWeek;
 
 	if (mode === "date") {
-		if (!search.timestamp && !search.from) {
-			const currentDate = search.date
-				? parseISO(search.date)
-				: new Date();
+		const targetDate = search.date ? parseISO(search.date) : new Date();
+		
+		base.day = getCurrentDayEnum(targetDate);
+		base.week = search.ignoreWeek ? undefined : getWeekParity(targetDate);
 
-			base.day = getCurrentDayEnum(currentDate);
-			base.week = search.ignoreWeek
-				? undefined
-				: getWeekParity(currentDate);
-
-			base.timestamp = undefined;
-			base.from = undefined;
-			base.to = undefined;
-		} else {
+		if (search.timestamp) {
 			base.timestamp = search.timestamp;
+		} else if (search.from && search.to) {
 			base.from = search.from;
 			base.to = search.to;
-
-			base.day = undefined;
-			base.week = undefined;
 		}
 	} else {
 		base.day = search.day ?? base.day ?? getCurrentDayEnum();
