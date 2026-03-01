@@ -3,7 +3,16 @@ import {
 	type LessonsControllerFindFilteredParams,
 	type LessonEntity,
 } from "@/api/generated/models";
-import { addDays, getDay, getISOWeek, parseISO, set } from "date-fns";
+import {
+	addDays,
+	format,
+	getDay,
+	getISOWeek,
+	parse,
+	parseISO,
+	set,
+} from "date-fns";
+import { UTCDate } from "@date-fns/utc";
 import {
 	Day,
 	LessonWeek,
@@ -12,6 +21,18 @@ import {
 	type ScheduleSearchParams,
 	type ScheduleEvent,
 } from "@/types/schedule";
+
+export function formatFlatTime(isoString: string | Date): string {
+	const safeDate = new UTCDate(isoString);
+
+	return format(safeDate, "HH:mm");
+}
+
+export function createFlatDate(timeString: string): Date {
+	const baseDate = new UTCDate("1970-01-01T00:00:00Z");
+
+	return parse(timeString, "HH:mm", baseDate);
+}
 
 export const getCurrentDayEnum = (date: Date = new Date()): Day => {
 	return DAY_INDEX_TO_DAY[getDay(date)];

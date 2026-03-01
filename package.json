@@ -10,6 +10,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@date-fns/utc": "^2.1.1",
 		"@ory/client-fetch": "^1.22.15",
 		"@ory/elements-react": "^1.1.0",
 		"@radix-ui/react-accordion": "^1.2.12",

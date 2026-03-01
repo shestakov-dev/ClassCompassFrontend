@@ -33,8 +33,7 @@ import {
 import type { LessonEntity } from "@/api/generated/models";
 import { cn } from "@/lib/utils";
 import { LessonWeek } from "@/types/schedule";
-import { getWeekParity } from "@/lib/schedule-utils";
-import { format, parseISO } from "date-fns";
+import { formatFlatTime, getWeekParity } from "@/lib/schedule-utils";
 import { Button } from "@/components/ui/button";
 import { WeekBadge } from "@/components/schedule/week-badge";
 
@@ -94,9 +93,7 @@ export function LessonListView({
 		<div className="space-y-4 pb-10">
 			{Object.entries(groupedLessons).map(([timeKey, classGroups]) => {
 				const [startIso, endIso] = timeKey.split("|");
-				const startDate = parseISO(startIso);
-				const endDate = parseISO(endIso);
-				const timeRange = `${format(startDate, "HH:mm")} - ${format(endDate, "HH:mm")}`;
+				const timeRange = `${formatFlatTime(startIso)} - ${formatFlatTime(endIso)}`;
 				const lessonCount = Object.keys(classGroups).length;
 
 				return (

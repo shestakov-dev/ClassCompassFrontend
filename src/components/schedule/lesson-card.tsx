@@ -10,12 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Info, Edit, Trash2 } from "lucide-react";
 import { type LessonEntity } from "@/api/generated/models";
-import { format, parseISO } from "date-fns";
 import {
 	WeekBadge,
 	getLessonWeekVariant,
 } from "@/components/schedule/week-badge";
 import { useSession } from "@/context/session-context";
+import { formatFlatTime } from "@/lib/schedule-utils";
 
 export const lessonCardVariants = cva("", {
 	variants: {
@@ -68,9 +68,7 @@ export function LessonCard({
 		: "Unknown Teacher";
 	const className = lesson.dailySchedule?.class?.name ?? "Unknown Class";
 
-	const startTime = parseISO(lesson.startTime);
-	const endTime = parseISO(lesson.endTime);
-	const timeRange = `${format(startTime, "HH:mm")} - ${format(endTime, "HH:mm")}`;
+	const timeRange = `${formatFlatTime(lesson.startTime)} - ${formatFlatTime(lesson.endTime)}`;
 
 	const { isAdmin } = useSession();
 

@@ -17,7 +17,7 @@ import {
 	CalendarX2,
 	Plus,
 } from "lucide-react";
-import { addDays, subDays, setDay, parseISO, set } from "date-fns";
+import { addDays, subDays, setDay, parseISO } from "date-fns";
 import { useSession } from "@/context/session-context";
 import { useSchool } from "@/context/school-context";
 import { SchoolRequired } from "@/components/common/school-required";
@@ -70,6 +70,7 @@ import {
 	DeleteLessonDialog,
 	LessonDetailsDialog,
 } from "@/components/schedule/lesson-dialogs";
+import { UTCDate } from "@date-fns/utc";
 
 export default function SchedulePage() {
 	const { user, isAdmin } = useSession();
@@ -171,24 +172,37 @@ export default function SchedulePage() {
 			};
 
 			if (search.timestamp) {
-				const oldTs = parseISO(search.timestamp);
-				updates.timestamp = set(newDate, {
-					hours: oldTs.getHours(),
-					minutes: oldTs.getMinutes(),
-				}).toISOString();
+				const oldTimestamp = new UTCDate(search.timestamp);
+
+				const safeTargetDate = new UTCDate(
+					newDate.getFullYear(),
+					newDate.getMonth(),
+					newDate.getDate(),
+					oldTimestamp.getHours(),
+					oldTimestamp.getMinutes()
+				);
+				updates.timestamp = safeTargetDate.toISOString();
 			}
 
 			if (search.from && search.to) {
-				const oldFrom = parseISO(search.from);
-				const oldTo = parseISO(search.to);
-				updates.from = set(newDate, {
-					hours: oldFrom.getHours(),
-					minutes: oldFrom.getMinutes(),
-				}).toISOString();
-				updates.to = set(newDate, {
-					hours: oldTo.getHours(),
-					minutes: oldTo.getMinutes(),
-				}).toISOString();
+				const oldFrom = new UTCDate(search.from);
+				const oldTo = new UTCDate(search.to);
+
+				updates.from = new UTCDate(
+					newDate.getFullYear(),
+					newDate.getMonth(),
+					newDate.getDate(),
+					oldFrom.getHours(),
+					oldFrom.getMinutes()
+				).toISOString();
+
+				updates.to = new UTCDate(
+					newDate.getFullYear(),
+					newDate.getMonth(),
+					newDate.getDate(),
+					oldTo.getHours(),
+					oldTo.getMinutes()
+				).toISOString();
 			}
 
 			updateSearch(updates);

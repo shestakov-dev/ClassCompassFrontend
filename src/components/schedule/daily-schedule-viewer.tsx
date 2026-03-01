@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { TimeGrid } from "@/components/schedule/daily-schedule-grid";
-import { format, parseISO } from "date-fns";
 import {
 	Dialog,
 	DialogContent,
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { type LessonEntity } from "@/api/generated/models";
 import { WeekBadge } from "@/components/schedule/week-badge";
+import { formatFlatTime } from "@/lib/schedule-utils";
 
 interface DailyScheduleViewerProps {
 	lessons: LessonEntity[];
@@ -67,16 +67,12 @@ export function DailyScheduleViewer({
 								</span>
 								<span className="bg-muted px-2.5 py-1 rounded text-sm font-medium">
 									{selectedLesson?.startTime &&
-										format(
-											parseISO(selectedLesson.startTime),
-											"HH:mm"
+										formatFlatTime(
+											selectedLesson.startTime
 										)}{" "}
 									-{" "}
 									{selectedLesson?.endTime &&
-										format(
-											parseISO(selectedLesson.endTime),
-											"HH:mm"
-										)}
+										formatFlatTime(selectedLesson.endTime)}
 								</span>
 								{selectedLesson && (
 									<WeekBadge

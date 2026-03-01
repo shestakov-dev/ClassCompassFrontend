@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent } from "react";
-import { format, parseISO, set } from "date-fns";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 
@@ -34,6 +33,7 @@ import {
 } from "@/types/schedule";
 import { WeekBadge } from "@/components/schedule/week-badge";
 import { useSession } from "@/context/session-context";
+import { createFlatDate, formatFlatTime } from "@/lib/schedule-utils";
 
 const lessonSchema = z.object({
 	day: z.string().min(1, "Day is required"),
@@ -81,19 +81,8 @@ export function CreateLessonDialog({
 			lessonWeek: LessonWeek.every as LessonWeek,
 		},
 		onSubmit: async ({ value }) => {
-			const [startHours, startMinutes] = value.startTime
-				.split(":")
-				.map(Number);
-			const [endHours, endMinutes] = value.endTime.split(":").map(Number);
-
-			const dateTimeStart = set(new Date(0), {
-				hours: startHours,
-				minutes: startMinutes,
-			}).toISOString();
-			const dateTimeEnd = set(new Date(0), {
-				hours: endHours,
-				minutes: endMinutes,
-			}).toISOString();
+			const dateTimeStart = createFlatDate(value.startTime).toISOString();
+			const dateTimeEnd = createFlatDate(value.endTime).toISOString();
 
 			onSubmit({
 				day: value.day,
@@ -561,20 +550,10 @@ export function EditLessonDialog({
 			lessonWeek: LessonWeek.every as LessonWeek,
 		},
 		onSubmit: async ({ value }) => {
-			const [startHours, startMinutes] = value.startTime
-				.split(":")
-				.map(Number);
-			const [endHours, endMinutes] = value.endTime.split(":").map(Number);
-
-			const updatedStartTime = set(new Date(0), {
-				hours: startHours,
-				minutes: startMinutes,
-			}).toISOString();
-
-			const updatedEndTime = set(new Date(0), {
-				hours: endHours,
-				minutes: endMinutes,
-			}).toISOString();
+			const updatedStartTime = createFlatDate(
+				value.startTime
+			).toISOString();
+			const updatedEndTime = createFlatDate(value.endTime).toISOString();
 
 			onSubmit({
 				day: value.day,
@@ -599,14 +578,12 @@ export function EditLessonDialog({
 
 			form.setFieldValue(
 				"startTime",
-				lesson.startTime
-					? format(parseISO(lesson.startTime), "HH:mm")
-					: ""
+				lesson.startTime ? formatFlatTime(lesson.startTime) : ""
 			);
 
 			form.setFieldValue(
 				"endTime",
-				lesson.endTime ? format(parseISO(lesson.endTime), "HH:mm") : ""
+				lesson.endTime ? formatFlatTime(lesson.endTime) : ""
 			);
 
 			form.setFieldValue(
@@ -1078,8 +1055,8 @@ export function DeleteLessonDialog({
 						<div className="flex justify-between py-2 border-b">
 							<dt className="text-muted-foreground">Time:</dt>
 							<dd className="font-medium">
-								{format(parseISO(lesson.startTime), "HH:mm")} -{" "}
-								{format(parseISO(lesson.endTime), "HH:mm")}
+								{formatFlatTime(lesson.startTime)} -{" "}
+								{formatFlatTime(lesson.endTime)}
 							</dd>
 						</div>
 
@@ -1152,15 +1129,8 @@ export function LessonDetailsDialog({
 									.charAt(0)
 									.toUpperCase() +
 									lesson.dailySchedule.day.slice(1)}{" "}
-							•{" "}
-							{lesson.startTime &&
-								format(
-									parseISO(lesson.startTime),
-									"HH:mm"
-								)}{" "}
-							-{" "}
-							{lesson.endTime &&
-								format(parseISO(lesson.endTime), "HH:mm")}
+							• {formatFlatTime(lesson.startTime)} -{" "}
+							{formatFlatTime(lesson.endTime)}
 						</span>
 
 						<WeekBadge lessonWeek={lesson.lessonWeek} />

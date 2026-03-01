@@ -48,6 +48,7 @@ import {
 } from "@/types/schedule";
 import { useForm, useStore } from "@tanstack/react-form";
 import { Combobox } from "@/components/ui/combobox";
+import { UTCDate } from "@date-fns/utc";
 
 interface ScheduleFiltersProps {
 	date: Date;
@@ -123,7 +124,9 @@ export function ScheduleFilters({
 			} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
 				const [hours, minutes] = targetAtTime.split(":").map(Number);
 
-				const dateWithTime = set(targetDate, {
+				const utcTargetDate = new UTCDate(targetDate);
+
+				const dateWithTime = set(utcTargetDate, {
 					hours,
 					minutes,
 					seconds: 0,
@@ -148,13 +151,15 @@ export function ScheduleFilters({
 					.split(":")
 					.map(Number);
 
-				const fromDate = set(targetDate, {
+				const utcTargetDate = new UTCDate(targetDate);
+
+				const fromDate = set(utcTargetDate, {
 					hours: startHour,
 					minutes: startMinute,
 					seconds: 0,
 					milliseconds: 0,
 				});
-				const toDate = set(targetDate, {
+				const toDate = set(utcTargetDate, {
 					hours: endHour,
 					minutes: endMinute,
 					seconds: 0,

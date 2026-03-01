@@ -2,10 +2,10 @@ import {
 	differenceInMinutes,
 	startOfDay,
 	addDays,
-	parseISO,
 	set,
 	startOfWeek,
 } from "date-fns";
+import { UTCDate } from "@date-fns/utc";
 import { useMemo } from "react";
 import { type LessonEntity } from "@/api/generated/models";
 import { DAY_TO_DAY_INDEX, Day } from "@/types/schedule";
@@ -50,8 +50,8 @@ export const TimeGrid = ({
 			const daysToAdd = dayOffset === 0 ? 6 : dayOffset - 1;
 			const targetDate = addDays(weekStart, daysToAdd);
 
-			const startTime = parseISO(lesson.startTime);
-			const endTime = parseISO(lesson.endTime);
+			const startTime = new UTCDate(lesson.startTime);
+			const endTime = new UTCDate(lesson.endTime);
 
 			return {
 				...lesson,
