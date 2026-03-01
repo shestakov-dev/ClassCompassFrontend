@@ -38,7 +38,7 @@ import {
 	useCallback,
 	useMemo,
 } from "react";
-import { getCurrentDayEnum, getWeekParity } from "@/lib/schedule-utils";
+import { getCurrentDayEnum } from "@/lib/schedule-utils";
 import {
 	Day,
 	LessonWeek,
@@ -104,20 +104,12 @@ export function ScheduleFilters({
 		targetRangeEnd: string,
 		targetGenericDay: Day,
 		targetGenericWeek: LessonWeek,
-		targetDate: Date,
-		currentIgnoreWeek: boolean | undefined
+		targetDate: Date
 	): Partial<LessonsControllerFindFilteredParams> => {
 		const nextParams: Partial<LessonsControllerFindFilteredParams> = {};
 
 		if (targetMode === "date") {
-			nextParams.ignoreWeek = currentIgnoreWeek;
-
 			if (targetTimeSubMode === "full-day") {
-				nextParams.day = getCurrentDayEnum(targetDate);
-				nextParams.week = currentIgnoreWeek
-					? undefined
-					: getWeekParity(targetDate);
-
 				nextParams.timestamp = undefined;
 				nextParams.from = undefined;
 				nextParams.to = undefined;
@@ -137,9 +129,6 @@ export function ScheduleFilters({
 
 				nextParams.from = undefined;
 				nextParams.to = undefined;
-
-				nextParams.day = getCurrentDayEnum(targetDate);
-				nextParams.week = currentIgnoreWeek ? undefined : getWeekParity(targetDate);
 			} else if (
 				targetTimeSubMode === "range" &&
 				targetRangeStart &&
@@ -171,9 +160,6 @@ export function ScheduleFilters({
 				nextParams.to = toDate.toISOString();
 
 				nextParams.timestamp = undefined;
-
-				nextParams.day = getCurrentDayEnum(targetDate);
-				nextParams.week = currentIgnoreWeek ? undefined : getWeekParity(targetDate);
 			}
 		} else {
 			nextParams.day = targetGenericDay;
@@ -201,8 +187,7 @@ export function ScheduleFilters({
 				values.rangeEnd,
 				genericDay,
 				values.genericWeek,
-				date,
-				filters.ignoreWeek
+				date
 			);
 
 			setFilters(previousFilters => ({
@@ -210,7 +195,7 @@ export function ScheduleFilters({
 				...newParameters,
 			}));
 		},
-		[form, mode, genericDay, date, filters.ignoreWeek, setFilters]
+		[form, mode, genericDay, date, setFilters]
 	);
 
 	useEffect(() => {
@@ -409,8 +394,8 @@ export function ScheduleFilters({
 								<TabsTrigger
 									value="weekly"
 									className="flex items-center gap-2">
-									<CalendarRange className="h-4 w-4" /> Weekly
-									Schedule
+									<CalendarRange className="h-4 w-4" />
+									Weekly Schedule
 								</TabsTrigger>
 								<TabsTrigger
 									value="date"

@@ -8,6 +8,7 @@ import {
 	format,
 	getDay,
 	getISOWeek,
+	isValid,
 	parse,
 	parseISO,
 	set,
@@ -117,9 +118,11 @@ export const buildScheduleFilters = (
 
 	if (mode === "date") {
 		const targetDate = search.date ? parseISO(search.date) : new Date();
-		
-		base.day = getCurrentDayEnum(targetDate);
-		base.week = search.ignoreWeek ? undefined : getWeekParity(targetDate);
+
+		const safeDate = isValid(targetDate) ? targetDate : new Date();
+
+		base.day = getCurrentDayEnum(safeDate);
+		base.week = search.ignoreWeek ? undefined : getWeekParity(safeDate);
 
 		if (search.timestamp) {
 			base.timestamp = search.timestamp;
