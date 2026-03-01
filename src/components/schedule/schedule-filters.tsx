@@ -137,8 +137,9 @@ export function ScheduleFilters({
 
 				nextParams.from = undefined;
 				nextParams.to = undefined;
-				nextParams.day = undefined;
-				nextParams.week = undefined;
+
+				nextParams.day = getCurrentDayEnum(targetDate);
+				nextParams.week = currentIgnoreWeek ? undefined : getWeekParity(targetDate);
 			} else if (
 				targetTimeSubMode === "range" &&
 				targetRangeStart &&
@@ -170,8 +171,9 @@ export function ScheduleFilters({
 				nextParams.to = toDate.toISOString();
 
 				nextParams.timestamp = undefined;
-				nextParams.day = undefined;
-				nextParams.week = undefined;
+
+				nextParams.day = getCurrentDayEnum(targetDate);
+				nextParams.week = currentIgnoreWeek ? undefined : getWeekParity(targetDate);
 			}
 		} else {
 			nextParams.day = targetGenericDay;

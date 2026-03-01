@@ -1,0 +1,31 @@
+interesting lesson view with icons in the background?? <- very cool idea
+
+responsiveness
+redirect to not authorized page when accessing a page you don't have access to
+global spinner is unused currently.
+
+we can clean up a lot of checks for "?." by checking the parent object first.
+
+1. missing stars on required form fields
+2. floor description "" is not valid (does not pass undefined as it should)
+3. daily schedule error??
+5. light theme tab selector for academics page
+6. when there are no results found for a combobox or similar, add a button to the page to create a new item of that type.
+7. if all columns are toggled off in a table, show a message that at least one column must be selected.
+8. daily schedules should be removed when there are no lessons for them.
+9. trim data fields and add max lengths where appropriate.
+10. user is able to delete themselves. - prevent this
+12. restyle the date picker
+13. responsiveness is broken once again (platform admin on navbar)
+
+intl provider? flow hints? toasts?
+provide a user icon top right to allow users to edit credentials
+flow hints don't work on server
+error handling and redirects on kratos service??
+deleting the selected school doesn't clear it from local storage.
+once again unable to pass empty string as description on edit - it gets ignored instead of set as empty.
+
+user was only admin, added them as teacher; the teacher didn't appear in the create lesson list until refresh.
+
+
+internationalization, interactive map, bug fixes
