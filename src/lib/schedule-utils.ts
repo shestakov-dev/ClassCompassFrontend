@@ -170,3 +170,25 @@ export const isScheduleDefaultFilter = (
 
 	return true;
 };
+
+export const createLessonFilters = (
+	timestamp: Date,
+	ignoreWeek: boolean = false
+): LessonsControllerFindFilteredParams => {
+	const day = getCurrentDayEnum(timestamp);
+
+	const week = ignoreWeek ? undefined : getWeekParity(timestamp);
+
+	return {
+		day,
+		week,
+		ignoreWeek,
+		timestamp: new UTCDate(
+			timestamp.getFullYear(),
+			timestamp.getMonth(),
+			timestamp.getDate(),
+			timestamp.getHours(),
+			timestamp.getMinutes()
+		).toISOString(),
+	};
+};

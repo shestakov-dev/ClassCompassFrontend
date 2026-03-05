@@ -228,6 +228,7 @@ export const TimeGrid = ({
 						<LessonCard
 							key={lesson.id}
 							lesson={lesson}
+							style={lesson.style}
 							onClick={onLessonClick}
 							onEdit={onEdit}
 							onDelete={onDelete}

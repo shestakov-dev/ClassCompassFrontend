@@ -34,32 +34,29 @@ export type LessonCardVariant = VariantProps<
 	typeof lessonCardVariants
 >["variant"];
 
-type LayoutLesson = LessonEntity & {
-	computedStart: Date;
-	computedEnd: Date;
-	style: {
-		top: string;
-		height: string;
-		left: string;
-		width: string;
-	};
-};
-
 interface LessonCardProps {
-	lesson: LayoutLesson;
+	lesson: LessonEntity;
+	style?: React.CSSProperties;
 	onClick?: (lesson: LessonEntity) => void;
 	onEdit?: (lesson: LessonEntity) => void;
 	onDelete?: (lesson: LessonEntity) => void;
+	showMenu?: boolean;
+	showRoom?: boolean;
+	className?: string;
 }
 
 export function LessonCard({
 	lesson,
+	style,
 	onClick,
 	onEdit,
 	onDelete,
+	showMenu = true,
+	showRoom = true,
+	className: cardClassName,
 }: LessonCardProps) {
 	const variant = getLessonWeekVariant(lesson.lessonWeek);
-	const heightPx = parseFloat(lesson.style.height);
+	const heightPx = style?.height ? parseFloat(style.height as string) : 100;
 
 	const subjectName = lesson.subject?.name ?? "Unknown Subject";
 	const roomName = lesson.room?.name ?? "Unknown Room";
@@ -74,63 +71,72 @@ export function LessonCard({
 
 	return (
 		<Card
-			onClick={clickEvent => {
-				clickEvent.stopPropagation();
-				onClick?.(lesson);
-			}}
+			onClick={
+				onClick
+					? clickEvent => {
+							clickEvent.stopPropagation();
+							onClick(lesson);
+						}
+					: undefined
+			}
 			className={cn(
-				"absolute z-10 border-l-4 cursor-pointer transition-all hover:shadow-lg overflow-hidden",
+				style && "absolute z-10",
+				"border-l-4 transition-all overflow-hidden",
 				"p-0 gap-0 shadow-sm flex flex-col justify-center",
-				lessonCardVariants({ variant })
+				onClick && "cursor-pointer hover:shadow-lg",
+				lessonCardVariants({ variant }),
+				cardClassName
 			)}
-			style={lesson.style}>
+			style={style}>
 			<CardHeader className="p-2 pb-1 gap-1 relative">
 				<div className="flex items-start justify-between gap-1">
 					<CardTitle className="text-base font-semibold truncate leading-tight flex-1">
 						{subjectName}
 					</CardTitle>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-6 w-6 -mt-0.5 -mr-1"
-								onClick={e => e.stopPropagation()}>
-								<MoreVertical className="h-3.5 w-3.5" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem
-								onClick={e => {
-									e.stopPropagation();
-									onClick?.(lesson);
-								}}>
-								<Info className="h-4 w-4 mr-2" />
-								Info
-							</DropdownMenuItem>
-							{isAdmin && (
-								<>
-									<DropdownMenuItem
-										onClick={e => {
-											e.stopPropagation();
-											onEdit?.(lesson);
-										}}>
-										<Edit className="h-4 w-4 mr-2" />
-										Edit
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={e => {
-											e.stopPropagation();
-											onDelete?.(lesson);
-										}}
-										className="text-destructive focus:text-destructive">
-										<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
-										Delete
-									</DropdownMenuItem>
-								</>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
+					{showMenu && (
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-6 w-6 -mt-0.5 -mr-1"
+									onClick={e => e.stopPropagation()}>
+									<MoreVertical className="h-3.5 w-3.5" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem
+									onClick={e => {
+										e.stopPropagation();
+										onClick?.(lesson);
+									}}>
+									<Info className="h-4 w-4 mr-2" />
+									Info
+								</DropdownMenuItem>
+								{isAdmin && (
+									<>
+										<DropdownMenuItem
+											onClick={e => {
+												e.stopPropagation();
+												onEdit?.(lesson);
+											}}>
+											<Edit className="h-4 w-4 mr-2" />
+											Edit
+										</DropdownMenuItem>
+										<DropdownMenuItem
+											onClick={e => {
+												e.stopPropagation();
+												onDelete?.(lesson);
+											}}
+											className="text-destructive focus:text-destructive">
+											<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
+											Delete
+										</DropdownMenuItem>
+									</>
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
+					)}
 				</div>
 				<div className="flex items-center gap-1.5 text-xs font-medium">
 					<span>{timeRange}</span>
@@ -144,8 +150,8 @@ export function LessonCard({
 
 			<CardContent className="p-2 pt-0 text-xs opacity-80 space-y-0.5">
 				<div className="truncate">{className}</div>
-				<div className="truncate">{roomName}</div>
-				{heightPx > 70 && (
+				{showRoom && <div className="truncate">{roomName}</div>}
+				{(heightPx > 70 || !style) && (
 					<div className="truncate opacity-90">{teacherName}</div>
 				)}
 			</CardContent>

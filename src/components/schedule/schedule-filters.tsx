@@ -5,8 +5,9 @@ import {
 	ChevronsUpDown,
 	CalendarDays,
 	CalendarRange,
+	Clock,
 } from "lucide-react";
-import { set } from "date-fns";
+import { format, set } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -351,7 +352,7 @@ export function ScheduleFilters({
 							{mode === "date" ? (
 								<span className="flex items-center gap-1">
 									<CalendarIcon className="h-3 w-3" />
-									{date.toLocaleDateString()}
+									{format(date, "PPP")}
 								</span>
 							) : (
 								<span className="capitalize flex items-center gap-1">
@@ -485,18 +486,17 @@ export function ScheduleFilters({
 													},
 												}}
 												children={field => (
-													<Input
-														type="time"
-														value={
-															field.state.value
-														}
-														onChange={e =>
-															field.handleChange(
-																e.target.value
-															)
-														}
-														className="h-9"
-													/>
+														<div className="relative">
+															<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+															<Input
+																type="time"
+																value={field.state.value}
+																onChange={e =>
+																	field.handleChange(e.target.value)
+																}
+																className="h-9 pl-7"
+															/>
+														</div>
 												)}
 											/>
 										</div>
@@ -522,20 +522,17 @@ export function ScheduleFilters({
 														},
 													}}
 													children={field => (
-														<Input
-															type="time"
-															value={
-																field.state
-																	.value
-															}
-															onChange={e =>
-																field.handleChange(
-																	e.target
-																		.value
-																)
-															}
-															className="h-9"
-														/>
+														<div className="relative">
+															<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+															<Input
+																type="time"
+																value={field.state.value}
+																onChange={e =>
+																	field.handleChange(e.target.value)
+																}
+																className="h-9 pl-7"
+															/>
+														</div>
 													)}
 												/>
 											</div>
@@ -558,20 +555,17 @@ export function ScheduleFilters({
 														},
 													}}
 													children={field => (
-														<Input
-															type="time"
-															value={
-																field.state
-																	.value
-															}
-															onChange={e =>
-																field.handleChange(
-																	e.target
-																		.value
-																)
-															}
-															className="h-9"
-														/>
+														<div className="relative">
+															<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+															<Input
+																type="time"
+																value={field.state.value}
+																onChange={e =>
+																	field.handleChange(e.target.value)
+																}
+																className="h-9 pl-7"
+															/>
+														</div>
 													)}
 												/>
 											</div>
