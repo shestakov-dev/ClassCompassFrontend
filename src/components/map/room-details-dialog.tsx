@@ -18,6 +18,7 @@ import { LessonCard } from "@/components/schedule/lesson-card";
 import type { RoomOccupancy } from "@/types/map";
 import { format } from "date-fns";
 import { CheckCircle2, Info } from "lucide-react";
+import { UTCDate } from "@date-fns/utc";
 
 interface RoomDetailsDialogProps {
 	open: boolean;
@@ -57,7 +58,10 @@ export function RoomDetailsDialog({
 					</DialogTitle>
 
 					<DialogDescription>
-						{format(timestamp, "EEE, MMM d 'at' HH:mm")}
+						{format(
+							new UTCDate(timestamp),
+							"EEE, MMM d 'at' HH:mm"
+						)}
 					</DialogDescription>
 				</DialogHeader>
 
