@@ -9,7 +9,6 @@ import {
 	getDay,
 	getISOWeek,
 	isValid,
-	parse,
 	parseISO,
 	set,
 } from "date-fns";
@@ -30,9 +29,9 @@ export function formatFlatTime(isoString: string | Date): string {
 }
 
 export function createFlatDate(timeString: string): Date {
-	const baseDate = new UTCDate("1970-01-01T00:00:00Z");
+	const [hours, minutes] = timeString.split(":").map(Number);
 
-	return parse(timeString, "HH:mm", baseDate);
+	return new UTCDate(1970, 0, 1, hours, minutes, 0, 0);
 }
 
 export const getCurrentDayEnum = (date: Date = new Date()): Day => {
@@ -121,16 +120,38 @@ export const buildScheduleFilters = (
 
 		const safeDate = isValid(targetDate) ? targetDate : new Date();
 
-		base.day = getCurrentDayEnum(safeDate);
-		base.week = search.ignoreWeek ? undefined : getWeekParity(safeDate);
-
 		if (search.timestamp) {
+			// The backend derives day-of-week and week parity from the date portion,
+			// so we only need to forward the timestamp and ignoreWeek.
 			base.timestamp = search.timestamp;
+
+			base.from = undefined;
+			base.to = undefined;
 		} else if (search.from && search.to) {
+			// The backend derives day-of-week and week parity from from's date portion.
 			base.from = search.from;
 			base.to = search.to;
+
+			base.timestamp = undefined;
+		} else {
+			// Full-day date mode
+			// Use search.day directly — it was set from the user's local date
+			// when they navigated, so it correctly reflects their calendar day.
+			base.day = search.day ?? getCurrentDayEnum();
+
+			// For week parity, getISOWeek on a UTCDate gives the correct ISO
+			// week number for the chosen calendar date.
+			base.week = search.ignoreWeek
+				? undefined
+				: getWeekParity(new UTCDate(safeDate));
+
+			base.timestamp = undefined;
+			base.from = undefined;
+			base.to = undefined;
 		}
 	} else {
+		// Weekly mode: show all lessons for a given day (and optionally a specific
+		// week parity).
 		base.day = search.day ?? base.day ?? getCurrentDayEnum();
 		base.week = search.week ?? base.week;
 

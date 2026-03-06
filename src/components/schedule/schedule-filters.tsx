@@ -97,86 +97,91 @@ export function ScheduleFilters({
 	const timeSubMode = useStore(form.store, state => state.values.timeSubMode);
 	const genericWeek = useStore(form.store, state => state.values.genericWeek);
 
-	const computeParams = (
-		targetMode: ScheduleMode,
-		targetTimeSubMode: TimeSubMode,
-		targetAtTime: string,
-		targetRangeStart: string,
-		targetRangeEnd: string,
-		targetGenericDay: Day,
-		targetGenericWeek: LessonWeek,
-		targetDate: Date
-	): Partial<LessonsControllerFindFilteredParams> => {
-		const nextParams: Partial<LessonsControllerFindFilteredParams> = {};
+	const computeParams = useCallback(
+		(
+			targetMode: ScheduleMode,
+			targetTimeSubMode: TimeSubMode,
+			targetAtTime: string,
+			targetRangeStart: string,
+			targetRangeEnd: string,
+			targetGenericDay: Day,
+			targetGenericWeek: LessonWeek,
+			targetDate: Date
+		): Partial<LessonsControllerFindFilteredParams> => {
+			const nextParams: Partial<LessonsControllerFindFilteredParams> = {};
 
-		if (targetMode === "date") {
-			if (targetTimeSubMode === "full-day") {
+			if (targetMode === "date") {
+				if (targetTimeSubMode === "full-day") {
+					nextParams.timestamp = undefined;
+					nextParams.from = undefined;
+					nextParams.to = undefined;
+				} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
+					const [hours, minutes] = targetAtTime
+						.split(":")
+						.map(Number);
+
+					const utcTargetDate = new UTCDate(targetDate);
+
+					const dateWithTime = set(utcTargetDate, {
+						hours,
+						minutes,
+						seconds: 0,
+						milliseconds: 0,
+					});
+
+					nextParams.timestamp = dateWithTime.toISOString();
+
+					nextParams.from = undefined;
+					nextParams.to = undefined;
+				} else if (
+					targetTimeSubMode === "range" &&
+					targetRangeStart &&
+					targetRangeEnd
+				) {
+					const [startHour, startMinute] = targetRangeStart
+						.split(":")
+						.map(Number);
+					const [endHour, endMinute] = targetRangeEnd
+						.split(":")
+						.map(Number);
+
+					const utcTargetDate = new UTCDate(targetDate);
+
+					const fromDate = set(utcTargetDate, {
+						hours: startHour,
+						minutes: startMinute,
+						seconds: 0,
+						milliseconds: 0,
+					});
+					const toDate = set(utcTargetDate, {
+						hours: endHour,
+						minutes: endMinute,
+						seconds: 0,
+						milliseconds: 0,
+					});
+
+					nextParams.from = fromDate.toISOString();
+					nextParams.to = toDate.toISOString();
+
+					nextParams.timestamp = undefined;
+				}
+			} else {
+				nextParams.day = targetGenericDay;
+				nextParams.week =
+					targetGenericWeek === LessonWeek.every
+						? undefined
+						: targetGenericWeek;
+
 				nextParams.timestamp = undefined;
 				nextParams.from = undefined;
 				nextParams.to = undefined;
-			} else if (targetTimeSubMode === "timestamp" && targetAtTime) {
-				const [hours, minutes] = targetAtTime.split(":").map(Number);
-
-				const utcTargetDate = new UTCDate(targetDate);
-
-				const dateWithTime = set(utcTargetDate, {
-					hours,
-					minutes,
-					seconds: 0,
-					milliseconds: 0,
-				});
-
-				nextParams.timestamp = dateWithTime.toISOString();
-
-				nextParams.from = undefined;
-				nextParams.to = undefined;
-			} else if (
-				targetTimeSubMode === "range" &&
-				targetRangeStart &&
-				targetRangeEnd
-			) {
-				const [startHour, startMinute] = targetRangeStart
-					.split(":")
-					.map(Number);
-				const [endHour, endMinute] = targetRangeEnd
-					.split(":")
-					.map(Number);
-
-				const utcTargetDate = new UTCDate(targetDate);
-
-				const fromDate = set(utcTargetDate, {
-					hours: startHour,
-					minutes: startMinute,
-					seconds: 0,
-					milliseconds: 0,
-				});
-				const toDate = set(utcTargetDate, {
-					hours: endHour,
-					minutes: endMinute,
-					seconds: 0,
-					milliseconds: 0,
-				});
-
-				nextParams.from = fromDate.toISOString();
-				nextParams.to = toDate.toISOString();
-
-				nextParams.timestamp = undefined;
+				nextParams.ignoreWeek = undefined;
 			}
-		} else {
-			nextParams.day = targetGenericDay;
-			nextParams.week =
-				targetGenericWeek === LessonWeek.every
-					? undefined
-					: targetGenericWeek;
 
-			nextParams.timestamp = undefined;
-			nextParams.from = undefined;
-			nextParams.to = undefined;
-			nextParams.ignoreWeek = undefined;
-		}
-
-		return nextParams;
-	};
+			return nextParams;
+		},
+		[]
+	);
 
 	const handleFilterUpdate = useCallback(
 		(values: typeof form.state.values) => {
@@ -196,12 +201,13 @@ export function ScheduleFilters({
 				...newParameters,
 			}));
 		},
-		[form, mode, genericDay, date, setFilters]
+		[form, computeParams, mode, genericDay, date, setFilters]
 	);
 
+	// Update filters when external props (mode, date, or genericDay) change
 	useEffect(() => {
 		handleFilterUpdate(form.state.values);
-	}, [handleFilterUpdate, form.state.values]);
+	}, [mode, date, genericDay, form, handleFilterUpdate]);
 
 	const handleGenericDayChange = (value: string) => {
 		setGenericDay(value as Day);
@@ -486,17 +492,23 @@ export function ScheduleFilters({
 													},
 												}}
 												children={field => (
-														<div className="relative">
-															<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-															<Input
-																type="time"
-																value={field.state.value}
-																onChange={e =>
-																	field.handleChange(e.target.value)
-																}
-																className="h-9 pl-7"
-															/>
-														</div>
+													<div className="relative">
+														<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+														<Input
+															type="time"
+															value={
+																field.state
+																	.value
+															}
+															onChange={e =>
+																field.handleChange(
+																	e.target
+																		.value
+																)
+															}
+															className="h-9 pl-7"
+														/>
+													</div>
 												)}
 											/>
 										</div>
@@ -526,9 +538,15 @@ export function ScheduleFilters({
 															<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
 															<Input
 																type="time"
-																value={field.state.value}
+																value={
+																	field.state
+																		.value
+																}
 																onChange={e =>
-																	field.handleChange(e.target.value)
+																	field.handleChange(
+																		e.target
+																			.value
+																	)
 																}
 																className="h-9 pl-7"
 															/>
@@ -559,9 +577,15 @@ export function ScheduleFilters({
 															<Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
 															<Input
 																type="time"
-																value={field.state.value}
+																value={
+																	field.state
+																		.value
+																}
 																onChange={e =>
-																	field.handleChange(e.target.value)
+																	field.handleChange(
+																		e.target
+																			.value
+																	)
 																}
 																className="h-9 pl-7"
 															/>
