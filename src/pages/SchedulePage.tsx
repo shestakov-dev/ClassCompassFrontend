@@ -166,8 +166,20 @@ export default function SchedulePage() {
 	const handleDateChange = useCallback(
 		(newDate: Date) => {
 			const dayEnum = getCurrentDayEnum(newDate);
+
+			// Preserve the local date without timezone conversion
+			const utcDate = new UTCDate(
+				newDate.getFullYear(),
+				newDate.getMonth(),
+				newDate.getDate(),
+				0,
+				0,
+				0,
+				0
+			);
+
 			const updates: Partial<typeof search> = {
-				date: newDate.toISOString(),
+				date: utcDate.toISOString(),
 				day: dayEnum,
 			};
 
