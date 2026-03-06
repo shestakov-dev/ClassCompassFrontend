@@ -428,7 +428,7 @@ export function ScheduleFilters({
 										<DatePicker
 											date={date}
 											setDate={setDate}
-											className="w-full h-9"
+											className="h-9"
 										/>
 									</div>
 									<div className="space-y-1">

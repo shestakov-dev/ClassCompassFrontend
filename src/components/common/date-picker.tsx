@@ -25,7 +25,7 @@ export function DatePicker({
 	setDate,
 	className,
 	align = "start",
-	variant = "ghost",
+	variant = "outline",
 	size = "sm",
 }: DatePickerProps) {
 	return (

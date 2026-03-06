@@ -196,20 +196,15 @@ export const createLessonFilters = (
 	timestamp: Date,
 	ignoreWeek: boolean = false
 ): LessonsControllerFindFilteredParams => {
-	const day = getCurrentDayEnum(timestamp);
+	const utcTimestamp = new UTCDate(timestamp);
 
-	const week = ignoreWeek ? undefined : getWeekParity(timestamp);
+	const day = getCurrentDayEnum(utcTimestamp);
+	const week = ignoreWeek ? undefined : getWeekParity(utcTimestamp);
 
 	return {
 		day,
 		week,
 		ignoreWeek,
-		timestamp: new UTCDate(
-			timestamp.getFullYear(),
-			timestamp.getMonth(),
-			timestamp.getDate(),
-			timestamp.getHours(),
-			timestamp.getMinutes()
-		).toISOString(),
+		timestamp: set(utcTimestamp, { seconds: 0, milliseconds: 0 }).toISOString(),
 	};
 };

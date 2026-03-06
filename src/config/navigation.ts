@@ -21,6 +21,12 @@ export const NAV_ITEMS: readonly MainNavItem[] = [
 		type: "link",
 	},
 	{
+		title: "Map",
+		href: "/map",
+		visibility: "authenticated",
+		type: "link",
+	},
+	{
 		title: "Infrastructure",
 		href: "/infrastructure",
 		visibility: "admin",
