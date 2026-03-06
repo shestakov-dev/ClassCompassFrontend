@@ -1,9 +1,7 @@
 import type { LessonEntity, RoomEntity } from "@/api/generated/models";
 
-export interface RoomOccupancy {
-	room: RoomEntity;
-	occupied: boolean;
-	currentLessons: LessonEntity;
-}
+export type RoomOccupancy =
+	| { room: RoomEntity; occupied: true; currentLesson: LessonEntity }
+	| { room: RoomEntity; occupied: false };
 
 export type RoomOccupancyMap = Record<string, RoomOccupancy>;
