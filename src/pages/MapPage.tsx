@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-import { keepPreviousData } from "@tanstack/react-query";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { useSchool } from "@/context/school-context";
 import { SchoolRequired } from "@/components/common/school-required";
 import { Spinner } from "@/components/ui/spinner";
@@ -11,11 +11,17 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Map as MapIcon } from "lucide-react";
+import { Map as MapIcon, ImageOff, Upload } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints/buildings/buildings";
-import { useFloorsControllerFindAllByBuilding } from "@/api/generated/endpoints/floors/floors";
-import { useFloorsControllerGetFloorPlan } from "@/api/generated/endpoints/floors/floors";
+import {
+	useFloorsControllerFindAllByBuilding,
+	useFloorsControllerGetFloorPlan,
+	useFloorsControllerUploadFloorPlan,
+	useFloorsControllerDeleteFloorPlan,
+	getFloorsControllerFindAllByBuildingQueryKey,
+	getFloorsControllerGetFloorPlanQueryKey,
+} from "@/api/generated/endpoints/floors/floors";
 import { useRoomsControllerFindAllByFloor } from "@/api/generated/endpoints/rooms/rooms";
 import { useLessonsControllerFindFiltered } from "@/api/generated/endpoints/lessons/lessons";
 import { BuildingSelector } from "@/components/map/building-selector";
@@ -27,6 +33,13 @@ import type { RoomOccupancy, RoomOccupancyMap } from "@/types/map";
 import type { FloorEntity } from "@/api/generated/models";
 import { createLessonFilters } from "@/lib/schedule-utils";
 import { Route } from "@/routes/map";
+import { Button } from "@/components/ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 export default function MapPage() {
 	const { schoolId } = useSchool();
@@ -226,6 +239,73 @@ export default function MapPage() {
 		[sortedFloors, selectedFloorId, handleFloorSelect]
 	);
 
+	const queryClient = useQueryClient();
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const uploadFloorPlan = useFloorsControllerUploadFloorPlan({
+		mutation: {
+			onSuccess: (_data, variables) => {
+				toast.success("Floor plan uploaded");
+
+				if (selectedBuildingId) {
+					queryClient.invalidateQueries({
+						queryKey:
+							getFloorsControllerFindAllByBuildingQueryKey(
+								selectedBuildingId
+							),
+					});
+				}
+
+				queryClient.invalidateQueries({
+					queryKey: getFloorsControllerGetFloorPlanQueryKey(
+						variables.id
+					),
+				});
+
+				queryClient.removeQueries({ queryKey: ["floor-plan-svg"] });
+			},
+			onError: () => toast.error("Failed to upload floor plan"),
+		},
+	});
+
+	const deleteFloorPlan = useFloorsControllerDeleteFloorPlan({
+		mutation: {
+			onSuccess: (_data, variables) => {
+				toast.success("Floor plan removed");
+
+				if (selectedBuildingId) {
+					queryClient.invalidateQueries({
+						queryKey:
+							getFloorsControllerFindAllByBuildingQueryKey(
+								selectedBuildingId
+							),
+					});
+				}
+
+				queryClient.removeQueries({
+					queryKey: getFloorsControllerGetFloorPlanQueryKey(
+						variables.id
+					),
+				});
+
+				queryClient.removeQueries({ queryKey: ["floor-plan-svg"] });
+			},
+			onError: () => toast.error("Failed to remove floor plan"),
+		},
+	});
+
+	const handleFloorPlanUpload = (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const file = event.target.files?.[0];
+
+		if (file && selectedFloorId) {
+			uploadFloorPlan.mutate({ id: selectedFloorId, data: { file } });
+		}
+
+		event.target.value = "";
+	};
+
 	const isLoading = buildingsLoading || floorsLoading;
 
 	return (
@@ -267,6 +347,58 @@ export default function MapPage() {
 									</>
 								)}
 							</>
+						)}
+
+						{selectedFloorId && (
+							<div className="ml-auto flex items-center gap-1">
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8"
+											onClick={() =>
+												fileInputRef.current?.click()
+											}
+											disabled={
+												uploadFloorPlan.isPending
+											}>
+											<Upload className="h-4 w-4" />
+										</Button>
+									</TooltipTrigger>
+
+									<TooltipContent>
+										{selectedFloor?.floorPlanETag
+											? "Replace floor plan"
+											: "Upload floor plan"}
+									</TooltipContent>
+								</Tooltip>
+
+								{selectedFloor?.floorPlanETag && (
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
+												onClick={() =>
+													deleteFloorPlan.mutate({
+														id: selectedFloorId,
+													})
+												}
+												disabled={
+													deleteFloorPlan.isPending
+												}>
+												<ImageOff className="h-4 w-4" />
+											</Button>
+										</TooltipTrigger>
+
+										<TooltipContent>
+											Remove floor plan
+										</TooltipContent>
+									</Tooltip>
+								)}
+							</div>
 						)}
 					</div>
 
@@ -386,6 +518,36 @@ export default function MapPage() {
 									</EmptyContent>
 								</Empty>
 							</div>
+						) : selectedFloor && !selectedFloor.floorPlanETag ? (
+							<div className="flex-1 flex items-center justify-center">
+								<Empty>
+									<EmptyHeader>
+										<EmptyMedia variant="icon">
+											<MapIcon className="h-10 w-10 text-muted-foreground/50" />
+										</EmptyMedia>
+
+										<EmptyTitle>No floor plan</EmptyTitle>
+
+										<EmptyDescription>
+											This floor doesn't have a floor plan
+											yet.
+										</EmptyDescription>
+									</EmptyHeader>
+
+									<EmptyContent>
+										<Button
+											onClick={() =>
+												fileInputRef.current?.click()
+											}
+											disabled={
+												uploadFloorPlan.isPending
+											}>
+											<Upload className="h-4 w-4" />
+											Upload floor plan
+										</Button>
+									</EmptyContent>
+								</Empty>
+							</div>
 						) : (
 							<FloorPlanViewer
 								floorPlanUrl={floorPlanData?.url}
@@ -405,6 +567,14 @@ export default function MapPage() {
 					roomData={selectedRoomData}
 					roomDataAttribute={selectedRoomAttribute}
 					timestamp={timestamp}
+				/>
+
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept="image/svg+xml"
+					className="hidden"
+					onChange={handleFloorPlanUpload}
 				/>
 			</div>
 		</SchoolRequired>

@@ -18,12 +18,12 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		plugins: [
-			react(),
 			tailwindcss({ optimize: true }),
 			tanstackRouter({
 				target: "react",
 				autoCodeSplitting: true,
 			}),
+			react(),
 		],
 		resolve: {
 			alias: {

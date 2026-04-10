@@ -10,6 +10,10 @@ import {
 	useFloorsControllerCreate,
 	useFloorsControllerUpdate,
 	useFloorsControllerRemove,
+	useFloorsControllerUploadFloorPlan,
+	useFloorsControllerDeleteFloorPlan,
+	getFloorsControllerGetFloorPlanQueryKey,
+	getFloorsControllerFindAllByBuildingQueryKey,
 } from "@/api/generated/endpoints/floors/floors";
 import {
 	useRoomsControllerCreate,
@@ -283,6 +287,90 @@ export function useInfrastructureMutations(schoolId: string | undefined) {
 				onSuccess: () => toast.success("Room deleted"),
 				onError,
 				onSettled,
+			},
+		}),
+
+		uploadFloorPlan: useFloorsControllerUploadFloorPlan({
+			mutation: {
+				meta: {
+					operationContext: "upload floor plan",
+				},
+				onSuccess: (_data, variables) => {
+					toast.success("Floor plan uploaded");
+
+					onSettled();
+
+					// Find the buildingId for this floor from cache so we can invalidate
+					// the floors-by-building query used by the map page
+					const buildings =
+						queryClient.getQueryData<BuildingEntity[]>(queryKey);
+
+					const buildingId = buildings?.find(building =>
+						building.floors?.some(
+							floor => floor.id === variables.id
+						)
+					)?.id;
+
+					if (buildingId) {
+						queryClient.invalidateQueries({
+							queryKey:
+								getFloorsControllerFindAllByBuildingQueryKey(
+									buildingId
+								),
+						});
+					}
+
+					queryClient.invalidateQueries({
+						queryKey: getFloorsControllerGetFloorPlanQueryKey(
+							variables.id
+						),
+					});
+
+					queryClient.removeQueries({ queryKey: ["floor-plan-svg"] });
+				},
+				onError: () => toast.error("Failed to upload floor plan"),
+			},
+		}),
+
+		deleteFloorPlan: useFloorsControllerDeleteFloorPlan({
+			mutation: {
+				meta: {
+					operationContext: "delete floor plan",
+				},
+				onSuccess: (_data, variables) => {
+					toast.success("Floor plan removed");
+
+					onSettled();
+
+					const buildings =
+						queryClient.getQueryData<BuildingEntity[]>(queryKey);
+
+					const buildingId = buildings?.find(building =>
+						building.floors?.some(
+							floor => floor.id === variables.id
+						)
+					)?.id;
+
+					if (buildingId) {
+						queryClient.invalidateQueries({
+							queryKey:
+								getFloorsControllerFindAllByBuildingQueryKey(
+									buildingId
+								),
+						});
+					}
+
+					// removeQueries so the map page doesn't
+					// hold a stale presigned URL when enabled flips to false
+					queryClient.removeQueries({
+						queryKey: getFloorsControllerGetFloorPlanQueryKey(
+							variables.id
+						),
+					});
+
+					queryClient.removeQueries({ queryKey: ["floor-plan-svg"] });
+				},
+				onError: () => toast.error("Failed to remove floor plan"),
 			},
 		}),
 	};
