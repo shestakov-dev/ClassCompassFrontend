@@ -322,6 +322,19 @@ export default function InfrastructurePage() {
 															room.name
 														)
 													}
+													onUploadPlan={file =>
+														mutations.uploadFloorPlan.mutate(
+															{
+																id: floor.id,
+																data: { file },
+															}
+														)
+													}
+													onDeletePlan={() =>
+														mutations.deleteFloorPlan.mutate(
+															{ id: floor.id }
+														)
+													}
 												/>
 											))}
 										<DashedButton

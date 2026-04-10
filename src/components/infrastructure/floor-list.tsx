@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import {
 	ChevronRight,
 	Edit2,
@@ -6,6 +7,8 @@ import {
 	DoorOpen,
 	MoreVertical,
 	Layers,
+	Upload,
+	ImageOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +28,8 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DashedButton } from "@/components/common/dashed-button";
@@ -65,6 +70,12 @@ function RoomItem({
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
+					<DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+						Actions
+					</DropdownMenuLabel>
+
+					<DropdownMenuSeparator />
+
 					<DropdownMenuItem
 						onClick={onEdit}
 						className="cursor-pointer">
@@ -91,6 +102,8 @@ export function FloorItem({
 	onAddRoom,
 	onEditRoom,
 	onDeleteRoom,
+	onUploadPlan,
+	onDeletePlan,
 }: {
 	floor: FloorEntity;
 	isOpen: boolean;
@@ -100,7 +113,11 @@ export function FloorItem({
 	onAddRoom: () => void;
 	onEditRoom: (room: RoomEntity) => void;
 	onDeleteRoom: (room: RoomEntity) => void;
+	onUploadPlan: (file: File) => void;
+	onDeletePlan: () => void;
 }) {
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
 	return (
 		<Collapsible
 			open={isOpen}
@@ -139,29 +156,77 @@ export function FloorItem({
 						</div>
 					</div>
 				</CollapsibleTrigger>
+
 				<div className="flex items-center gap-1">
-					<Button
-						variant="ghost"
-						size="icon-sm"
-						className="text-muted-foreground hover:text-foreground hover:bg-accent"
-						onClick={e => {
-							e.stopPropagation();
+					<input
+						ref={fileInputRef}
+						type="file"
+						accept="image/svg+xml"
+						className="hidden"
+						onChange={e => {
+							const file = e.target.files?.[0];
 
-							onEditFloor();
-						}}>
-						<Edit2 className="h-4 w-4" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon-sm"
-						className="text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
-						onClick={e => {
-							e.stopPropagation();
+							if (file) {
+								onUploadPlan(file);
+							}
 
-							onDeleteFloor();
-						}}>
-						<Trash2 className="h-4 w-4" />
-					</Button>
+							e.target.value = "";
+						}}
+					/>
+
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								className="text-muted-foreground hover:text-foreground hover:bg-accent"
+								onClick={e => e.stopPropagation()}>
+								<MoreVertical className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+
+						<DropdownMenuContent align="end">
+							<DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+								Actions
+							</DropdownMenuLabel>
+
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem
+								className="cursor-pointer"
+								onClick={() => fileInputRef.current?.click()}>
+								<Upload className="mr-2 h-3.5 w-3.5" />
+								{floor.floorPlanETag
+									? "Replace floor plan"
+									: "Upload floor plan"}
+							</DropdownMenuItem>
+
+							{floor.floorPlanETag && (
+								<DropdownMenuItem
+									className="cursor-pointer text-destructive focus:text-destructive"
+									onClick={onDeletePlan}>
+									<ImageOff className="mr-2 h-3.5 w-3.5 text-destructive" />
+									Remove floor plan
+								</DropdownMenuItem>
+							)}
+
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem
+								className="cursor-pointer"
+								onClick={onEditFloor}>
+								<Edit2 className="mr-2 h-3.5 w-3.5" /> Edit
+								floor
+							</DropdownMenuItem>
+
+							<DropdownMenuItem
+								className="text-destructive focus:text-destructive cursor-pointer"
+								onClick={onDeleteFloor}>
+								<Trash2 className="mr-2 h-3.5 w-3.5 text-destructive" />
+								Delete floor
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 
@@ -189,14 +254,17 @@ export function FloorItem({
 						</Empty>
 					) : (
 						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-							{floor.rooms.map(room => (
-								<RoomItem
-									key={room.id}
-									room={room}
-									onEdit={() => onEditRoom(room)}
-									onDelete={() => onDeleteRoom(room)}
-								/>
-							))}
+							{floor.rooms
+								.slice()
+								.sort((a, b) => a.name.localeCompare(b.name))
+								.map(room => (
+									<RoomItem
+										key={room.id}
+										room={room}
+										onEdit={() => onEditRoom(room)}
+										onDelete={() => onDeleteRoom(room)}
+									/>
+								))}
 							<DashedButton
 								onClick={onAddRoom}
 								className="h-full min-h-12 flex items-center justify-center gap-2">

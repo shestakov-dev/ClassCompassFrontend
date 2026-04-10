@@ -19,6 +19,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
 	DropdownMenuTrigger,
 	DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -72,6 +73,12 @@ export function ClassCard({
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
+							<DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+								Actions
+							</DropdownMenuLabel>
+
+							<DropdownMenuSeparator />
+
 							<DropdownMenuItem onClick={onAssign}>
 								<UserPlus className="mr-2 h-4 w-4" />
 								Assign Students
@@ -85,7 +92,7 @@ export function ClassCard({
 							</DropdownMenuItem>
 
 							<DropdownMenuItem
-								className="text-destructive"
+								className="text-destructive focus:text-destructive cursor-pointer"
 								onClick={onDelete}>
 								<Trash2 className="mr-2 h-4 w-4 text-destructive" />
 								Delete

@@ -17,6 +17,8 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -250,6 +252,12 @@ export function LessonListView({
 																</Button>
 															</DropdownMenuTrigger>
 															<DropdownMenuContent align="end">
+																<DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+																	Actions
+																</DropdownMenuLabel>
+
+																<DropdownMenuSeparator />
+
 																<DropdownMenuItem
 																	onClick={e => {
 																		e.stopPropagation();
@@ -277,8 +285,8 @@ export function LessonListView({
 																			lesson
 																		);
 																	}}
-																	className="text-destructive focus:text-destructive">
-																	<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
+																	className="text-destructive focus:text-destructive cursor-pointer">
+																	<Trash2 className="h-4 w-4 mr-2 text-destructive" />
 																	Delete
 																</DropdownMenuItem>
 															</DropdownMenuContent>

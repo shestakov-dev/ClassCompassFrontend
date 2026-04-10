@@ -74,7 +74,7 @@ export function InfrastructureMobileMenu({
 							)}>
 							<span className="truncate">{building.name}</span>
 
-							<div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+							<div className="flex gap-1">
 								<Button
 									variant="ghost"
 									size="icon-sm"
@@ -86,7 +86,7 @@ export function InfrastructureMobileMenu({
 								<Button
 									variant="ghost"
 									size="icon-sm"
-									className="h-6 w-6 text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
+									className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
 									onClick={e =>
 										handleDelete(
 											e,

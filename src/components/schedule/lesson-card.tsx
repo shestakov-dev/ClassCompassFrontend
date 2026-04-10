@@ -5,6 +5,8 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -104,7 +106,14 @@ export function LessonCard({
 									<MoreVertical className="h-3.5 w-3.5" />
 								</Button>
 							</DropdownMenuTrigger>
+
 							<DropdownMenuContent align="end">
+								<DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+									Actions
+								</DropdownMenuLabel>
+
+								<DropdownMenuSeparator />
+
 								<DropdownMenuItem
 									onClick={e => {
 										e.stopPropagation();
@@ -113,6 +122,7 @@ export function LessonCard({
 									<Info className="h-4 w-4 mr-2" />
 									Info
 								</DropdownMenuItem>
+
 								{isAdmin && (
 									<>
 										<DropdownMenuItem
@@ -123,13 +133,14 @@ export function LessonCard({
 											<Edit className="h-4 w-4 mr-2" />
 											Edit
 										</DropdownMenuItem>
+
 										<DropdownMenuItem
 											onClick={e => {
 												e.stopPropagation();
 												onDelete?.(lesson);
 											}}
-											className="text-destructive focus:text-destructive">
-											<Trash2 className="h-4 w-4 mr-2 text-destructive focus:text-destructive" />
+											className="text-destructive focus:text-destructive cursor-pointer">
+											<Trash2 className="h-4 w-4 mr-2 text-destructive" />
 											Delete
 										</DropdownMenuItem>
 									</>

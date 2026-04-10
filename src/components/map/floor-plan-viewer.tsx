@@ -241,7 +241,7 @@ export function FloorPlanViewer({
 
 					text.style.fontSize = `${fontSize}px`;
 					text.style.fontWeight = "700";
-					text.style.fill = "currentColor";
+					text.style.fill = "var(--primary)";
 					text.style.pointerEvents = "none";
 					text.style.userSelect = "none";
 					text.style.transition = "transform 0.35s ease-in-out";
