@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@ory/client-fetch': ^1.22.15
+
 importers:
 
   .:
@@ -818,9 +821,6 @@ packages:
 
   '@orval/zod@7.21.0':
     resolution: {integrity: sha512-bTMAxdtJ8/KxDusTRL0u57YN7H0VWim8pbWj5eQYwo3xABs+puYdF3kKZ2c2biB/jUwgJJEnVkwbZV8XjxaWYw==}
-
-  '@ory/client-fetch@1.21.5':
-    resolution: {integrity: sha512-MV0C14bCi524JgZgp2eumZrLb8cGCrliaAfR5+chaQBwxt2XzqcLY1CxHMGIXDmQU2vEK9wUgmSbWDVgNk/JWw==}
 
   '@ory/client-fetch@1.22.34':
     resolution: {integrity: sha512-4K7mOaLbII+4/ste8ZFPnqmCqHyAcXyHLpbLlqhwCrc+0JZAHeTzsy8oyVhRqu+2PRChAo/IgLn9Hlqpl7QsBg==}
@@ -4542,14 +4542,12 @@ snapshots:
       - supports-color
       - typescript
 
-  '@ory/client-fetch@1.21.5': {}
-
   '@ory/client-fetch@1.22.34': {}
 
   '@ory/elements-react@1.1.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3)':
     dependencies:
       '@marsidev/react-turnstile': 1.5.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@ory/client-fetch': 1.21.5
+      '@ory/client-fetch': 1.22.34
       '@radix-ui/react-dropdown-menu': 2.1.14(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@radix-ui/react-switch': 1.2.4(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       class-variance-authority: 0.7.1
