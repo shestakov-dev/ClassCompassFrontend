@@ -11,6 +11,8 @@ export const oryConfig: OryClientConfiguration = {
 	},
 	project: {
 		name: "ClassCompass",
+		enabled_locales: ["en"],
+		translations: [],
 		default_locale: "en",
 		default_redirect_url: "/",
 		locale_behavior: "force_default",
