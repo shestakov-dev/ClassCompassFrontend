@@ -73,10 +73,7 @@ export function InfrastructureDialogs({
 			} else if (type === "floor") {
 				onSubmit({
 					number: Number(value.number),
-					description:
-						value.description === ""
-							? undefined
-							: value.description,
+					description: value.description,
 				});
 			} else if (type === "room") {
 				onSubmit({ name: value.name });
