@@ -295,7 +295,7 @@ export const createUserColumns = ({
 							</TooltipTrigger>
 							{currentUser?.id === user.id && user.isAdmin && (
 								<TooltipContent>
-									<p>You cannot demote yourself from admin</p>
+									<p>You cannot demote yourself</p>
 								</TooltipContent>
 							)}
 						</Tooltip>
@@ -304,12 +304,24 @@ export const createUserColumns = ({
 							Send invite
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							onClick={() => onDelete(user)}
-						className="text-destructive focus:text-destructive cursor-pointer">
-							<Trash2 className="mr-2 h-4 w-4 text-destructive" />
-							Delete user
-						</DropdownMenuItem>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div>
+									<DropdownMenuItem
+										onClick={() => onDelete(user)}
+										disabled={currentUser?.id === user.id}
+										className="text-destructive focus:text-destructive cursor-pointer">
+										<Trash2 className="mr-2 h-4 w-4 text-destructive" />
+										Delete user
+									</DropdownMenuItem>
+								</div>
+							</TooltipTrigger>
+							{currentUser?.id === user.id && (
+								<TooltipContent>
+									<p>You cannot delete yourself</p>
+								</TooltipContent>
+							)}
+						</Tooltip>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);

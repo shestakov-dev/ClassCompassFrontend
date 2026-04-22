@@ -112,7 +112,9 @@ export function CreateUserDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									First Name
 								</FieldLabel>
 								<Input
@@ -145,7 +147,9 @@ export function CreateUserDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Last Name
 								</FieldLabel>
 								<Input
@@ -178,7 +182,9 @@ export function CreateUserDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Email
 								</FieldLabel>
 								<Input
@@ -306,7 +312,9 @@ export function EditUserDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									First Name
 								</FieldLabel>
 								<Input
@@ -339,7 +347,9 @@ export function EditUserDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Last Name
 								</FieldLabel>
 								<Input
@@ -372,7 +382,9 @@ export function EditUserDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Email
 								</FieldLabel>
 								<Input
@@ -1092,7 +1104,7 @@ export function ToggleAdminDialog({
 						</TooltipTrigger>
 						{isSelf && !isPromoting && (
 							<TooltipContent>
-								<p>You cannot demote yourself from admin</p>
+								<p>You cannot demote yourself</p>
 							</TooltipContent>
 						)}
 					</Tooltip>

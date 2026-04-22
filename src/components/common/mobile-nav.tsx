@@ -1,6 +1,6 @@
 import { useState, type PropsWithChildren } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
+import { Menu, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Sheet,
@@ -20,10 +20,12 @@ import {
 import { Logo } from "@/components/common/nav-logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 import { SchoolSelector } from "@/components/common/school-selector";
+import { useSession } from "@/context/session-context";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
 	const { navGroups, navLinks, navButtons } = useNavigationItems();
+	const { isAuthenticated, user } = useSession();
 
 	const handleLinkClick = () => {
 		setOpen(false);
@@ -32,7 +34,7 @@ export function MobileNav() {
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
 			<SheetTrigger asChild>
-				<Button variant="ghost" size="icon" className="md:hidden">
+				<Button variant="ghost" size="icon" className="nav:hidden">
 					<Menu className="h-5 w-5" />
 					<span className="sr-only">Toggle menu</span>
 				</Button>
@@ -40,14 +42,15 @@ export function MobileNav() {
 
 			<SheetContent
 				side="left"
-				className="w-75 sm:w-100 [&>button]:top-5.5">
-				<SheetHeader className="text-left border-b pb-4 mb-4 px-6">
+				className="w-75 sm:w-100 [&>button]:top-5.5 overflow-hidden">
+				<SheetHeader className="text-left border-b pb-4 px-6">
 					<SheetTitle asChild>
 						<Logo onClick={handleLinkClick} />
 					</SheetTitle>
 				</SheetHeader>
 
-				<div className="flex flex-col px-6">
+				{/* Scrollable middle */}
+				<div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
 					<div className="mb-4">
 						<p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
 							Current School
@@ -93,10 +96,46 @@ export function MobileNav() {
 							</Link>
 						))}
 					</div>
+				</div>
 
-					{/* Action Buttons */}
-					<div className="flex flex-col gap-3 mt-6">
-						{navButtons.map(item => (
+				{/* Action Buttons */}
+				<div className="px-6 pb-2 flex flex-col gap-3">
+					{isAuthenticated ? (
+						<>
+							{user && (
+								<div className="px-1 py-1">
+									<p className="text-sm font-medium leading-none">
+										{user.firstName} {user.lastName}
+									</p>
+									<p className="text-xs text-muted-foreground truncate mt-0.5">
+										{user.email}
+									</p>
+								</div>
+							)}
+							<Link
+								to="/settings"
+								onClick={handleLinkClick}
+								className="block"
+								activeProps={{
+									className:
+										"block [&>button]:bg-secondary [&>button]:border-secondary",
+								}}>
+								<Button variant="outline" className="w-full">
+									<Settings className="mr-2 h-4 w-4" />
+									Settings
+								</Button>
+							</Link>
+							<Link to="/logout" onClick={handleLinkClick}>
+								<Button
+									variant="outline"
+									className="w-full text-destructive hover:text-destructive">
+									<LogOut className="mr-2 h-4 w-4 text-destructive" />
+									Log out
+								</Button>
+							</Link>
+						</>
+					) : (
+						navButtons.map(item => (
 							<Link
 								key={item.href}
 								to={item.href}
@@ -111,8 +150,8 @@ export function MobileNav() {
 									{item.title}
 								</Button>
 							</Link>
-						))}
-					</div>
+						))
+					)}
 				</div>
 
 				<SheetFooter className="px-6 pb-6">

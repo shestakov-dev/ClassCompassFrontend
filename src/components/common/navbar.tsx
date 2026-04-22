@@ -21,9 +21,12 @@ import { MobileNav } from "@/components/common/mobile-nav";
 import { Logo } from "@/components/common/nav-logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 import { SchoolSelector } from "@/components/common/school-selector";
+import { UserMenu } from "@/components/common/user-menu";
+import { useSession } from "@/context/session-context";
 
 export function Navbar() {
 	const { navGroups, navLinks, navButtons } = useNavigationItems();
+	const { isAuthenticated } = useSession();
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -31,12 +34,12 @@ export function Navbar() {
 				{/* Left Section */}
 				<div className="flex items-center gap-6">
 					{/* Mobile Navigation Trigger */}
-					<div className="md:hidden">
+					<div className="nav:hidden">
 						<MobileNav />
 					</div>
 
 					{/* Desktop Logo & Navigation */}
-					<div className="hidden md:flex items-center gap-6">
+					<div className="hidden nav:flex items-center gap-6">
 						<Logo />
 
 						<div className="flex items-center gap-1">
@@ -129,37 +132,40 @@ export function Navbar() {
 				</div>
 
 				{/* Center Section (only visible on small screens) */}
-				<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden">
+				<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 nav:hidden">
 					<Logo />
 				</div>
 
 				{/* Right Section */}
 				<div className="flex items-center gap-2">
-					<div className="hidden md:block">
+					<div className="hidden nav:block">
 						<SchoolSelector />
 					</div>
 
-					{navButtons.map(item => (
-						<Link key={item.href} to={item.href}>
-							<Button
-								variant={item.variant}
-								size="sm"
-								className="hidden md:inline-flex">
-								{item.title}
-							</Button>
-							{/* Use an Icon for smaller screens */}
-							<Button
-								variant={item.variant}
-								size="sm"
-								className="md:hidden">
-								{item.iconElement && (
-									<item.iconElement className="h-4 w-4" />
-								)}
-							</Button>
-						</Link>
-					))}
+					{isAuthenticated ? (
+						<UserMenu />
+					) : (
+						navButtons.map(item => (
+							<Link key={item.href} to={item.href}>
+								<Button
+									variant={item.variant}
+									size="sm"
+									className="hidden nav:inline-flex">
+									{item.title}
+								</Button>
+								<Button
+									variant={item.variant}
+									size="sm"
+									className="nav:hidden">
+									{item.iconElement && (
+										<item.iconElement className="h-4 w-4" />
+									)}
+								</Button>
+							</Link>
+						))
+					)}
 
-					<div className="hidden md:inline-flex">
+					<div className="hidden nav:inline-flex">
 						<ModeToggle />
 					</div>
 				</div>
