@@ -517,9 +517,7 @@ export function CreateLessonDialog({
 interface EditLessonDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onSubmit: (
-		data: UpdateLessonDto & { day?: string; classId?: string }
-	) => void;
+	onSubmit: (data: UpdateLessonDto) => void;
 	isLoading: boolean;
 	lesson: LessonEntity | null;
 	options: {

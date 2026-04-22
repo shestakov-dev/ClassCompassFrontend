@@ -6,11 +6,14 @@
  * OpenAPI spec version: 1.0
  */
 
-export type LessonsControllerFindFilteredDay =
-	(typeof LessonsControllerFindFilteredDay)[keyof typeof LessonsControllerFindFilteredDay];
+/**
+ * The lesson's day of the week
+ */
+export type UpdateLessonDtoDay =
+	(typeof UpdateLessonDtoDay)[keyof typeof UpdateLessonDtoDay];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const LessonsControllerFindFilteredDay = {
+export const UpdateLessonDtoDay = {
 	monday: "monday",
 	tuesday: "tuesday",
 	wednesday: "wednesday",

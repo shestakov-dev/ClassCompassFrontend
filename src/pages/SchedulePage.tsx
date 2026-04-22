@@ -33,11 +33,6 @@ import { useBuildingsControllerFindAllBySchool } from "@/api/generated/endpoints
 import { useSubjectsControllerFindAllBySchool } from "@/api/generated/endpoints/subjects/subjects";
 import { useTeachersControllerFindAllBySchool } from "@/api/generated/endpoints/teachers/teachers";
 import {
-	useDailySchedulesControllerCreate,
-	getDailySchedulesControllerFindAllByClassQueryKey,
-	dailySchedulesControllerFindAllByClass,
-} from "@/api/generated/endpoints/daily-schedules/daily-schedules";
-import {
 	Day,
 	ALL_DAYS,
 	DAY_TO_DAY_INDEX,
@@ -348,63 +343,15 @@ export default function SchedulePage() {
 		},
 	});
 
-	const createDailyScheduleMutation = useDailySchedulesControllerCreate({
-		mutation: {
-			meta: {
-				operationContext: "create daily schedule",
-			},
-		},
-	});
-
-	const findOrCreateDailySchedule = async (
-		classId: string,
-		day: Day
-	): Promise<string> => {
-		const queryKey =
-			getDailySchedulesControllerFindAllByClassQueryKey(classId);
-
-		const schedules = await queryClient.fetchQuery({
-			queryKey,
-			queryFn: ({ signal }) =>
-				dailySchedulesControllerFindAllByClass(classId, { signal }),
-		});
-
-		const found = schedules.find(schedule => schedule.day === day);
-
-		if (found) {
-			return found.id;
-		}
-
-		const created = await createDailyScheduleMutation.mutateAsync({
-			data: { classId, day },
-		});
-
-		queryClient.invalidateQueries({ queryKey });
-
-		return created.id;
-	};
-
-	const handleCreateLesson = async (data: CreateLessonFormData) => {
-		const { day, classId, lessonWeek, ...rest } = data;
+	const handleCreateLesson = (data: CreateLessonFormData) => {
+		const { day, classId, ...rest } = data;
 		if (!day || !classId) {
 			toast.error("Class and day are required");
 			return;
 		}
-		try {
-			const dailyScheduleId = await findOrCreateDailySchedule(
-				classId,
-				day
-			);
-			createLessonMutation.mutate({
-				data: {
-					...rest,
-					lessonWeek,
-					dailyScheduleId,
-				},
-			});
-		} catch {
-			toast.error("Failed to resolve daily schedule");
-		}
+		createLessonMutation.mutate({
+			data: { ...rest, classId, day },
+		});
 	};
 
 	const handleDeleteLesson = () => {
@@ -413,29 +360,9 @@ export default function SchedulePage() {
 		}
 	};
 
-	const handleEditLesson = async (
-		data: UpdateLessonDto & { day?: string; classId?: string }
-	) => {
+	const handleEditLesson = (data: UpdateLessonDto) => {
 		if (!selectedLesson) return;
-
-		if (data.day && data.classId) {
-			try {
-				const dailyScheduleId = await findOrCreateDailySchedule(
-					data.classId,
-					data.day as Day
-				);
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { day: _day, classId: _classId, ...updateData } = data;
-				updateLessonMutation.mutate({
-					id: selectedLesson.id,
-					data: { ...updateData, dailyScheduleId },
-				});
-			} catch {
-				toast.error("Failed to resolve daily schedule");
-			}
-		} else {
-			updateLessonMutation.mutate({ id: selectedLesson.id, data });
-		}
+		updateLessonMutation.mutate({ id: selectedLesson.id, data });
 	};
 
 	const handleEditClick = (lesson: LessonEntity) => {
