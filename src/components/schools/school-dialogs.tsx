@@ -97,7 +97,7 @@ export function CreateSchoolDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>
+								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									School Name
 								</FieldLabel>
 								<Input
@@ -222,7 +222,7 @@ export function EditSchoolDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>
+								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									School Name
 								</FieldLabel>
 								<Input

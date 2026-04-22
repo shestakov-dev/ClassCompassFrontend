@@ -97,7 +97,7 @@ export function CreateSubjectDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>
+								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Subject Name
 								</FieldLabel>
 								<Input
@@ -225,7 +225,7 @@ export function EditSubjectDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>
+								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Subject Name
 								</FieldLabel>
 								<Input

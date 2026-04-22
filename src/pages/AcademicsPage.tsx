@@ -477,14 +477,14 @@ export default function AcademicsPage() {
 							/>
 							<TabsTrigger
 								value="classes"
-								className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
+								className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-white dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-white">
 								<GraduationCap className="h-4 w-4" />
 								Classes
 							</TabsTrigger>
 
 							<TabsTrigger
 								value="subjects"
-								className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:text-white dark:data-[state=active]:text-white">
+								className="cursor-pointer hover:brightness-130 border-none relative z-10 gap-2 h-full transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-white dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-white">
 								<BookOpen className="h-4 w-4" />
 								Subjects
 							</TabsTrigger>
