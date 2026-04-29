@@ -1,5 +1,5 @@
-import { useEffect, useEffectEvent } from "react";
-import { useForm } from "@tanstack/react-form";
+import { useEffect, useEffectEvent, useMemo } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import { z } from "zod";
 
 import {
@@ -39,7 +39,7 @@ const lessonSchema = z.object({
 	day: z.string().min(1, "Day is required"),
 	classId: z.string().min(1, "Class is required"),
 	subjectId: z.string().min(1, "Subject is required"),
-	teacherId: z.string().optional(),
+	teacherId: z.string().min(1, "Teacher is required"),
 	roomId: z.string().min(1, "Room is required"),
 	startTime: z.string().min(1, "Start time is required"),
 	endTime: z.string().min(1, "End time is required"),
@@ -127,6 +127,36 @@ export function CreateLessonDialog({
 			syncFormData();
 		}
 	}, [open, defaultValues]);
+
+	const selectedSubjectId = useStore(
+		form.store,
+		state => state.values.subjectId
+	);
+
+	const selectedTeacherId = useStore(
+		form.store,
+		state => state.values.teacherId
+	);
+
+	const availableTeachers = useMemo(() => {
+		if (!selectedSubjectId) {
+			return options.teachers ?? [];
+		}
+
+		return (options.teachers ?? []).filter(teacher =>
+			teacher.subjects?.some(subject => subject.id === selectedSubjectId)
+		);
+	}, [selectedSubjectId, options.teachers]);
+
+	const availableSubjects = useMemo(() => {
+		if (!selectedTeacherId) {
+			return options.subjects ?? [];
+		}
+
+		return (options.subjects ?? []).filter(subject =>
+			subject.teachers?.some(teacher => teacher.id === selectedTeacherId)
+		);
+	}, [selectedTeacherId, options.subjects]);
 
 	const rooms: RoomEntity[] =
 		options.buildings?.flatMap(
@@ -244,6 +274,26 @@ export function CreateLessonDialog({
 										value
 									);
 
+								if (value) {
+									const currentTeacherId =
+										form.getFieldValue("teacherId");
+
+									if (currentTeacherId) {
+										const teacher = options.teachers?.find(
+											teacher =>
+												teacher.id === currentTeacherId
+										);
+
+										if (
+											!teacher?.subjects?.some(
+												subject => subject.id === value
+											)
+										) {
+											form.setFieldValue("teacherId", "");
+										}
+									}
+								}
+
 								return result.success
 									? undefined
 									: {
@@ -260,12 +310,10 @@ export function CreateLessonDialog({
 									Subject
 								</FieldLabel>
 								<Combobox
-									items={(options.subjects ?? []).map(
-										subject => ({
-											value: subject.id,
-											label: subject.name,
-										})
-									)}
+									items={availableSubjects.map(subject => ({
+										value: subject.id,
+										label: subject.name,
+									}))}
 									value={field.state.value}
 									onChange={value =>
 										field.handleChange(value)
@@ -280,6 +328,41 @@ export function CreateLessonDialog({
 
 					<form.Field
 						name="teacherId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.teacherId.safeParse(
+										value
+									);
+
+								if (value) {
+									const currentSubjectId =
+										form.getFieldValue("subjectId");
+
+									if (currentSubjectId) {
+										const subject = options.subjects?.find(
+											subject =>
+												subject.id === currentSubjectId
+										);
+
+										if (
+											!subject?.teachers?.some(
+												teacher => teacher.id === value
+											)
+										) {
+											form.setFieldValue("subjectId", "");
+										}
+									}
+								}
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
 						children={field => (
 							<Field>
 								<FieldLabel
@@ -288,13 +371,15 @@ export function CreateLessonDialog({
 									Teacher
 								</FieldLabel>
 								<Combobox
-									items={(options.teachers ?? []).map(
-										teacher => ({
-											value: teacher.id,
-											label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
-											secondaryLabel: teacher.user?.email,
-										})
-									)}
+									items={availableTeachers.map(teacher => ({
+										value: teacher.id,
+										label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
+										secondaryLabel:
+											teacher.subjects
+												?.map(subject => subject.name)
+												.join(", ") ??
+											teacher.user?.email,
+									}))}
 									value={field.state.value}
 									onChange={value =>
 										field.handleChange(value)
@@ -302,6 +387,7 @@ export function CreateLessonDialog({
 									placeholder="Select teacher"
 									searchPlaceholder="Search teachers..."
 								/>
+								<FieldError errors={field.state.meta.errors} />
 							</Field>
 						)}
 					/>
@@ -597,13 +683,45 @@ export function EditLessonDialog({
 		}
 	}, [open, lesson]);
 
+	const selectedSubjectId = useStore(
+		form.store,
+		state => state.values.subjectId
+	);
+
+	const selectedTeacherId = useStore(
+		form.store,
+		state => state.values.teacherId
+	);
+
+	const availableTeachers = useMemo(() => {
+		if (!selectedSubjectId) {
+			return options.teachers ?? [];
+		}
+
+		return (options.teachers ?? []).filter(teacher =>
+			teacher.subjects?.some(subject => subject.id === selectedSubjectId)
+		);
+	}, [selectedSubjectId, options.teachers]);
+
+	const availableSubjects = useMemo(() => {
+		if (!selectedTeacherId) {
+			return options.subjects ?? [];
+		}
+
+		return (options.subjects ?? []).filter(subject =>
+			subject.teachers?.some(teacher => teacher.id === selectedTeacherId)
+		);
+	}, [selectedTeacherId, options.subjects]);
+
 	const rooms: RoomEntity[] =
 		options.buildings?.flatMap(
 			building =>
 				building.floors?.flatMap(floor => floor.rooms ?? []) ?? []
 		) ?? [];
 
-	if (!lesson) return null;
+	if (!lesson) {
+		return null;
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -715,6 +833,26 @@ export function EditLessonDialog({
 										value
 									);
 
+								if (value) {
+									const currentTeacherId =
+										form.getFieldValue("teacherId");
+
+									if (currentTeacherId) {
+										const teacher = options.teachers?.find(
+											teacher =>
+												teacher.id === currentTeacherId
+										);
+
+										if (
+											!teacher?.subjects?.some(
+												subject => subject.id === value
+											)
+										) {
+											form.setFieldValue("teacherId", "");
+										}
+									}
+								}
+
 								return result.success
 									? undefined
 									: {
@@ -731,12 +869,10 @@ export function EditLessonDialog({
 									Subject
 								</FieldLabel>
 								<Combobox
-									items={(options.subjects ?? []).map(
-										subject => ({
-											value: subject.id,
-											label: subject.name,
-										})
-									)}
+									items={availableSubjects.map(subject => ({
+										value: subject.id,
+										label: subject.name,
+									}))}
 									value={field.state.value}
 									onChange={value =>
 										field.handleChange(value)
@@ -751,19 +887,58 @@ export function EditLessonDialog({
 
 					<form.Field
 						name="teacherId"
+						validators={{
+							onChange: ({ value }) => {
+								const result =
+									lessonSchema.shape.teacherId.safeParse(
+										value
+									);
+
+								if (value) {
+									const currentSubjectId =
+										form.getFieldValue("subjectId");
+
+									if (currentSubjectId) {
+										const subject = options.subjects?.find(
+											subject =>
+												subject.id === currentSubjectId
+										);
+
+										if (
+											!subject?.teachers?.some(
+												teacher => teacher.id === value
+											)
+										) {
+											form.setFieldValue("subjectId", "");
+										}
+									}
+								}
+
+								return result.success
+									? undefined
+									: {
+											message:
+												result.error.issues[0].message,
+										};
+							},
+						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Teacher
 								</FieldLabel>
 								<Combobox
-									items={(options.teachers ?? []).map(
-										teacher => ({
-											value: teacher.id,
-											label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
-											secondaryLabel: teacher.user?.email,
-										})
-									)}
+									items={availableTeachers.map(teacher => ({
+										value: teacher.id,
+										label: `${teacher.user?.firstName ?? ""} ${teacher.user?.lastName ?? ""}`.trim(),
+										secondaryLabel:
+											teacher.subjects
+												?.map(subject => subject.name)
+												.join(", ") ??
+											teacher.user?.email,
+									}))}
 									value={field.state.value}
 									onChange={value =>
 										field.handleChange(value)
@@ -771,6 +946,7 @@ export function EditLessonDialog({
 									placeholder="Select teacher"
 									searchPlaceholder="Search teachers..."
 								/>
+								<FieldError errors={field.state.meta.errors} />
 							</Field>
 						)}
 					/>

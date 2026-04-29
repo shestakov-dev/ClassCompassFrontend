@@ -22,6 +22,10 @@ import {
 } from "@/components/schools/school-dialogs";
 import type { CreateSchoolDto } from "@/api/generated/models/createSchoolDto";
 import type { UpdateSchoolDto } from "@/api/generated/models/updateSchoolDto";
+import {
+	getSchoolIdFromLocalStorage,
+	setSchoolIdToLocalStorage,
+} from "@/lib/school-utils";
 
 export default function SchoolsPage() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -85,8 +89,12 @@ export default function SchoolsPage() {
 			meta: {
 				operationContext: "delete school",
 			},
-			onSuccess: () => {
+			onSuccess: (_, { id }) => {
 				toast.success("School deleted successfully");
+
+				if (getSchoolIdFromLocalStorage() === id) {
+					setSchoolIdToLocalStorage(null);
+				}
 
 				queryClient.invalidateQueries({
 					queryKey: getSchoolsControllerFindAllQueryKey(),
