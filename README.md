@@ -1,10 +1,10 @@
 # ClassCompass Frontend
 
-React SPA (Shadcn UI + Tailwind)
+React SPA (Shadcn UI + Tailwind) frontend for the ClassCompass platform.
 
-Start locally:
+## Start locally
 
-Copy and rename the `.env.example` file to `.env`. Edit the `.env` file to set API URLs or your domain.
+Copy over the env example to `.env` and edit the values where needed.
 
 ```bash
 pnpm install
