@@ -22,7 +22,6 @@ import { Logo } from "@/components/common/nav-logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 import { SchoolSelector } from "@/components/common/school-selector";
 import { UserMenu } from "@/components/common/user-menu";
-import { LanguageSwitcher } from "@/components/common/language-switcher";
 import { useSession } from "@/context/session-context";
 
 export function Navbar() {
@@ -141,10 +140,6 @@ export function Navbar() {
 				<div className="flex items-center gap-2">
 					<div className="hidden nav:block">
 						<SchoolSelector />
-					</div>
-
-					<div className="hidden nav:inline-flex">
-						<LanguageSwitcher />
 					</div>
 
 					<div className="hidden nav:inline-flex">
