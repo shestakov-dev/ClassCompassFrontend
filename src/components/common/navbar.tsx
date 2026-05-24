@@ -22,6 +22,7 @@ import { Logo } from "@/components/common/nav-logo";
 import { useNavigationItems } from "@/hooks/use-navigation-items";
 import { SchoolSelector } from "@/components/common/school-selector";
 import { UserMenu } from "@/components/common/user-menu";
+import { LanguageSwitcher } from "@/components/common/language-switcher";
 import { useSession } from "@/context/session-context";
 
 export function Navbar() {
@@ -142,6 +143,14 @@ export function Navbar() {
 						<SchoolSelector />
 					</div>
 
+					<div className="hidden nav:inline-flex">
+						<LanguageSwitcher />
+					</div>
+
+					<div className="hidden nav:inline-flex">
+						<ModeToggle />
+					</div>
+
 					{isAuthenticated ? (
 						<UserMenu />
 					) : (
@@ -164,10 +173,6 @@ export function Navbar() {
 							</Link>
 						))
 					)}
-
-					<div className="hidden nav:inline-flex">
-						<ModeToggle />
-					</div>
 				</div>
 			</div>
 		</header>
