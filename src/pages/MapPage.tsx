@@ -48,10 +48,26 @@ export default function MapPage() {
 	const navigate = Route.useNavigate();
 
 	// Timestamp state from URL or default to now
-	const timestamp = useMemo(
-		() => (search.timestamp ? new Date(search.timestamp) : new Date()),
-		[search.timestamp]
-	);
+	const timestamp = useMemo(() => {
+		if (search.timestamp) {
+			return new Date(search.timestamp);
+		}
+
+		// Convert local current time to its UTC equivalent to avoid timezone offsets
+		// affecting the default and reset values when passed to the components.
+		const now = new Date();
+
+		return new Date(
+			Date.UTC(
+				now.getFullYear(),
+				now.getMonth(),
+				now.getDate(),
+				now.getHours(),
+				now.getMinutes(),
+				now.getSeconds()
+			)
+		);
+	}, [search.timestamp]);
 
 	const selectedBuildingId = search.buildingId;
 	const selectedFloorId = search.floorId;
