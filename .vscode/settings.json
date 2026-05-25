@@ -14,10 +14,5 @@
 		"dist": true,
 		".prettierignore": true
 	},
-	"hide-files.files": [
-		".tanstack",
-		".vscode",
-		"dist",
-		".prettierignore"
-	]
+	"hide-files.files": [".tanstack", ".vscode", "dist", ".prettierignore"]
 }

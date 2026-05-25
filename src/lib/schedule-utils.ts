@@ -205,6 +205,9 @@ export const createLessonFilters = (
 		day,
 		week,
 		ignoreWeek,
-		timestamp: set(utcTimestamp, { seconds: 0, milliseconds: 0 }).toISOString(),
+		timestamp: set(utcTimestamp, {
+			seconds: 0,
+			milliseconds: 0,
+		}).toISOString(),
 	};
 };

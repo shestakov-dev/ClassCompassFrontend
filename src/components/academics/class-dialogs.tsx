@@ -98,7 +98,9 @@ export function CreateClassDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Class Name
 								</FieldLabel>
 								<Input
@@ -226,7 +228,9 @@ export function EditClassDialog({
 						}}
 						children={field => (
 							<Field>
-								<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+								<FieldLabel
+									htmlFor={field.name}
+									className="after:content-['*'] after:ml-0.5 after:text-destructive">
 									Class Name
 								</FieldLabel>
 								<Input

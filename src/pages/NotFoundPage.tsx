@@ -11,15 +11,11 @@ export function NotFoundPage() {
 			title="404"
 			message="Sorry, the page you are looking for does not exist."
 			icon={SearchX}>
-			<Button
-				variant="outline"
-				onClick={() => router.history.back()}>
+			<Button variant="outline" onClick={() => router.history.back()}>
 				<ArrowLeft className="mr-2 h-4 w-4" />
 				Go Back
 			</Button>
-			<Button
-				asChild
-				variant="default">
+			<Button asChild variant="default">
 				<Link to="/">
 					<Home className="mr-2 h-4 w-4" />
 					Go Home

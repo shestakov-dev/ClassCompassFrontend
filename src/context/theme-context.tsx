@@ -52,7 +52,9 @@ export function ThemeProvider({
 		root.classList.remove("light", "dark");
 
 		if (theme === "system") {
-			const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+			const systemTheme = window.matchMedia(
+				"(prefers-color-scheme: dark)"
+			).matches
 				? "dark"
 				: "light";
 
@@ -72,9 +74,7 @@ export function ThemeProvider({
 	};
 
 	return (
-		<ThemeProviderContext.Provider
-			{...props}
-			value={value}>
+		<ThemeProviderContext.Provider {...props} value={value}>
 			{children}
 		</ThemeProviderContext.Provider>
 	);

@@ -12,7 +12,10 @@ import { isAxiosError } from "axios";
 export default function ErrorPage({ error }: ErrorComponentProps) {
 	const router = useRouter();
 
-	if (isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)) {
+	if (
+		isAxiosError(error) &&
+		[401, 403].includes(error.response?.status ?? 0)
+	) {
 		return <AuthError error={error} />;
 	}
 
@@ -32,15 +35,11 @@ export default function ErrorPage({ error }: ErrorComponentProps) {
 			title={errorTitle}
 			message={errorMessage}
 			icon={TriangleAlert}>
-			<Button
-				variant="outline"
-				onClick={() => router.history.back()}>
+			<Button variant="outline" onClick={() => router.history.back()}>
 				<ArrowLeft className="mr-2 h-4 w-4" />
 				Go Back
 			</Button>
-			<Button
-				asChild
-				variant="default">
+			<Button asChild variant="default">
 				<Link to="/">
 					<Home className="mr-2 h-4 w-4" />
 					Go Home

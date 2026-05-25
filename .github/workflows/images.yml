@@ -1,13 +1,17 @@
 name: Build and push images to GHCR
 
 on:
-    push:
+    workflow_run:
+        workflows: ["Lint and Format"]
         branches: ["main"]
-    workflow_dispatch: # allow manual trigger
+        types:
+            - completed
+    workflow_dispatch:
 
 jobs:
     build:
         runs-on: ubuntu-latest
+        if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
         permissions:
             contents: read

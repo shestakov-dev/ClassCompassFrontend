@@ -39,7 +39,9 @@ export type LessonWeekVariant = VariantProps<
 	typeof lessonWeekBadgeVariants
 >["variant"];
 
-export function getLessonWeekVariant(lessonWeek: LessonWeek): LessonWeekVariant {
+export function getLessonWeekVariant(
+	lessonWeek: LessonWeek
+): LessonWeekVariant {
 	if (lessonWeek === LessonWeek.odd) return "odd";
 	if (lessonWeek === LessonWeek.even) return "even";
 	return "default";
@@ -74,7 +76,9 @@ export function WeekBadge({
 }: WeekBadgeProps) {
 	const variant = getLessonWeekVariant(lessonWeek);
 	const text = getLessonWeekText(lessonWeek, format);
-	const variants = solid ? lessonWeekBadgeSolidVariants : lessonWeekBadgeVariants;
+	const variants = solid
+		? lessonWeekBadgeSolidVariants
+		: lessonWeekBadgeVariants;
 
 	return (
 		<Badge

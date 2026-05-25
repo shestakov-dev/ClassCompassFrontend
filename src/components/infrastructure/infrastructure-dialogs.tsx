@@ -142,7 +142,9 @@ export function InfrastructureDialogs({
 							}}
 							children={field => (
 								<Field>
-									<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									<FieldLabel
+										htmlFor={field.name}
+										className="after:content-['*'] after:ml-0.5 after:text-destructive">
 										Building Name
 									</FieldLabel>
 									<Input
@@ -187,7 +189,9 @@ export function InfrastructureDialogs({
 								}}
 								children={field => (
 									<Field>
-										<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+										<FieldLabel
+											htmlFor={field.name}
+											className="after:content-['*'] after:ml-0.5 after:text-destructive">
 											Floor Number
 										</FieldLabel>
 										<Input
@@ -257,7 +261,9 @@ export function InfrastructureDialogs({
 							}}
 							children={field => (
 								<Field>
-									<FieldLabel htmlFor={field.name} className="after:content-['*'] after:ml-0.5 after:text-destructive">
+									<FieldLabel
+										htmlFor={field.name}
+										className="after:content-['*'] after:ml-0.5 after:text-destructive">
 										Room Name / Number
 									</FieldLabel>
 									<Input
