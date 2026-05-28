@@ -153,6 +153,7 @@ export default function SchedulePage() {
 			navigate({
 				search: previousSearch => ({ ...previousSearch, ...newParams }),
 				replace: true,
+				resetScroll: false,
 			});
 		},
 		[navigate]

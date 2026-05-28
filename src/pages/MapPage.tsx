@@ -179,6 +179,7 @@ export default function MapPage() {
 					...params,
 				}),
 				replace: true,
+				resetScroll: false,
 			});
 		},
 		[navigate]
